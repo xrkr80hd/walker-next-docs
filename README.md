@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Walker Docs
 
-## Getting Started
+Walker Docs is the Next.js migration target for the Walker dealership document workflow. It is being rebuilt as a tablet and phone-first internal app while preserving the local-first workflow and exact print behavior from the legacy static version.
 
-First, run the development server:
+## Current Scope
+
+- Shared deal intake at `/workflow`
+- Document library at `/documents`
+- First migrated document at `/documents/delivery-checklist`
+- Dedicated exact-print surface at `/print/delivery-checklist`
+- Shared local storage contract in `lib/walker-workflow.ts`
+
+## Development
+
+Run the app locally:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Quality checks:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+```
 
-## Learn More
+Docker Compose files are included:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run docker:up
+npm run docker:down
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- The legacy static Walker Docs app remains the reference baseline.
+- Print parity is the critical constraint. Screen layout work must not corrupt letter-size output.
+- Customer/co-customer support is in progress and should replace single-name assumptions as forms are ported.
 
-## Deploy on Vercel
+## Next Steps
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Port the next workflow-critical forms behind the same shared data contract
+- Finish customer/co-customer corrections
+- Lock down printer validation before PWA/offline work
