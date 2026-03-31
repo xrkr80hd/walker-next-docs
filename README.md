@@ -2,6 +2,8 @@
 
 Walker Docs is the Next.js migration target for the Walker dealership document workflow. It is being rebuilt as a tablet and phone-first internal app while preserving the local-first workflow and exact print behavior from the legacy static version.
 
+This repo is the implementation source of truth for Walker Docs.
+
 ## Current Scope
 
 - Shared deal intake at `/workflow`
