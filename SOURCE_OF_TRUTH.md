@@ -4,7 +4,7 @@ This repository is the implementation source of truth for Walker Docs.
 
 Primary app repo:
 
-`/Users/xrkr80hd/Library/Mobile Documents/com~apple~CloudDocs/XRKR_ROOT/05_DEVELOPMENT/Applications/Walker_Docs/Source/walker-docs-next`
+`/Users/xrkr80hd/Library/Mobile Documents/com~apple~CloudDocs/xrkr_space/Walker Docs Next/Source/walker-docs-next`
 
 Supporting workspace:
 

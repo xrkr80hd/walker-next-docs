@@ -1,3 +1,27 @@
+import {
+  WORKFLOW_SESSION_CHANNEL_NAME,
+  WORKFLOW_SESSION_CLEAR_EVENT,
+} from "./walker-workflow";
+
+function broadcastWorkflowSessionCleared() {
+  try {
+    const channel = new BroadcastChannel(WORKFLOW_SESSION_CHANNEL_NAME);
+    channel.postMessage({ type: WORKFLOW_SESSION_CLEAR_EVENT });
+    channel.close();
+  } catch {
+    // Ignore browsers that do not support BroadcastChannel.
+  }
+}
+
+function printCurrentWindowAndClear() {
+  const clear = () => {
+    broadcastWorkflowSessionCleared();
+  };
+
+  window.addEventListener("afterprint", clear, { once: true });
+  window.print();
+}
+
 export async function printElementExact(target: HTMLElement) {
   let html2canvas: typeof import("html2canvas").default;
 
@@ -7,7 +31,7 @@ export async function printElementExact(target: HTMLElement) {
     window.alert(
       "Could not load the exact print renderer. Falling back to browser print.",
     );
-    window.print();
+    printCurrentWindowAndClear();
     return;
   }
 
@@ -53,6 +77,18 @@ export async function printElementExact(target: HTMLElement) {
 <body>
   <div class="page"><img src="${dataUrl}" alt="Form print output"></div>
   <script>
+    const channelName = ${JSON.stringify(WORKFLOW_SESSION_CHANNEL_NAME)};
+    const clearMessageType = ${JSON.stringify(WORKFLOW_SESSION_CLEAR_EVENT)};
+    function clearWorkflowSession() {
+      try {
+        const channel = new BroadcastChannel(channelName);
+        channel.postMessage({ type: clearMessageType });
+        channel.close();
+      } catch {}
+      window.close();
+    }
+
+    window.addEventListener("afterprint", clearWorkflowSession, { once: true });
     window.onload = function () {
       setTimeout(function () { window.print(); }, 80);
     };

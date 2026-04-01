@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 import { DeliveryChecklistSheet } from "@/components/documents/delivery-checklist-sheet";
 import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
@@ -9,6 +9,7 @@ import { printElementExact } from "@/lib/exact-print";
 import {
   loadDeliveryChecklistNotes,
   loadWorkflow,
+  subscribeToWorkflowSessionClear,
   type DeliveryChecklistNotes,
   type WorkflowData,
 } from "@/lib/walker-workflow";
@@ -23,13 +24,10 @@ export function DeliveryChecklistPrintScreen() {
   const printedRef = useRef(false);
 
   useEffect(() => {
-    const handleStorage = () => {
+    return subscribeToWorkflowSessionClear(() => {
       setWorkflow(loadWorkflow());
       setNotes(loadDeliveryChecklistNotes());
-    };
-
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    });
   }, []);
 
   useEffect(() => {
@@ -72,7 +70,10 @@ export function DeliveryChecklistPrintScreen() {
   return (
     <>
       <div className="min-h-screen bg-[#f5f5f5] px-4 py-4">
-        <div className="mx-auto mb-4 flex w-full max-w-[8.5in] justify-end print:hidden">
+        <div className="mx-auto mb-4 flex w-full max-w-[8.5in] items-center justify-between gap-4 print:hidden">
+          <p className="text-sm font-semibold text-[var(--muted)]">
+            Exact print clears this browser session when the print dialog closes.
+          </p>
           <button
             type="button"
             onClick={handlePrint}

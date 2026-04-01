@@ -2,6 +2,8 @@ export const WORKFLOW_STORAGE_KEY = "walker.walkthrough.workflow.v1";
 export const SIGNATURE_STORAGE_KEY = "walker.signature.v1";
 export const DELIVERY_CHECKLIST_NOTES_STORAGE_KEY =
   "walker.document.deliveryChecklist.v1";
+export const WORKFLOW_SESSION_CHANNEL_NAME = "walker.workflow.session.v1";
+export const WORKFLOW_SESSION_CLEAR_EVENT = "workflow-session-cleared";
 
 export const CHECKLIST_ITEMS = [
   { key: "validDriversLicense", label: "Valid Driver's License" },
@@ -60,7 +62,7 @@ export const DOCUMENT_LIBRARY = [
     slug: "delivery-checklist",
     title: "Delivery Checklist",
     description:
-      "First full Next.js port with shared local workflow data and exact print output.",
+      "First full Next.js port with shared browser-session workflow data and exact print output.",
     href: "/documents/delivery-checklist",
     printHref: "/print/delivery-checklist",
     stage: "MVP",
@@ -187,6 +189,14 @@ function isBrowser() {
   return typeof window !== "undefined";
 }
 
+function getBrowserStorage() {
+  if (!isBrowser()) {
+    return null;
+  }
+
+  return window.sessionStorage;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -221,11 +231,14 @@ export function getLast8(vin: string) {
   return normalized.length >= 8 ? normalized.slice(-8) : normalized;
 }
 
-export function getYearMakeModel(data: Pick<
-  WorkflowData,
-  "vehicleYear" | "vehicleMake" | "vehicleModel"
->) {
-  return [safeTrim(data.vehicleYear), safeTrim(data.vehicleMake), safeTrim(data.vehicleModel)]
+export function getYearMakeModel(
+  data: Pick<WorkflowData, "vehicleYear" | "vehicleMake" | "vehicleModel">,
+) {
+  return [
+    safeTrim(data.vehicleYear),
+    safeTrim(data.vehicleMake),
+    safeTrim(data.vehicleModel),
+  ]
     .filter(Boolean)
     .join(" ");
 }
@@ -295,7 +308,8 @@ export function normalizeWorkflowData(value: unknown): WorkflowData {
     dealDate: safeTrim(value.dealDate) || base.dealDate,
     email: safeTrim(value.email),
     cellPhone: safeTrim(value.cellPhone),
-    homeAddressCategory: safeTrim(value.homeAddressCategory) || base.homeAddressCategory,
+    homeAddressCategory:
+      safeTrim(value.homeAddressCategory) || base.homeAddressCategory,
     mailingAddressCategory:
       safeTrim(value.mailingAddressCategory) || base.mailingAddressCategory,
     homeAddress,
@@ -318,21 +332,59 @@ export function normalizeWorkflowData(value: unknown): WorkflowData {
   };
 }
 
-export function getCustomerDisplayName(data: Pick<WorkflowData, "customerName" | "coCustomerName">) {
+export function getCustomerDisplayName(
+  data: Pick<WorkflowData, "customerName" | "coCustomerName">,
+) {
   return [safeTrim(data.customerName), safeTrim(data.coCustomerName)]
     .filter(Boolean)
     .join(" / ");
 }
 
+function broadcastWorkflowSessionCleared() {
+  if (!isBrowser() || typeof BroadcastChannel === "undefined") {
+    return;
+  }
+
+  const channel = new BroadcastChannel(WORKFLOW_SESSION_CHANNEL_NAME);
+  channel.postMessage({ type: WORKFLOW_SESSION_CLEAR_EVENT });
+  channel.close();
+}
+
+export function clearWorkflowSession(options: { broadcast?: boolean } = {}) {
+  const storage = getBrowserStorage();
+
+  storage?.removeItem(WORKFLOW_STORAGE_KEY);
+  storage?.removeItem(SIGNATURE_STORAGE_KEY);
+  storage?.removeItem(DELIVERY_CHECKLIST_NOTES_STORAGE_KEY);
+
+  if (options.broadcast !== false) {
+    broadcastWorkflowSessionCleared();
+  }
+}
+
+export function subscribeToWorkflowSessionClear(onClear: () => void) {
+  if (!isBrowser() || typeof BroadcastChannel === "undefined") {
+    return () => undefined;
+  }
+
+  const channel = new BroadcastChannel(WORKFLOW_SESSION_CHANNEL_NAME);
+  channel.onmessage = (event: MessageEvent<{ type?: string }>) => {
+    if (event.data?.type === WORKFLOW_SESSION_CLEAR_EVENT) {
+      onClear();
+    }
+  };
+
+  return () => channel.close();
+}
+
 export function loadWorkflow() {
-  if (!isBrowser()) {
+  const storage = getBrowserStorage();
+  if (!storage) {
     return createDefaultWorkflowData();
   }
 
   try {
-    return normalizeWorkflowData(
-      JSON.parse(window.localStorage.getItem(WORKFLOW_STORAGE_KEY) || "{}"),
-    );
+    return normalizeWorkflowData(JSON.parse(storage.getItem(WORKFLOW_STORAGE_KEY) || "{}"));
   } catch {
     return createDefaultWorkflowData();
   }
@@ -340,43 +392,51 @@ export function loadWorkflow() {
 
 export function saveWorkflow(data: WorkflowData) {
   const next = normalizeWorkflowData(data);
-  if (isBrowser()) {
-    window.localStorage.setItem(WORKFLOW_STORAGE_KEY, JSON.stringify(next));
+  const storage = getBrowserStorage();
+  if (storage) {
+    storage.setItem(WORKFLOW_STORAGE_KEY, JSON.stringify(next));
   }
   return next;
 }
 
 export function loadSignatures() {
-  if (!isBrowser()) {
+  const storage = getBrowserStorage();
+  if (!storage) {
     return {};
   }
 
   try {
-    return JSON.parse(window.localStorage.getItem(SIGNATURE_STORAGE_KEY) || "{}");
+    return JSON.parse(storage.getItem(SIGNATURE_STORAGE_KEY) || "{}");
   } catch {
     return {};
   }
 }
 
 export function saveSignatures(store: SignatureStore) {
-  if (isBrowser()) {
-    window.localStorage.setItem(SIGNATURE_STORAGE_KEY, JSON.stringify(store));
+  const storage = getBrowserStorage();
+  if (storage) {
+    storage.setItem(SIGNATURE_STORAGE_KEY, JSON.stringify(store));
   }
   return store;
 }
 
-export function signatureIdFor(pathname: string, explicitId: string | undefined, index: number) {
+export function signatureIdFor(
+  pathname: string,
+  explicitId: string | undefined,
+  index: number,
+) {
   return explicitId || `${pathname}#signature-${index}`;
 }
 
 export function loadDeliveryChecklistNotes() {
-  if (!isBrowser()) {
+  const storage = getBrowserStorage();
+  if (!storage) {
     return {};
   }
 
   try {
     return JSON.parse(
-      window.localStorage.getItem(DELIVERY_CHECKLIST_NOTES_STORAGE_KEY) || "{}",
+      storage.getItem(DELIVERY_CHECKLIST_NOTES_STORAGE_KEY) || "{}",
     ) as DeliveryChecklistNotes;
   } catch {
     return {};
@@ -388,11 +448,9 @@ export function saveDeliveryChecklistNotes(notes: DeliveryChecklistNotes) {
     Object.entries(notes).filter(([, value]) => cleanSingleLine(value)),
   ) as DeliveryChecklistNotes;
 
-  if (isBrowser()) {
-    window.localStorage.setItem(
-      DELIVERY_CHECKLIST_NOTES_STORAGE_KEY,
-      JSON.stringify(next),
-    );
+  const storage = getBrowserStorage();
+  if (storage) {
+    storage.setItem(DELIVERY_CHECKLIST_NOTES_STORAGE_KEY, JSON.stringify(next));
   }
 
   return next;

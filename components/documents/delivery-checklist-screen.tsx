@@ -9,6 +9,7 @@ import {
   loadDeliveryChecklistNotes,
   loadWorkflow,
   saveDeliveryChecklistNotes,
+  subscribeToWorkflowSessionClear,
   type DeliveryChecklistNoteKey,
   type DeliveryChecklistNotes,
   type WorkflowData,
@@ -22,13 +23,10 @@ export function DeliveryChecklistScreen() {
   );
 
   useEffect(() => {
-    const handleStorage = () => {
+    return subscribeToWorkflowSessionClear(() => {
       setWorkflow(loadWorkflow());
       setNotes(loadDeliveryChecklistNotes());
-    };
-
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    });
   }, []);
 
   function updateNote(fieldKey: DeliveryChecklistNoteKey, value: string) {
@@ -51,11 +49,7 @@ export function DeliveryChecklistScreen() {
       return;
     }
 
-    window.open(
-      "/print/delivery-checklist?autoprint=1&vinchecked=1",
-      "_blank",
-      "noopener,noreferrer",
-    );
+    window.open("/print/delivery-checklist?autoprint=1&vinchecked=1", "_blank");
   }
 
   return (
@@ -71,9 +65,9 @@ export function DeliveryChecklistScreen() {
                 Delivery Checklist
               </h2>
               <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
-                This page reuses the shared workflow record and now persists the
-                extra on-sheet notes needed before print. Exact output runs in a
-                separate chrome-free route.
+                This page reuses the shared workflow draft and keeps the extra
+                notes only in the active browser session. Exact output runs in a
+                separate chrome-free route and clears the session after print.
               </p>
             </div>
 

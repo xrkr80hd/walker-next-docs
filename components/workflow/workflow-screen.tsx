@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
 import {
   CHECKLIST_ITEMS,
+  clearWorkflowSession,
   createEmailDraft,
   DOCUMENT_LIBRARY,
   getLast8,
@@ -15,6 +16,7 @@ import {
   normalizeVin,
   openMailDraft,
   saveWorkflow,
+  subscribeToWorkflowSessionClear,
   type WorkflowData,
 } from "@/lib/walker-workflow";
 
@@ -77,12 +79,11 @@ export function WorkflowScreen() {
   }, [data]);
 
   useEffect(() => {
-    const handleStorage = () => {
+    return subscribeToWorkflowSessionClear(() => {
       setData(loadWorkflow());
-    };
-
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+      setStatus("Browser session cleared. Start a new deal when ready.");
+      setTone("success");
+    });
   }, []);
 
   function setStatusMessage(message: string, nextTone: StatusTone = "") {
@@ -112,7 +113,10 @@ export function WorkflowScreen() {
     patchWorkflow({ [name]: String(value) } as Partial<WorkflowData>);
   }
 
-  function updateChecklist(key: keyof WorkflowData["deliveryChecklist"], checked: boolean) {
+  function updateChecklist(
+    key: keyof WorkflowData["deliveryChecklist"],
+    checked: boolean,
+  ) {
     setData((current) => ({
       ...current,
       deliveryChecklist: {
@@ -125,7 +129,19 @@ export function WorkflowScreen() {
   function saveNow() {
     const saved = saveWorkflow(data);
     setData(saved);
-    setStatusMessage("Saved in this browser for this site.", "success");
+    setStatusMessage(
+      "Saved in this open browser session only.",
+      "success",
+    );
+  }
+
+  function clearSessionNow() {
+    clearWorkflowSession();
+    setData(loadWorkflow());
+    setStatusMessage(
+      "Browser session cleared. Start a new deal when ready.",
+      "success",
+    );
   }
 
   function validateForOutput() {
@@ -160,12 +176,11 @@ export function WorkflowScreen() {
       return;
     }
 
-    window.open(
-      "/print/delivery-checklist?autoprint=1&vinchecked=1",
-      "_blank",
-      "noopener,noreferrer",
+    window.open("/print/delivery-checklist?autoprint=1&vinchecked=1", "_blank");
+    setStatusMessage(
+      "Opening exact print. This browser session clears when the print dialog closes.",
+      "success",
     );
-    setStatusMessage("Opening Delivery Checklist for exact print.", "success");
   }
 
   async function emailFni() {
@@ -211,19 +226,19 @@ export function WorkflowScreen() {
               </h2>
               <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
                 This is the first Next.js pass for Walker Docs. It keeps the
-                local browser workflow, preserves the VIN gate, and drives the
-                Delivery Checklist into an isolated print surface for tablet and
-                phone use.
+                workflow inside the active browser session, preserves the VIN
+                gate, and drives the Delivery Checklist into an isolated print
+                surface for tablet and phone use.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="border border-[var(--border)] bg-[var(--panel-strong)] px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
-                  Local-first
+                  Session only
                 </span>
                 <span className="border border-[var(--border)] bg-[var(--panel-strong)] px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
                   Exact print pilot
                 </span>
                 <span className="border border-[var(--border)] bg-[var(--panel-strong)] px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
-                  Delivery Checklist first
+                  Auto-clear after print
                 </span>
               </div>
             </div>
@@ -248,7 +263,7 @@ export function WorkflowScreen() {
                 Customer Information
               </p>
               <h3 className="mt-1 text-2xl font-bold text-[var(--foreground)]">
-                Shared deal record
+                Session-only deal draft
               </h3>
             </div>
             <div className="border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--foreground)]">
@@ -358,7 +373,14 @@ export function WorkflowScreen() {
               onClick={saveNow}
               className="inline-flex min-h-12 items-center justify-center border border-[var(--foreground)] bg-white px-5 text-sm font-bold uppercase tracking-[0.08em] text-[var(--foreground)]"
             >
-              Save
+              Save Session
+            </button>
+            <button
+              type="button"
+              onClick={clearSessionNow}
+              className="inline-flex min-h-12 items-center justify-center border border-[var(--foreground)] bg-white px-5 text-sm font-bold uppercase tracking-[0.08em] text-[var(--foreground)]"
+            >
+              Clear Session
             </button>
             <button
               type="button"
@@ -396,8 +418,8 @@ export function WorkflowScreen() {
           </p>
 
           <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-            Save keeps the deal in this browser for this site. Exact print still
-            uses a dedicated rasterized letter-size output.
+            This draft stays only in the active browser session. Exact print
+            clears the session when the print dialog closes.
           </p>
         </section>
 
@@ -443,9 +465,9 @@ export function WorkflowScreen() {
               Pilot Notes
             </p>
             <ul className="mt-4 grid gap-3 text-sm leading-6 text-[var(--muted)]">
-              <li>Storage keys remain compatible with the static app.</li>
+              <li>Deal data stays in the current browser session only.</li>
               <li>Print uses a dedicated route and exact raster output.</li>
-              <li>Delivery Checklist is the first parity target.</li>
+              <li>The session clears when the print dialog closes.</li>
               <li>Other documents stay mapped but intentionally unported.</li>
             </ul>
           </aside>
