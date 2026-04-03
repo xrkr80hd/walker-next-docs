@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
@@ -107,7 +106,6 @@ function clearWorkflowViewState() {
 }
 
 export function WorkflowScreen() {
-  const router = useRouter();
   const { confirmVinAction, dialog } = useVinConfirmation();
   const [data, setData] = useState<WorkflowData>(() => loadWorkflow());
   const [dealer, setDealer] = useState<DealerInfo>(() => loadDealer());
@@ -159,7 +157,6 @@ export function WorkflowScreen() {
         mailingZip: data.homeZip,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mailingSameAsPhysical, data.homeAddress, data.homeCity, data.homeState, data.homeZip]);
 
   useEffect(() => {
@@ -451,12 +448,6 @@ export function WorkflowScreen() {
       "PDF downloading…",
       "success",
     );
-  }
-
-  function openChecklist() {
-    persistWorkflowViewState();
-    saveWorkflow(data);
-    router.push("/documents/delivery-checklist");
   }
 
   return (

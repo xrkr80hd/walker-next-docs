@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useSyncExternalStore, useState, type ReactNode } from "react";
 
 const DISCLOSURE_ACCEPTED_KEY = "walker.disclosure.accepted";
 const DISCLOSURE_TTL_MS = 72 * 60 * 60 * 1000; // 72 hours
@@ -29,14 +29,15 @@ function saveAcceptance() {
   }
 }
 
-export function DisclosureGate({ children }: { children: ReactNode }) {
-  const [accepted, setAccepted] = useState(false);
+const emptySubscribe = () => () => {};
 
-  useEffect(() => {
-    if (hasAcceptedDisclosure()) {
-      setAccepted(true);
-    }
-  }, []);
+export function DisclosureGate({ children }: { children: ReactNode }) {
+  const initiallyAccepted = useSyncExternalStore(
+    emptySubscribe,
+    hasAcceptedDisclosure,
+    () => false,
+  );
+  const [accepted, setAccepted] = useState(initiallyAccepted);
 
   if (accepted) return <>{children}</>;
 

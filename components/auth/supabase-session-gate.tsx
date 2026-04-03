@@ -20,12 +20,9 @@ export function SupabaseSessionGate({
   children,
   surface = "app",
 }: SupabaseSessionGateProps) {
-  // Auth temporarily disabled — pass through immediately
-  if (process.env.NEXT_PUBLIC_DISABLE_AUTH === "1") {
-    return <>{children}</>;
-  }
+  const authDisabled = process.env.NEXT_PUBLIC_DISABLE_AUTH === "1";
 
-  const [checking, setChecking] = useState(true);
+  const [checking, setChecking] = useState(!authDisabled);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [session, setSession] = useState<Session | null>(null);
@@ -35,7 +32,7 @@ export function SupabaseSessionGate({
   const [mode, setMode] = useState<"login" | "signup">("login");
 
   useEffect(() => {
-    if (!isSupabaseConfigured()) {
+    if (authDisabled || !isSupabaseConfigured()) {
       setChecking(false);
       return;
     }
@@ -86,7 +83,7 @@ export function SupabaseSessionGate({
       active = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [authDisabled]);
 
   async function handleAuthSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -112,13 +109,15 @@ export function SupabaseSessionGate({
       const supabase = getSupabaseBrowserClient();
 
       if (mode === "signup") {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email: trimmedEmail,
-          password: trimmedPassword,
+        const res = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ email: trimmedEmail, password: trimmedPassword }),
         });
+        const data = await res.json();
 
-        if (signUpError) {
-          setError(signUpError.message);
+        if (!res.ok) {
+          setError(data.error ?? "Signup failed.");
           return;
         }
 
@@ -165,6 +164,11 @@ export function SupabaseSessionGate({
           : "Could not sign out.",
       );
     }
+  }
+
+  // Auth bypass — pass through immediately
+  if (authDisabled) {
+    return <>{children}</>;
   }
 
   if (!isSupabaseConfigured()) {
