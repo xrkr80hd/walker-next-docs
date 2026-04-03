@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "workspaceRoot": "../..",
+  "profileKey": "websites-apps",
+  "buildKey": "websites-apps",
+  "projectDomain": "websites-and-apps",
+  "templateKey": "websites-apps",
+  "snippetCatalogPath": "snippet_catalog/ui-snippets.json",
+  "displayName": "Websites and Apps",
+  "description": "Multi-project websites and app build pack driven by the workspace agent chain.",
+  "requestSeed": "Build and organize the websites and apps collection with clean routing, backend planning where needed, phased execution, audit, and verification.",
+  "tags": [
+    "websites",
+    "apps",
+    "church app",
+    "workspace organization",
+    "multi-project",
+    "square"
+  ],
+  "governingReferences": [
+    ".github/copilot-instructions.md",
+    "MASTER_TEMPLATE.md",
+    "OmniPath/agents/AGENT_PERMISSIONS_ACTIONS_ONE_SHEET.md"
+  ],
+  "naming": {
+    "canonicalProjectName": "Websites-and-Apps",
+    "googleDriveFolderName": "Websites",
+    "workspaceLabel": "Websites / Apps"
+  },
+  "agentMap": {
+    "MOSES": "OmniPath/agents/mo.agent.md",
+    "EZRA": "OmniPath/agents/ezra.agent.md",
+    "DAN": "OmniPath/agents/dan.agent.md",
+    "GABE": "OmniPath/agents/gabe.agent.md",
+    "JOSH": "OmniPath/agents/josh.agent.md",
+    "MIKE": "OmniPath/agents/mike.agent.md",
+    "NATE": "OmniPath/agents/nathan.agent.md",
+    "SCRIBE": "OmniPath/agents/scribe.agent.md"
+  },
+  "organization": {
+    "driveCollection": "Websites",
+    "projectGroup": "Projects",
+    "workspaceGroup": "Workspaces",
+    "projects": [
+      {
+        "name": "YourLocal-Studio",
+        "sourcePath": "YourLocal_xrkr80hdstudio",
+        "role": "website-app-platform",
+        "notes": "Canonical YourLocal workspace in this repo."
+      },
+      {
+        "name": "MyWildRoseDesigns",
+        "sourcePath": "mywildrosedesigns",
+        "role": "website-project",
+        "notes": "Primary MyWildRoseDesigns source tree in this repo."
+      },
+      {
+        "name": "GoLibertyChurch-App",
+        "aliases": [
+          "GLC-APP"
+        ],
+        "sourcePath": "/Users/xrkr80hd/Library/Mobile Documents/com~apple~CloudDocs/member",
+        "role": "church-app-fragment",
+        "notes": "Recovered iCloud fragment tied to the historical GLC-APP project."
+      }
+    ]
+  }
+}

@@ -62,71 +62,61 @@ export const DOCUMENT_LIBRARY = [
     slug: "delivery-checklist",
     title: "Delivery Checklist",
     description:
-      "First full Next.js port with shared browser-session workflow data and exact print output.",
+      "Customer info, checklist items, and accounting fields.",
     href: "/documents/delivery-checklist",
     printHref: "/print/delivery-checklist",
-    stage: "MVP",
+    stage: "Deal Form",
     ready: true,
   },
   {
     slug: "pain-points",
-    title: "Pain Points",
+    title: "Space Sheet",
     description:
-      "Queued after the first print-parity pass. Icon workflow and questioning logic come later.",
+      "Priority selling points and customer concerns.",
     href: "/documents/pain-points",
     printHref: "/print/pain-points",
-    stage: "Queued",
-    ready: false,
+    stage: "Deal Form",
+    ready: true,
   },
   {
     slug: "payoff-form",
     title: "Payoff Form",
     description:
-      "Next target after shared document routing and print output are proven stable.",
+      "Trade-in lienholder, payoff details, and signatures.",
     href: "/documents/payoff-form",
     printHref: "/print/payoff-form",
-    stage: "Queued",
-    ready: false,
+    stage: "Deal Form",
+    ready: true,
   },
   {
     slug: "address-information",
     title: "Address Information Sheet",
     description:
-      "Will reuse the shared intake data once the first routed form is stable.",
+      "Physical and mailing address details.",
     href: "/documents/address-information",
     printHref: "/print/address-information",
-    stage: "Queued",
-    ready: false,
+    stage: "Deal Form",
+    ready: true,
   },
   {
     slug: "buyers-guide",
     title: "Buyers Guide",
     description:
-      "Held back for legal review and print verification after the pilot document.",
+      "Federal warranty disclosure and dealer contact (2 pages).",
     href: "/documents/buyers-guide",
     printHref: "/print/buyers-guide",
-    stage: "Queued",
-    ready: false,
-  },
-  {
-    slug: "buyers-guide-reverse",
-    title: "Buyers Guide - Reverse",
-    description:
-      "Companion legal print surface to migrate only after front-side parity is checked.",
-    href: "/documents/buyers-guide/reverse",
-    printHref: "/print/buyers-guide/reverse",
-    stage: "Queued",
-    ready: false,
+    stage: "Deal Form",
+    ready: true,
   },
   {
     slug: "vin-verification",
     title: "VIN Verification",
     description:
-      "Uses the same VIN contract and comes after the guided checklist path.",
+      "VIN confirmation and salesperson signature.",
     href: "/documents/vin-verification",
     printHref: "/print/vin-verification",
-    stage: "Queued",
-    ready: false,
+    stage: "Deal Form",
+    ready: true,
   },
 ] as const;
 
@@ -156,7 +146,13 @@ export type WorkflowData = {
   homeAddressCategory: string;
   mailingAddressCategory: string;
   homeAddress: string;
+  homeCity: string;
+  homeState: string;
+  homeZip: string;
   mailingAddress: string;
+  mailingCity: string;
+  mailingState: string;
+  mailingZip: string;
   address: string;
   salespersonName: string;
   salespersonNumber: string;
@@ -168,7 +164,11 @@ export type WorkflowData = {
   vehicleMake: string;
   vehicleModel: string;
   mileage: string;
+  etchNumbers: string;
+  taxPercent: string;
   vin: string;
+  hasCoOwner: boolean;
+  payoffVerified: boolean;
   deliveryEnabled: boolean;
   deliveryChecklist: Record<ChecklistKey, boolean>;
 };
@@ -267,7 +267,13 @@ export function createDefaultWorkflowData(): WorkflowData {
     homeAddressCategory: "Home Address",
     mailingAddressCategory: "Mailing Address",
     homeAddress: "",
+    homeCity: "",
+    homeState: "",
+    homeZip: "",
     mailingAddress: "",
+    mailingCity: "",
+    mailingState: "",
+    mailingZip: "",
     address: "",
     salespersonName: "",
     salespersonNumber: "",
@@ -279,7 +285,11 @@ export function createDefaultWorkflowData(): WorkflowData {
     vehicleMake: "",
     vehicleModel: "",
     mileage: "",
+    etchNumbers: "",
+    taxPercent: "",
     vin: "",
+    hasCoOwner: false,
+    payoffVerified: false,
     deliveryEnabled: true,
     deliveryChecklist: createEmptyChecklist(),
   };
@@ -313,7 +323,13 @@ export function normalizeWorkflowData(value: unknown): WorkflowData {
     mailingAddressCategory:
       safeTrim(value.mailingAddressCategory) || base.mailingAddressCategory,
     homeAddress,
+    homeCity: safeTrim(value.homeCity),
+    homeState: safeTrim(value.homeState),
+    homeZip: safeTrim(value.homeZip),
     mailingAddress: safeTrim(value.mailingAddress),
+    mailingCity: safeTrim(value.mailingCity),
+    mailingState: safeTrim(value.mailingState),
+    mailingZip: safeTrim(value.mailingZip),
     address: homeAddress,
     salespersonName: safeTrim(value.salespersonName),
     salespersonNumber: safeTrim(value.salespersonNumber),
@@ -325,7 +341,13 @@ export function normalizeWorkflowData(value: unknown): WorkflowData {
     vehicleMake: safeTrim(value.vehicleMake),
     vehicleModel: safeTrim(value.vehicleModel),
     mileage: safeTrim(value.mileage),
+    etchNumbers: safeTrim(value.etchNumbers),
+    taxPercent: safeTrim(value.taxPercent),
     vin: normalizeVin(value.vin),
+    hasCoOwner:
+      typeof value.hasCoOwner === "boolean" ? value.hasCoOwner : false,
+    payoffVerified:
+      typeof value.payoffVerified === "boolean" ? value.payoffVerified : false,
     deliveryEnabled:
       typeof value.deliveryEnabled === "boolean" ? value.deliveryEnabled : true,
     deliveryChecklist: nextChecklist,
@@ -456,7 +478,7 @@ export function saveDeliveryChecklistNotes(notes: DeliveryChecklistNotes) {
   return next;
 }
 
-export function createEmailDraft(data: WorkflowData): EmailDraft {
+export function createEmailDraft(data: WorkflowData, salespersonName?: string): EmailDraft {
   const selectedItems = CHECKLIST_ITEMS.filter(
     (item) => data.deliveryChecklist[item.key],
   ).map((item) => `- ${item.label}`);
@@ -467,7 +489,7 @@ export function createEmailDraft(data: WorkflowData): EmailDraft {
     `Last 8: ${getLast8(data.vin) || "-"}`,
     `Deal #: ${safeTrim(data.dealNumber) || "-"}`,
     `Stock #: ${safeTrim(data.stockNumber) || "-"}`,
-    `Salesperson: ${safeTrim(data.salespersonName) || "-"}`,
+    `Salesperson: ${salespersonName || safeTrim(data.salespersonName) || "-"}`,
     `Email: ${safeTrim(data.email) || "-"}`,
     "",
   ];
@@ -482,9 +504,8 @@ export function createEmailDraft(data: WorkflowData): EmailDraft {
 
   return {
     to: safeTrim(data.fniEmail),
-    subject: `Delivery Checklist - ${
-      getCustomerDisplayName(data) || normalizeVin(data.vin) || "Walker Customer"
-    }`,
+    subject: `Delivery Checklist - ${getCustomerDisplayName(data) || normalizeVin(data.vin) || "Walker Customer"
+      }`,
     body: lines.join("\n"),
   };
 }

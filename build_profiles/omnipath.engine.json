@@ -1,0 +1,242 @@
+{
+  "profileKey": "omnipath",
+  "displayName": "OmniPath",
+  "description": "Profile-driven agent engine for the OmniPath magical tabletop RPG hub, campaign setup, and multi-system play flow.",
+  "aliases": ["omni path", "omni", "ttrpg", "magical ttrpg"],
+  "agentPackagePath": "build_profiles/omnipath.agents.md",
+  "forceBackendRequired": true,
+  "systemTypeOverride": "SYSTEM_BACKED",
+  "systemSummary": "OmniPath is a system-backed magical tabletop RPG hub where players and GMs set up campaigns, choose systems like DND or sci-fi rulesets, manage characters, configure spell and relic loadouts, and resolve magical session effects.",
+  "dependencyNotes": [
+    "Lock hub structure before screen work.",
+    "Separate system selection, campaign setup, character flow, and live session flow.",
+    "Dan is required because campaign setup, player ownership, and save-state are platform concerns.",
+    "Define spell, relic, and effect resolution rules before encounter UI execution."
+  ],
+  "backendTriggerPatterns": [
+    {
+      "label": "campaign_setup",
+      "pattern": "\\b(campaign|campaigns|session zero|game setup|gm|dm|host|party|table)\\b"
+    },
+    {
+      "label": "game_systems",
+      "pattern": "\\b(dnd|d&d|pathfinder|sci[- ]?fi|system|ruleset|rule set|genre|world)\\b"
+    },
+    {
+      "label": "player_state",
+      "pattern": "\\b(player|players|character|characters|inventory|loadout|equipment|profile|profiles|save|saved)\\b"
+    },
+    {
+      "label": "magic_systems",
+      "pattern": "\\b(magic|magical|spell|spells|spellbook|mana|arcane|wizard|sorcerer|relic|artifact|enchant|curse|effect|effects|ritual)\\b"
+    }
+  ],
+  "seedModules": [
+    "game_system_catalog",
+    "campaign_setup",
+    "character_roster",
+    "session_hub",
+    "world_codex",
+    "magic_systems",
+    "spellbook_management",
+    "effect_resolution"
+  ],
+  "moduleRules": [
+    {
+      "patterns": ["\\bcharacter(s)?\\b", "\\bclass(es)?\\b", "\\bbuild(s)?\\b", "\\bplayer(s)?\\b"],
+      "add": ["character_progression", "party_management", "player_roster"]
+    },
+    {
+      "patterns": ["\\bquest(s)?\\b", "\\bmission(s)?\\b", "\\bcampaign(s)?\\b"],
+      "add": ["quest_tracking", "mission_state", "campaign_management"]
+    },
+    {
+      "patterns": ["\\bdnd\\b", "\\bd&d\\b", "\\bpathfinder\\b", "\\bsci[- ]?fi\\b", "\\bruleset\\b", "\\bgenre\\b"],
+      "add": ["system_templates", "genre_presets"]
+    },
+    {
+      "patterns": ["\\bmagic\\b", "\\bmagical\\b", "\\bspell(s)?\\b", "\\bspellbook\\b", "\\bmana\\b", "\\barcane\\b", "\\brelic(s)?\\b", "\\bartifact(s)?\\b", "\\beffect(s)?\\b", "\\britual(s)?\\b"],
+      "add": ["spellcasting", "mana_resources", "relic_management", "effect_library"]
+    }
+  ],
+  "seedRoutes": [
+    "/",
+    "/systems",
+    "/campaigns",
+    "/campaigns/new",
+    "/worlds",
+    "/characters",
+    "/quests",
+    "/spellbook",
+    "/relics",
+    "/effects"
+  ],
+  "routeRules": [
+    {
+      "patterns": ["\\bprofile\\b", "\\bsave\\b", "\\bplayer\\b"],
+      "add": ["/profile"]
+    },
+    {
+      "patterns": ["\\badmin\\b", "\\beditor\\b", "\\bmoderation\\b", "\\bgm\\b", "\\bdm\\b"],
+      "add": ["/admin"]
+    },
+    {
+      "patterns": ["\\binventory\\b", "\\bequipment\\b"],
+      "add": ["/inventory"]
+    },
+    {
+      "patterns": ["\\bsession zero\\b", "\\bcampaign\\b", "\\bparty\\b"],
+      "add": ["/campaigns/:campaignId", "/campaigns/:campaignId/session-zero"]
+    },
+    {
+      "patterns": ["\\bmagic\\b", "\\bspell(s)?\\b", "\\brelic(s)?\\b", "\\beffect(s)?\\b", "\\britual(s)?\\b"],
+      "add": ["/spellbook", "/relics", "/effects", "/rituals"]
+    }
+  ],
+  "pageGroups": ["public_pages", "player_pages", "admin_pages"],
+  "userFlows": [
+    "landing_to_system_selection",
+    "system_selection_to_campaign_setup",
+    "campaign_setup_to_character_assignment",
+    "character_browse_to_campaign_entry",
+    "character_build_to_spell_loadout",
+    "quest_reward_to_relic_attunement"
+  ],
+  "accessBoundaries": ["public", "player", "admin"],
+  "schemaTables": [
+    "users",
+    "roles",
+    "user_roles",
+    "game_systems",
+    "campaigns",
+    "campaign_members",
+    "characters",
+    "world_entries",
+    "quests",
+    "spells",
+    "spell_effects",
+    "relics",
+    "character_spells",
+    "status_effects"
+  ],
+  "schemaRules": [
+    {
+      "patterns": ["\\binventory\\b", "\\bequipment\\b"],
+      "add": ["inventory_items", "loadouts"]
+    },
+    {
+      "patterns": ["\\bprofile\\b", "\\bsave\\b"],
+      "add": ["save_profiles"]
+    },
+    {
+      "patterns": ["\\bdnd\\b", "\\bd&d\\b", "\\bpathfinder\\b", "\\bsci[- ]?fi\\b", "\\bruleset\\b"],
+      "add": ["system_presets", "campaign_settings"]
+    },
+    {
+      "patterns": ["\\bmagic\\b", "\\bmagical\\b", "\\bspell(s)?\\b", "\\bspellbook\\b", "\\bmana\\b", "\\barcane\\b", "\\brelic(s)?\\b", "\\beffect(s)?\\b", "\\britual(s)?\\b"],
+      "add": ["spells", "spell_effects", "relics", "character_spells", "status_effects"]
+    }
+  ],
+  "relationships": [
+    "users -> user_roles -> roles",
+    "game_systems -> campaigns",
+    "campaigns -> campaign_members -> users",
+    "characters -> campaigns",
+    "quests -> world_entries",
+    "characters -> inventory_items",
+    "characters -> character_spells -> spells",
+    "spells -> spell_effects",
+    "characters -> status_effects",
+    "campaigns -> relics"
+  ],
+  "validationRules": [
+    "slug_uniqueness_enforced",
+    "relationship_integrity_enforced",
+    "campaign_membership_validation_enforced",
+    "save_profile_ownership_enforced",
+    "spell_effect_stack_validation_enforced",
+    "mana_or_resource_cost_validation_enforced"
+  ],
+  "ownershipRules": [
+    "public_codex_records_are_read_only",
+    "players_can_only_edit_owned_profiles",
+    "players_edit_owned_spell_loadouts_only",
+    "gms_manage_owned_campaigns",
+    "gms_manage_relic_and_effect_balancing",
+    "admin_overrides_require_role_check"
+  ],
+  "rolesPermissions": [
+    "admin:full",
+    "gm:campaign_session_and_magic_balance_management",
+    "editor:lore_and_balance",
+    "player:self_only",
+    "viewer:read_only"
+  ],
+  "additionalComponents": [
+    "system_selector",
+    "campaign_setup_wizard",
+    "codex_filters",
+    "reference_rail",
+    "spellbook_panel",
+    "effect_resolution_log",
+    "relic_attunement_panel"
+  ],
+  "componentRules": [
+    {
+      "patterns": ["\\bcharacter(s)?\\b"],
+      "add": ["character_card_grid"]
+    },
+    {
+      "patterns": ["\\bquest(s)?\\b"],
+      "add": ["quest_log_panel"]
+    },
+    {
+      "patterns": ["\\bcampaign(s)?\\b", "\\bsession zero\\b", "\\bdnd\\b", "\\bsci[- ]?fi\\b"],
+      "add": ["campaign_lobby", "system_preset_picker"]
+    },
+    {
+      "patterns": ["\\bmagic\\b", "\\bspell(s)?\\b", "\\brelic(s)?\\b", "\\beffect(s)?\\b", "\\britual(s)?\\b"],
+      "add": ["spellbook_builder", "effect_preview_panel", "relic_attunement_panel"]
+    }
+  ],
+  "additionalInteractions": [
+    "system_selection_flow",
+    "campaign_setup_flow",
+    "codex_search",
+    "drilldown_navigation",
+    "spell_cast_resolution_flow",
+    "relic_attunement_flow",
+    "effect_stack_resolution_flow"
+  ],
+  "interactionRules": [
+    {
+      "patterns": ["\\binventory\\b", "\\bequipment\\b"],
+      "add": ["inventory_compare_flow"]
+    },
+    {
+      "patterns": ["\\bprofile\\b", "\\bsave\\b"],
+      "add": ["profile_save_flow"]
+    },
+    {
+      "patterns": ["\\bcampaign(s)?\\b", "\\bparty\\b", "\\bsession zero\\b"],
+      "add": ["campaign_invite_flow", "session_zero_flow"]
+    },
+    {
+      "patterns": ["\\bmagic\\b", "\\bspell(s)?\\b", "\\brelic(s)?\\b", "\\beffect(s)?\\b", "\\britual(s)?\\b", "\\bmana\\b"],
+      "add": ["spellbook_management_flow", "spell_effect_resolution_flow", "relic_attunement_flow"]
+    }
+  ],
+  "metadata": {
+    "canonicalProjectFolder": "OmniPath",
+    "recommendedDriveFolder": "OmniPath",
+    "domain": "magical-tabletop-game-hub",
+    "designLanguage": "square-first",
+    "shapePolicy": "no-pills",
+    "forbiddenUiPatterns": [
+      "pill buttons",
+      "pill tabs",
+      "pill badges",
+      "capsule shells"
+    ]
+  }
+}

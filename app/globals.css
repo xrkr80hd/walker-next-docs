@@ -52,4 +52,8 @@ textarea {
   body {
     background: #fff;
   }
+
+  .print\:bg-none {
+    background-image: none !important;
+  }
 }

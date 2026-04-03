@@ -1,14 +1,14 @@
 "use client";
 
 import type { Session } from "@supabase/supabase-js";
+import Image from "next/image";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 
 import {
-  getAuthRedirectUrl,
   getSessionLabel,
   getSupabaseBrowserClient,
   getSupabaseConfigError,
-  isSupabaseConfigured,
+  isSupabaseConfigured
 } from "@/lib/supabase-browser";
 
 type SupabaseSessionGateProps = {
@@ -20,12 +20,19 @@ export function SupabaseSessionGate({
   children,
   surface = "app",
 }: SupabaseSessionGateProps) {
+  // Auth temporarily disabled — pass through immediately
+  if (process.env.NEXT_PUBLIC_DISABLE_AUTH === "1") {
+    return <>{children}</>;
+  }
+
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [session, setSession] = useState<Session | null>(null);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
+  const [mode, setMode] = useState<"login" | "signup">("login");
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
@@ -81,12 +88,19 @@ export function SupabaseSessionGate({
     };
   }, []);
 
-  async function handleMagicLinkSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleAuthSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const trimmedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+
     if (!trimmedEmail) {
-      setError("Enter an authorized email address.");
+      setError("Enter your email address.");
+      return;
+    }
+
+    if (!trimmedPassword || trimmedPassword.length < 6) {
+      setError("Password must be at least 6 characters.");
       return;
     }
 
@@ -96,27 +110,37 @@ export function SupabaseSessionGate({
 
     try {
       const supabase = getSupabaseBrowserClient();
-      const { error: signInError } = await supabase.auth.signInWithOtp({
-        email: trimmedEmail,
-        options: {
-          emailRedirectTo: getAuthRedirectUrl(),
-          shouldCreateUser: false,
-        },
-      });
 
-      if (signInError) {
-        setError(signInError.message);
-        return;
+      if (mode === "signup") {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: trimmedEmail,
+          password: trimmedPassword,
+        });
+
+        if (signUpError) {
+          setError(signUpError.message);
+          return;
+        }
+
+        setStatus("Account created. You can now sign in.");
+        setMode("login");
+        setPassword("");
+      } else {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: trimmedEmail,
+          password: trimmedPassword,
+        });
+
+        if (signInError) {
+          setError(signInError.message);
+          return;
+        }
       }
-
-      setStatus(
-        "Magic link sent. Finish sign-in from that email on this device to open the app.",
-      );
-    } catch (signInError) {
+    } catch (authError) {
       setError(
-        signInError instanceof Error
-          ? signInError.message
-          : "Could not start sign-in.",
+        authError instanceof Error
+          ? authError.message
+          : "Could not complete sign-in.",
       );
     } finally {
       setSending(false);
@@ -145,100 +169,123 @@ export function SupabaseSessionGate({
 
   if (!isSupabaseConfigured()) {
     return (
-      <div className="mx-auto flex min-h-screen w-full max-w-3xl items-center px-4 py-10 sm:px-6">
-        <section className="w-full border border-red-900/20 bg-[var(--panel)] p-6 shadow-[0_24px_60px_rgba(35,23,12,0.12)]">
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-[var(--accent)]">
-            Supabase Setup Needed
-          </p>
-          <h1 className="mt-2 text-3xl font-extrabold text-[var(--foreground)]">
-            Auth gate is waiting on environment config.
-          </h1>
-          <p className="mt-3 text-base leading-7 text-[var(--muted)]">
-            {getSupabaseConfigError()} Add the public Supabase URL and anon key,
-            then reload this app.
-          </p>
-        </section>
+      <div className="mx-auto flex min-h-screen w-full max-w-xl items-center px-4 py-10 sm:px-6">
+        <div className="w-full overflow-hidden border border-black/10 shadow-[0_24px_60px_rgba(35,23,12,0.12)]">
+          <div className="bg-[var(--accent)] bg-[url('/bg-hero-16x9.jpg')] bg-cover bg-center px-5 py-6 text-center sm:px-6">
+            <Image src="/walker-red-graphic-v2.png" alt="Walker Automotive" width={320} height={116} priority className="mx-auto h-auto w-full max-w-[200px]" />
+            <p className="mt-3 text-xs font-bold uppercase tracking-[0.24em] text-white/80 drop-shadow-sm">Walker Docs</p>
+          </div>
+          <div className="bg-[var(--panel)] px-5 py-6 sm:px-6">
+            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[var(--accent)]">Setup Needed</p>
+            <h1 className="mt-2 text-2xl font-extrabold text-[var(--foreground)]">Auth gate is waiting on environment config.</h1>
+            <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+              {getSupabaseConfigError()} Add the public Supabase URL and anon key, then reload this app.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (checking) {
     return (
-      <div className="mx-auto flex min-h-screen w-full max-w-3xl items-center px-4 py-10 sm:px-6">
-        <section className="w-full border border-black/10 bg-[var(--panel)] p-6 shadow-[0_24px_60px_rgba(35,23,12,0.12)]">
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-[var(--accent)]">
-            Authorizing
-          </p>
-          <h1 className="mt-2 text-3xl font-extrabold text-[var(--foreground)]">
-            Checking access…
-          </h1>
-          <p className="mt-3 text-base leading-7 text-[var(--muted)]">
-            This login session stays in the active browser session only.
-          </p>
-        </section>
+      <div className="mx-auto flex min-h-screen w-full max-w-xl items-center px-4 py-10 sm:px-6">
+        <div className="w-full overflow-hidden border border-black/10 shadow-[0_24px_60px_rgba(35,23,12,0.12)]">
+          <div className="bg-[var(--accent)] bg-[url('/bg-hero-16x9.jpg')] bg-cover bg-center px-5 py-6 text-center sm:px-6">
+            <Image src="/walker-red-graphic-v2.png" alt="Walker Automotive" width={320} height={116} priority className="mx-auto h-auto w-full max-w-[200px]" />
+            <p className="mt-3 text-xs font-bold uppercase tracking-[0.24em] text-white/80 drop-shadow-sm">Walker Docs</p>
+          </div>
+          <div className="bg-[var(--panel)] px-5 py-6 sm:px-6">
+            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[var(--accent)]">Authorizing</p>
+            <h1 className="mt-2 text-2xl font-extrabold text-[var(--foreground)]">Checking access…</h1>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!session) {
-    const title =
-      surface === "print"
-        ? "Sign in before using the print surface."
-        : "Authorized access only.";
-    const description =
-      surface === "print"
-        ? "Open the workflow in a signed-in tab first, or request a magic link below."
-        : "Use an approved email to enter Walker Docs. Customer information still stays in the live browser session only and clears after the print dialog closes.";
-
     return (
-      <div className="mx-auto flex min-h-screen w-full max-w-3xl items-center px-4 py-10 sm:px-6">
-        <section className="w-full border border-black/10 bg-[var(--panel)] p-6 shadow-[0_24px_60px_rgba(35,23,12,0.12)]">
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-[var(--accent)]">
-            Walker Docs Access
-          </p>
-          <h1 className="mt-2 text-3xl font-extrabold text-[var(--foreground)]">
-            {title}
-          </h1>
-          <p className="mt-3 text-base leading-7 text-[var(--muted)]">
-            {description}
-          </p>
+      <div className="mx-auto flex min-h-screen w-full max-w-xl items-center px-4 py-10 sm:px-6">
+        <div className="w-full overflow-hidden border border-black/10 shadow-[0_24px_60px_rgba(35,23,12,0.12)]">
+          {/* Hero header with graphic */}
+          <div className="bg-[var(--accent)] bg-[url('/bg-hero-16x9.jpg')] bg-cover bg-center px-5 py-8 text-center sm:px-6">
+            <Image src="/walker-red-graphic-v2.png" alt="Walker Automotive" width={320} height={116} priority className="mx-auto h-auto w-full max-w-[200px]" />
+            <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-white drop-shadow-sm">Walker Docs</p>
+            <h2 className="mt-1 text-2xl font-extrabold text-white drop-shadow-sm sm:text-3xl">
+              {mode === "signup" ? "Create Account" : "Sign In"}
+            </h2>
+          </div>
 
-          <form className="mt-6 grid gap-4" onSubmit={handleMagicLinkSubmit}>
-            <label className="grid gap-2">
-              <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
-                Authorized Email
-              </span>
-              <input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="name@company.com"
-                className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
-                autoComplete="email"
-              />
-            </label>
+          {/* Form body */}
+          <div className="border-t border-[var(--border)] bg-[var(--panel)] px-5 py-6 sm:px-6">
+            <form className="grid gap-4" onSubmit={handleAuthSubmit}>
+              <label className="grid gap-2">
+                <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">Email</span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="name@company.com"
+                  className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+                  autoComplete="email"
+                />
+              </label>
 
-            <button
-              type="submit"
-              disabled={sending}
-              className="inline-flex min-h-12 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-4 text-sm font-bold uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {sending ? "Sending Link…" : "Email Magic Link"}
-            </button>
-          </form>
+              <label className="grid gap-2">
+                <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">Password</span>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="••••••••"
+                  className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+                  autoComplete="current-password"
+                />
+              </label>
 
-          {status ? (
-            <p className="mt-4 border border-emerald-800/20 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
-              {status}
-            </p>
-          ) : null}
+              <button
+                type="submit"
+                disabled={sending}
+                className="inline-flex min-h-12 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-4 text-sm font-bold uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {sending
+                  ? "Please wait…"
+                  : mode === "signup"
+                    ? "Create Account"
+                    : "Sign In"}
+              </button>
+            </form>
 
-          {error ? (
-            <p className="mt-4 border border-red-900/20 bg-red-50 px-4 py-3 text-sm font-medium text-red-900">
-              {error}
-            </p>
-          ) : null}
-        </section>
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode(mode === "login" ? "signup" : "login");
+                  setError("");
+                  setStatus("");
+                }}
+                className="text-sm font-bold text-[var(--accent)] underline underline-offset-2"
+              >
+                {mode === "login"
+                  ? "Have an invite? Create your account"
+                  : "Already have an account? Sign in"}
+              </button>
+            </div>
+
+            {status ? (
+              <p className="mt-4 border border-emerald-800/20 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
+                {status}
+              </p>
+            ) : null}
+
+            {error ? (
+              <p className="mt-4 border border-red-900/20 bg-red-50 px-4 py-3 text-sm font-medium text-red-900">
+                {error}
+              </p>
+            ) : null}
+          </div>
+        </div>
       </div>
     );
   }

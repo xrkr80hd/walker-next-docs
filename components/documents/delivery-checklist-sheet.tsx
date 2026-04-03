@@ -13,10 +13,12 @@ import {
   getLast8,
   getYearMakeModel,
   normalizeVin,
-  type DeliveryChecklistNotes,
   type DeliveryChecklistNoteKey,
+  type DeliveryChecklistNotes,
   type WorkflowData,
 } from "@/lib/walker-workflow";
+
+import { type ConsultantInfo } from "@/lib/dealer-consultant";
 
 import styles from "./delivery-checklist.module.css";
 
@@ -83,12 +85,14 @@ function EditableLine({
 }
 
 type DeliveryChecklistSheetProps = {
+  consultant?: ConsultantInfo;
   notes: DeliveryChecklistNotes;
   onNoteChange?: (fieldKey: DeliveryChecklistNoteKey, value: string) => void;
   workflow: WorkflowData;
 };
 
 export function DeliveryChecklistSheet({
+  consultant,
   notes,
   onNoteChange,
   workflow,
@@ -98,6 +102,7 @@ export function DeliveryChecklistSheet({
       className={styles.sheet}
       aria-label="Delivery Checklist form"
       data-print-sheet="delivery-checklist"
+      style={{ position: "relative" }}
     >
       <section className={styles.frame} aria-label="Delivery checklist content">
         <div className={`${styles.fieldRow} ${styles.fieldRowLarge} ${styles.dateRow}`}>
@@ -120,11 +125,11 @@ export function DeliveryChecklistSheet({
             <div className={styles.headerGap} />
             <div className={styles.headerLabel}>SALESPERSON:</div>
             <div className={`${styles.headerFill} ${styles.headerFillSalesperson}`}>
-              {workflow.salespersonName}
+              {consultant?.name || workflow.salespersonName}
             </div>
             <div className={styles.headerLabel}>#</div>
             <div className={`${styles.headerFill} ${styles.headerFillNumber}`}>
-              {workflow.salespersonNumber}
+              {consultant?.salespersonNumber || workflow.salespersonNumber}
             </div>
           </div>
 
@@ -162,11 +167,16 @@ export function DeliveryChecklistSheet({
             {CHECKLIST_ITEMS.map((item) => (
               <div key={item.key} className={styles.lineItem}>
                 <div
-                  className={`${styles.fillLine} ${
-                    workflow.deliveryChecklist[item.key] ? styles.isChecked : ""
-                  }`}
+                  className={`${styles.fillLine} ${workflow.deliveryChecklist[item.key] ? styles.isChecked : ""
+                    }`}
                 />
                 <span>{item.label}</span>
+                {item.key === "miles" && workflow.mileage ? (
+                  <span className={styles.lineItemValue}>{workflow.mileage}</span>
+                ) : null}
+                {item.key === "etchNumbers" && workflow.etchNumbers ? (
+                  <span className={styles.lineItemValue}>{workflow.etchNumbers}</span>
+                ) : null}
               </div>
             ))}
           </div>
@@ -175,13 +185,29 @@ export function DeliveryChecklistSheet({
             {DELIVERY_CHECKLIST_ENTRY_FIELDS.map((field) => (
               <div key={field.id} className={styles.entryItem}>
                 <span className={styles.entryLabel}>{field.label}</span>
-                <EditableLine
-                  ariaLabel={field.label}
-                  className={styles.entryLine}
-                  fieldKey={field.id}
-                  notes={notes}
-                  onNoteChange={onNoteChange}
-                />
+                {field.id === "taxWatch" ? (
+                  <div className={styles.taxWatchRow}>
+                    <EditableLine
+                      ariaLabel={field.label}
+                      className={styles.entryLine}
+                      fieldKey={field.id}
+                      notes={notes}
+                      onNoteChange={onNoteChange}
+                    />
+                    <span className={styles.taxPercentLabel}>Tax %:</span>
+                    <span className={styles.taxPercentValue}>
+                      {workflow.taxPercent}
+                    </span>
+                  </div>
+                ) : (
+                  <EditableLine
+                    ariaLabel={field.label}
+                    className={styles.entryLine}
+                    fieldKey={field.id}
+                    notes={notes}
+                    onNoteChange={onNoteChange}
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -400,6 +426,7 @@ export function DeliveryChecklistSheet({
           </div>
         </div>
       </section>
+      <span style={{ position: "absolute", bottom: 4, right: 8, fontSize: 7, color: "#bbb" }}>v1.0 • Delivery Checklist</span>
     </main>
   );
 }

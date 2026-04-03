@@ -1,0 +1,254 @@
+.sheet {
+  --paper: #ffffff;
+  --ink: #171717;
+  --pageShadow: 0 24px 60px rgba(0, 0, 0, 0.14);
+  --pageWidth: 8.5in;
+  --pageMinHeight: 11in;
+  --frameStroke: 1.5px solid #202020;
+  width: var(--pageWidth);
+  min-height: var(--pageMinHeight);
+  height: var(--pageMinHeight);
+  margin: 0 auto;
+  padding: 0.26in 0.28in 0.3in;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--pageShadow);
+  overflow: hidden;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.frame {
+  height: calc(var(--pageMinHeight) - 0.56in);
+  min-height: calc(var(--pageMinHeight) - 0.56in);
+  border: var(--frameStroke);
+  padding: 0.2in 0.22in 0.22in;
+  overflow: hidden;
+}
+
+.docTitle {
+  margin: 0;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.importantNote {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.importantLabel {
+  font-weight: 700;
+}
+
+.vehicleBar {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.6fr 1.6fr;
+  gap: 0;
+  margin-top: 10px;
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  padding: 4px 0;
+  font-size: 11px;
+}
+
+.vehicleBarCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vehicleBarLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+.vehicleBarValue {
+  font-weight: 700;
+  font-size: 12px;
+  min-height: 14px;
+}
+
+.warrantyTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.spacerSm {
+  height: 4px;
+}
+
+.spacerMd {
+  height: 8px;
+}
+
+.spacerLg {
+  height: 12px;
+}
+
+.sectionRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.checkbox {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+.checkboxLg {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+.impliedTitle {
+  font-size: 24px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.bodyText {
+  font-size: 11px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.dashedLine {
+  border-top: 1.5px dashed var(--ink);
+  margin: 8px 0;
+}
+
+.solidLine {
+  border-top: 1.5px solid var(--ink);
+  margin: 6px 0;
+}
+
+.dealerWarrantyTitle {
+  font-size: 22px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.warrantyCheckRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.warrantyCheckLabel {
+  font-weight: 400;
+}
+
+.limitedWarrantyText {
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.fieldLine {
+  display: inline-block;
+  min-width: 40px;
+  border-bottom: 1.2px solid var(--ink);
+  font-weight: 700;
+  font-size: 12px;
+  padding: 0 4px;
+  text-align: center;
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 24px;
+}
+
+.systemsCoveredLabel {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.underlineFill {
+  border-bottom: 1.2px solid var(--ink);
+  height: 1.2em;
+  margin-top: 6px;
+}
+
+.nonDealerTitle {
+  font-size: 14px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  padding: 4px 0;
+  margin: 0;
+}
+
+.boldText {
+  font-size: 11px;
+  line-height: 1.45;
+  font-weight: 700;
+  margin: 0;
+}
+
+.seeOther {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.spanishNote {
+  font-size: 11px;
+  line-height: 1.45;
+  margin: 8px 0 0;
+}
+
+@media print {
+  .sheet {
+    width: 8.5in;
+    min-height: 11in;
+    height: 11in;
+    margin: 0;
+    box-shadow: none;
+    padding: 0.26in 0.28in 0.3in;
+    overflow: hidden;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .frame {
+    min-height: calc(11in - 0.56in);
+    height: calc(11in - 0.56in);
+    padding: 0.2in 0.22in 0.22in;
+    overflow: hidden;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "workspaceRoot": "../..",
+  "profileKey": "omnipath",
+  "buildKey": "omnipath",
+  "projectDomain": "magical-tabletop-game-hub",
+  "templateKey": "omnipath-hub",
+  "snippetCatalogPath": "snippet_catalog/ui-snippets.json",
+  "overlayCatalogPaths": [
+    "snippet_catalog/omnipath-snippets.json"
+  ],
+  "displayName": "OmniPath",
+  "description": "System-backed magical tabletop RPG hub build using the workspace agent chain.",
+  "requestSeed": "Build OmniPath as a magical tabletop RPG hub where players and GMs can choose systems like DND or sci-fi rulesets, set up campaigns, manage characters, configure spellbooks and relic loadouts, and resolve magical effects through session flow with routing, backend ownership, UI planning, execution order, audit, and verification.",
+  "tags": [
+    "tabletop game hub",
+    "ttrpg",
+    "magical",
+    "spells",
+    "relics",
+    "effects",
+    "campaign setup",
+    "dnd",
+    "sci-fi",
+    "square",
+    "backend",
+    "routing",
+    "verification"
+  ],
+  "governingReferences": [
+    ".github/copilot-instructions.md",
+    "MASTER_TEMPLATE.md",
+    "OmniPath/agents/AGENT_PERMISSIONS_ACTIONS_ONE_SHEET.md"
+  ],
+  "naming": {
+    "canonicalProjectName": "OmniPath",
+    "googleDriveFolderName": "OmniPath",
+    "workspaceLabel": "OmniPath"
+  },
+  "agentMap": {
+    "MOSES": "OmniPath/agents/mo.agent.md",
+    "EZRA": "OmniPath/agents/ezra.agent.md",
+    "DAN": "OmniPath/agents/dan.agent.md",
+    "GABE": "OmniPath/agents/gabe.agent.md",
+    "JOSH": "OmniPath/agents/josh.agent.md",
+    "MIKE": "OmniPath/agents/mike.agent.md",
+    "NATE": "OmniPath/agents/nathan.agent.md",
+    "SCRIBE": "OmniPath/agents/scribe.agent.md"
+  },
+  "organization": {
+    "driveCollection": "Websites",
+    "projectGroup": "Projects",
+    "projects": [
+      {
+        "name": "OmniPath",
+        "sourcePath": "OmniPath",
+        "role": "primary-project-root",
+        "notes": "Canonical OmniPath source tree in this workspace."
+      }
+    ]
+  }
+}

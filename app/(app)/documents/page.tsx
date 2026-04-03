@@ -10,12 +10,11 @@ export default function DocumentsPage() {
           Document Library
         </p>
         <h2 className="mt-2 text-3xl font-extrabold tracking-[0.01em] text-[var(--foreground)]">
-          Route by route migration
+          All Documents
         </h2>
         <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
-          Delivery Checklist is the first fully routed Next.js document. The
-          rest stay mapped here as queued follow-on ports so the workflow shape
-          stays clear while print parity is proven.
+          View, edit, and print any deal document. All forms pull from the
+          information entered on the Workflow page.
         </p>
       </section>
 
@@ -35,11 +34,10 @@ export default function DocumentsPage() {
                 </h3>
               </div>
               <span
-                className={`border px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] ${
-                  doc.ready
+                className={`border px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] ${doc.ready
                     ? "border-[var(--success)] text-[var(--success)]"
                     : "border-[var(--border)] text-[var(--muted)]"
-                }`}
+                  }`}
               >
                 {doc.ready ? "Ready" : "Queued"}
               </span>
@@ -63,13 +61,12 @@ export default function DocumentsPage() {
                   rel="noopener noreferrer"
                   className="inline-flex min-h-11 items-center justify-center border border-[var(--foreground)] bg-white px-4 text-sm font-bold uppercase tracking-[0.08em] text-[var(--foreground)]"
                 >
-                  Open Print Surface
+                  Print Form
                 </Link>
               </div>
             ) : (
               <p className="mt-5 text-sm font-semibold text-[var(--muted)]">
-                Kept out of the first migration slice until the shared print
-                contract is locked.
+                Coming soon.
               </p>
             )}
           </article>

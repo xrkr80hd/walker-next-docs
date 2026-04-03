@@ -5,7 +5,7 @@
   --pageWidth: 8.5in;
   --pageMinHeight: 11in;
   --frameStroke: 1.5px solid #202020;
-  width: min(var(--pageWidth), calc(100vw - 32px));
+  width: var(--pageWidth);
   min-height: var(--pageMinHeight);
   height: var(--pageMinHeight);
   margin: 0 auto;
@@ -30,11 +30,11 @@
   align-items: flex-end;
   gap: 10px;
   margin: 5px 0;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .fieldRowLarge {
-  font-size: 18px;
+  font-size: 17px;
 }
 
 .fieldRowCompact {
@@ -59,18 +59,16 @@
   flex: 1 1 auto;
   min-width: 0;
   border-bottom: 1.3px solid var(--ink);
-  height: 1.1em;
-  min-height: 1.1em;
-  max-height: 1.1em;
+  height: 1.2em;
   display: flex;
   align-items: flex-end;
-  padding: 0 4px 2px;
-  font-size: 14px;
+  padding: 0 4px 1px;
+  font-size: 13px;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: clip;
+  text-overflow: ellipsis;
 }
 
 .fieldLineSm {
@@ -88,20 +86,20 @@
 }
 
 .grid2Contact {
-  gap: 16px 24px;
+  gap: 0 24px;
   align-items: start;
 }
 
 .headerStack {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .headerLine {
   display: flex;
   align-items: flex-end;
   gap: 0;
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1;
 }
 
@@ -113,20 +111,18 @@
 
 .headerFill {
   border-bottom: 1.3px solid var(--ink);
-  height: 1.1em;
-  min-height: 1.1em;
-  max-height: 1.1em;
+  height: 1.2em;
   min-width: 0;
   flex: 1 1 auto;
   display: flex;
   align-items: flex-end;
-  padding: 0 4px 2px;
-  font-size: 14px;
+  padding: 0 4px 1px;
+  font-size: 13px;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: clip;
+  text-overflow: ellipsis;
 }
 
 .headerGap {
@@ -169,61 +165,66 @@
   margin: 0;
   text-align: center;
   text-transform: uppercase;
-  font-size: 24px;
+  font-size: 23px;
   font-weight: 800;
 }
 
 .sectionHeading {
   margin: 0;
-  padding: 8px 0;
+  padding: 5px 0;
   text-align: center;
   text-transform: uppercase;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 800;
   border-top: 1.8px solid var(--ink);
   border-bottom: 1.8px solid var(--ink);
 }
 
 .spacerMd {
-  height: 14px;
+  height: 8px;
 }
 
 .spacerLg {
-  height: 24px;
+  height: 14px;
 }
 
 .checkGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px 28px;
+  gap: 5px 28px;
 }
 
 .lineList {
   display: grid;
-  gap: 8px;
+  gap: 5px;
 }
 
 .lineItem {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 15px;
+  font-size: 14px;
+}
+
+.lineItemValue {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .fillLine {
   flex: 0 0 76px;
   border-bottom: 1.2px solid var(--ink);
-  height: 18px;
-  min-height: 18px;
-  max-height: 18px;
+  height: 17px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
+  line-height: 1;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: clip;
+  text-overflow: ellipsis;
 }
 
 .isChecked::before {
@@ -232,14 +233,14 @@
 
 .entryList {
   display: grid;
-  gap: 8px;
+  gap: 5px;
 }
 
 .entryItem {
   display: flex;
   align-items: center;
   gap: 0;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .entryLabel {
@@ -250,23 +251,21 @@
   flex: 1 1 auto;
   min-width: 0;
   border-bottom: 1.2px solid var(--ink);
-  height: 1.1em;
-  min-height: 1.1em;
-  max-height: 1.1em;
+  height: 1.2em;
   display: flex;
   align-items: flex-end;
   padding: 0 4px 1px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: clip;
+  text-overflow: ellipsis;
 }
 
 .stackedLines {
   display: grid;
-  gap: 8px;
+  gap: 5px;
 }
 
 .officeDate {
@@ -305,43 +304,22 @@
   }
 }
 
-@media (max-width: 860px) {
-  .sheet {
-    width: 100%;
-    height: var(--pageMinHeight);
-    padding: 20px 18px 24px;
-  }
+.taxWatchRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
 
-  .frame {
-    height: calc(var(--pageMinHeight) - 0.56in);
-    min-height: 0;
-    padding: 16px;
-    overflow: hidden;
-  }
+.taxPercentLabel {
+  font-size: 8px;
+  font-weight: 700;
+  white-space: nowrap;
+}
 
-  .grid2,
-  .checkGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .headerLine {
-    flex-wrap: wrap;
-    gap: 6px 8px;
-  }
-
-  .headerFill,
-  .headerFillCustomer,
-  .headerFillSalesperson,
-  .headerFillNumber,
-  .headerFillDeal,
-  .headerFillStock,
-  .headerFillEmail,
-  .headerFillLast8,
-  .headerFillSource {
-    flex: 1 1 180px;
-  }
-
-  .headerGap {
-    display: none;
-  }
+.taxPercentValue {
+  font-size: 9px;
+  min-width: 32px;
+  border-bottom: 1px solid #000;
+  text-align: center;
 }

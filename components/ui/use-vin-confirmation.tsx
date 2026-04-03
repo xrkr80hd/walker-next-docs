@@ -19,8 +19,21 @@ export function useVinConfirmation() {
       return;
     }
 
-    request.resolve(result);
+    const resolveRequest = request.resolve;
     setRequest(null);
+
+    if (typeof window === "undefined") {
+      resolveRequest(result);
+      return;
+    }
+
+    // Resolve after the dialog unmounts so print/export actions do not
+    // capture the confirmation overlay.
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        resolveRequest(result);
+      });
+    });
   }
 
   function confirmVinAction(vinValue: string | undefined, actionLabel: string) {
@@ -50,12 +63,12 @@ export function useVinConfirmation() {
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 p-4 sm:items-center">
       <div className="w-full max-w-md border border-white/10 bg-[#141414] p-4 text-white shadow-[0_20px_44px_rgba(0,0,0,0.28)]">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70">
-          {request.dismissOnly ? "VIN Required" : "Confirm VIN"}
+          {request.dismissOnly ? "No VIN" : "Verify VIN"}
         </p>
         <h2 className="mt-2 text-lg font-bold leading-7">
           {request.dismissOnly
-            ? "Enter the full 17-character VIN before printing or emailing."
-            : `Check this VIN before ${request.actionLabel}.`}
+            ? "Please enter your VIN."
+            : "Verify VIN"}
         </h2>
 
         {request.vin ? (
@@ -81,7 +94,7 @@ export function useVinConfirmation() {
           ) : null}
           <button
             type="button"
-            onClick={() => finish(request.dismissOnly ? true : true)}
+            onClick={() => finish(request.dismissOnly ? false : true)}
             className="min-h-10 border border-[var(--accent)] bg-[var(--accent)] px-4 font-bold text-white"
           >
             {request.dismissOnly ? "OK" : "VIN Looks Right"}

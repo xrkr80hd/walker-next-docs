@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "workspaceRoot": "../..",
+  "profileKey": "walker-docs-app",
+  "buildKey": "walker-docs-app",
+  "projectDomain": "document-workflow-app",
+  "templateKey": "walker-docs-app",
+  "displayName": "Walker Docs App",
+  "description": "Walker Docs build pack driven by the local agent chain for document workflows, printable forms, and future framework migration planning.",
+  "requestSeed": "Build and maintain Walker Docs as a clean document workflow app with routing discipline, shared data-contract safety, print fidelity, phased execution, audit, and verification.",
+  "tags": [
+    "walker",
+    "documents",
+    "forms",
+    "workflow",
+    "print",
+    "pwa"
+  ],
+  "governingReferences": [
+    "AGENTS.md",
+    ".github/copilot-instructions.md",
+    "agents/AGENT_PERMISSIONS_ACTIONS_ONE_SHEET.md"
+  ],
+  "naming": {
+    "canonicalProjectName": "Walker Docs App",
+    "workspaceLabel": "Walker Docs App",
+    "primaryCodeFolder": "Walker Docs App Folder"
+  },
+  "agentMap": {
+    "MOSES": "agents/mo.agent.md",
+    "EZRA": "agents/ezra.agent.md",
+    "DAN": "agents/dan.agent.md",
+    "GABE": "agents/gabe.agent.md",
+    "JOSH": "agents/josh.agent.md",
+    "MIKE": "agents/mike.agent.md",
+    "NATE": "agents/nathan.agent.md",
+    "SCRIBE": "agents/scribe.agent.md"
+  },
+  "organization": {
+    "rootFolder": "walker-support-workspace",
+    "appFolder": "walker-docs-next",
+    "supportFolders": [
+      "output"
+    ],
+    "artifacts": [
+      "walker docks.pdf",
+      "Screenshot 2026-03-30 at 23.01.18.png"
+    ]
+  }
+}
