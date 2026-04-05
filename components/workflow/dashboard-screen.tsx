@@ -11,7 +11,7 @@ export function DashboardScreen() {
 
   return (
     <>
-      <section className="overflow-hidden border border-black/10 bg-[var(--panel)] bg-[url('/bg-hero-16x9.jpg')] bg-cover bg-center shadow-[0_24px_60px_rgba(35,23,12,0.12)]">
+      <section className="overflow-hidden border border-white/10 bg-[var(--panel)] bg-[url('/bg-hero-16x9.jpg')] bg-cover bg-center shadow-[0_0_40px_rgba(190,23,23,0.15),0_24px_60px_rgba(0,0,0,0.3)]">
         <div className="flex min-h-[60vh] items-center justify-center px-5 py-12 sm:px-6">
           <div className="text-center">
             <Image
@@ -33,6 +33,12 @@ export function DashboardScreen() {
             </p>
 
             <nav className="mx-auto mt-8 flex w-[200px] flex-col gap-3">
+              <Link
+                href="/documents/pain-points"
+                className="inline-flex min-h-12 w-full items-center justify-center border border-white bg-white text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent)] transition hover:bg-white/90"
+              >
+                SPACED
+              </Link>
               <Link
                 href="/workflow/new"
                 className="inline-flex min-h-12 w-full items-center justify-center border border-white bg-white text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent)] transition hover:bg-white/90"

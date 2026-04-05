@@ -179,10 +179,10 @@ export function SupabaseSessionGate({
             <Image src="/walker-red-graphic-v2.png" alt="Walker Automotive" width={320} height={116} priority className="mx-auto h-auto w-full max-w-[200px]" />
             <p className="mt-3 text-xs font-bold uppercase tracking-[0.24em] text-white/80 drop-shadow-sm">Walker Docs</p>
           </div>
-          <div className="bg-[var(--panel)] px-5 py-6 sm:px-6">
+          <div className="bg-[#2a2a2e] px-5 py-6 sm:px-6">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[var(--accent)]">Setup Needed</p>
-            <h1 className="mt-2 text-2xl font-extrabold text-[var(--foreground)]">Auth gate is waiting on environment config.</h1>
-            <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+            <h1 className="mt-2 text-2xl font-extrabold text-white">Auth gate is waiting on environment config.</h1>
+            <p className="mt-3 text-sm leading-7 text-white/60">
               {getSupabaseConfigError()} Add the public Supabase URL and anon key, then reload this app.
             </p>
           </div>
@@ -199,9 +199,9 @@ export function SupabaseSessionGate({
             <Image src="/walker-red-graphic-v2.png" alt="Walker Automotive" width={320} height={116} priority className="mx-auto h-auto w-full max-w-[200px]" />
             <p className="mt-3 text-xs font-bold uppercase tracking-[0.24em] text-white/80 drop-shadow-sm">Walker Docs</p>
           </div>
-          <div className="bg-[var(--panel)] px-5 py-6 sm:px-6">
+          <div className="bg-[#2a2a2e] px-5 py-6 sm:px-6">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[var(--accent)]">Authorizing</p>
-            <h1 className="mt-2 text-2xl font-extrabold text-[var(--foreground)]">Checking access…</h1>
+            <h1 className="mt-2 text-2xl font-extrabold text-white">Checking access…</h1>
           </div>
         </div>
       </div>
@@ -222,28 +222,28 @@ export function SupabaseSessionGate({
           </div>
 
           {/* Form body */}
-          <div className="border-t border-[var(--border)] bg-[var(--panel)] px-5 py-6 sm:px-6">
+          <div className="border-t border-white/10 bg-[#2a2a2e] px-5 py-6 sm:px-6">
             <form className="grid gap-4" onSubmit={handleAuthSubmit}>
               <label className="grid gap-2">
-                <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">Email</span>
+                <span className="text-xs font-bold uppercase tracking-[0.18em] text-white/60">Email</span>
                 <input
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="name@company.com"
-                  className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+                  className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
                   autoComplete="email"
                 />
               </label>
 
               <label className="grid gap-2">
-                <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">Password</span>
+                <span className="text-xs font-bold uppercase tracking-[0.18em] text-white/60">Password</span>
                 <input
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="••••••••"
-                  className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+                  className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
                   autoComplete="current-password"
                 />
               </label>
@@ -301,19 +301,19 @@ export function SupabaseSessionGate({
   return (
     <>
       <div className="mx-auto w-full max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-3 border border-black/10 bg-[var(--panel-strong)] px-4 py-3 shadow-[0_18px_44px_rgba(35,23,12,0.08)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 border border-white/10 bg-[#2a2a2e] px-4 py-3 shadow-[0_18px_44px_rgba(0,0,0,0.2)]">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/50">
               Authorized Session
             </p>
-            <p className="text-sm font-semibold text-[var(--foreground)]">
+            <p className="text-sm font-semibold text-white">
               {getSessionLabel(session)}
             </p>
           </div>
           <button
             type="button"
             onClick={handleSignOut}
-            className="inline-flex min-h-11 items-center justify-center border border-[var(--foreground)] bg-white px-4 text-sm font-bold uppercase tracking-[0.08em] text-[var(--foreground)]"
+            className="inline-flex min-h-11 items-center justify-center border border-white/20 bg-white/10 px-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:bg-white/20"
           >
             Sign Out
           </button>

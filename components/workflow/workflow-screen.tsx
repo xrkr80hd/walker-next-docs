@@ -427,7 +427,7 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
     <>
       <div className="grid gap-6">
         {/* ── Hero ── */}
-        <section className="overflow-hidden border border-black/10 bg-[var(--panel)] bg-[url('/bg-hero-16x9.jpg')] bg-cover bg-center shadow-[0_24px_60px_rgba(35,23,12,0.12)] print:bg-none">
+        <section className="overflow-hidden border border-white/10 bg-[var(--panel)] bg-[url('/bg-hero-16x9.jpg')] bg-cover bg-center shadow-[0_0_40px_rgba(190,23,23,0.15),0_24px_60px_rgba(0,0,0,0.3)] print:bg-none">
           <div className="grid gap-5 px-5 py-5 sm:px-6">
             <div className="text-center">
               <Image
@@ -466,7 +466,7 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
         </section>
 
         {/* ── Current Deal (primary section) ── */}
-        <section className="overflow-hidden border border-black/10 shadow-[0_18px_44px_rgba(35,23,12,0.08)]">
+        <section className="overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_18px_44px_rgba(0,0,0,0.25)]">
           <button
             type="button"
             onClick={() => toggleSection("deal")}
@@ -485,7 +485,7 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
             </div>
           </button>
           {openSections.deal && (
-            <div className="border-t border-[var(--border)] bg-white px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
+            <div className="border-t border-white/10 bg-[#2a2a2e] px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
 
               <div className="mt-5 grid gap-4 md:grid-cols-2">
                 {CUSTOMER_FIELDS.map((field) => (
@@ -493,7 +493,7 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                     key={field.name}
                     className={`grid gap-2 ${field.wide ? "md:col-span-2" : ""}`}
                   >
-                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">
                       {field.label}
                     </span>
                     <input
@@ -502,7 +502,7 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                       onChange={(event) =>
                         updateField(field.name, event.currentTarget.value)
                       }
-                      className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+                      className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
                     />
                   </label>
                 ))}
@@ -511,23 +511,23 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
               {/* Home Address */}
               <div className="mt-4 grid gap-4">
                 <label className="grid gap-2">
-                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Street Address</span>
-                  <input type="text" value={data.homeAddress} onChange={(e) => updateField("homeAddress", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Street Address</span>
+                  <input type="text" value={data.homeAddress} onChange={(e) => updateField("homeAddress", e.currentTarget.value)} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
                 </label>
                 <div className="grid gap-4 md:grid-cols-3">
                   <label className="grid gap-2">
-                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">City</span>
-                    <input type="text" value={data.homeCity} onChange={(e) => updateField("homeCity", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
+                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">City</span>
+                    <input type="text" value={data.homeCity} onChange={(e) => updateField("homeCity", e.currentTarget.value)} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
                   </label>
                   <label className="grid gap-2">
-                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">State</span>
-                    <select value={data.homeState} onChange={(e) => updateField("homeState", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]">
+                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">State</span>
+                    <select value={data.homeState} onChange={(e) => updateField("homeState", e.currentTarget.value)} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]">
                       {US_STATES.map((s) => <option key={s} value={s}>{s || "Select"}</option>)}
                     </select>
                   </label>
                   <label className="grid gap-2">
-                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Zip</span>
-                    <input type="text" value={data.homeZip} onChange={(e) => updateField("homeZip", e.currentTarget.value)} maxLength={10} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
+                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Zip</span>
+                    <input type="text" value={data.homeZip} onChange={(e) => updateField("homeZip", e.currentTarget.value)} maxLength={10} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
                   </label>
                 </div>
               </div>
@@ -539,7 +539,7 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                     key={field.name}
                     className={`grid gap-2 ${field.wide ? "md:col-span-2" : ""}`}
                   >
-                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">
                       {field.label}
                     </span>
                     <input
@@ -551,58 +551,58 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                       maxLength={field.name === "vin" ? 17 : undefined}
                       spellCheck={field.name === "vin" ? false : undefined}
                       autoCapitalize={field.name === "vin" ? "characters" : undefined}
-                      className={`min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]${field.name === "vin" ? " uppercase" : ""}`}
+                      className={`min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]${field.name === "vin" ? " uppercase" : ""}`}
                     />
                   </label>
                 ))}
               </div>
 
               {/* Mailing Address */}
-              <div className="mt-5 border-t border-[var(--border)] pt-4">
+              <div className="mt-5 border-t border-white/10 pt-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Mailing Address</span>
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Mailing Address</span>
                   <button
                     type="button"
                     onClick={() => setMailingSameAsPhysical(!mailingSameAsPhysical)}
-                    className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors ${mailingSameAsPhysical ? "bg-[var(--border)]" : "bg-[var(--accent)]"}`}
+                    className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors ${mailingSameAsPhysical ? "bg-white/20" : "bg-[var(--accent)]"}`}
                   >
                     <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${mailingSameAsPhysical ? "translate-x-0.5" : "translate-x-[22px]"}`} />
                   </button>
                 </div>
-                <p className="mt-1 text-xs text-[var(--muted)]">
+                <p className="mt-1 text-xs text-white/40">
                   {mailingSameAsPhysical ? "Same as physical address" : "Enter a separate mailing address"}
                 </p>
                 <div className={`mt-3 grid gap-4 transition-opacity ${mailingSameAsPhysical ? "pointer-events-none opacity-40" : "opacity-100"}`}>
                   <label className="grid gap-2">
-                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Street Address</span>
-                    <input type="text" value={mailingSameAsPhysical ? data.homeAddress : data.mailingAddress} onChange={(e) => updateField("mailingAddress", e.currentTarget.value)} disabled={mailingSameAsPhysical} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[var(--panel)] disabled:text-[var(--muted)]" />
+                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Street Address</span>
+                    <input type="text" value={mailingSameAsPhysical ? data.homeAddress : data.mailingAddress} onChange={(e) => updateField("mailingAddress", e.currentTarget.value)} disabled={mailingSameAsPhysical} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[#1c1c1e] disabled:text-white/40" />
                   </label>
                   <div className="grid gap-4 md:grid-cols-3">
                     <label className="grid gap-2">
-                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">City</span>
-                      <input type="text" value={mailingSameAsPhysical ? data.homeCity : data.mailingCity} onChange={(e) => updateField("mailingCity", e.currentTarget.value)} disabled={mailingSameAsPhysical} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[var(--panel)] disabled:text-[var(--muted)]" />
+                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">City</span>
+                      <input type="text" value={mailingSameAsPhysical ? data.homeCity : data.mailingCity} onChange={(e) => updateField("mailingCity", e.currentTarget.value)} disabled={mailingSameAsPhysical} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[#1c1c1e] disabled:text-white/40" />
                     </label>
                     <label className="grid gap-2">
-                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">State</span>
-                      <select value={mailingSameAsPhysical ? data.homeState : data.mailingState} onChange={(e) => updateField("mailingState", e.currentTarget.value)} disabled={mailingSameAsPhysical} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[var(--panel)] disabled:text-[var(--muted)]">
+                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">State</span>
+                      <select value={mailingSameAsPhysical ? data.homeState : data.mailingState} onChange={(e) => updateField("mailingState", e.currentTarget.value)} disabled={mailingSameAsPhysical} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[#1c1c1e] disabled:text-white/40">
                         {US_STATES.map((s) => <option key={s} value={s}>{s || "Select"}</option>)}
                       </select>
                     </label>
                     <label className="grid gap-2">
-                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Zip</span>
-                      <input type="text" value={mailingSameAsPhysical ? data.homeZip : data.mailingZip} onChange={(e) => updateField("mailingZip", e.currentTarget.value)} disabled={mailingSameAsPhysical} maxLength={10} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[var(--panel)] disabled:text-[var(--muted)]" />
+                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Zip</span>
+                      <input type="text" value={mailingSameAsPhysical ? data.homeZip : data.mailingZip} onChange={(e) => updateField("mailingZip", e.currentTarget.value)} disabled={mailingSameAsPhysical} maxLength={10} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[#1c1c1e] disabled:text-white/40" />
                     </label>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-5 grid gap-3 border-t border-[var(--border)] pt-4 sm:grid-cols-2">
+              <div className="mt-5 grid gap-3 border-t border-white/10 pt-4 sm:grid-cols-2">
                 <button
                   type="button"
                   onClick={() => updateField("deliveryEnabled", !data.deliveryEnabled)}
-                  className={`flex min-h-12 items-center gap-3 border px-4 text-sm font-bold transition ${data.deliveryEnabled ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]" : "border-[var(--border)] bg-white text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--foreground)]"}`}
+                  className={`flex min-h-12 items-center gap-3 border px-4 text-sm font-bold transition ${data.deliveryEnabled ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]" : "border-white/10 bg-white/10 text-white/60 hover:border-[var(--accent)] hover:text-white"}`}
                 >
-                  <span className={`flex h-5 w-5 items-center justify-center border text-xs ${data.deliveryEnabled ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-[var(--border)] bg-white"}`}>
+                  <span className={`flex h-5 w-5 items-center justify-center border text-xs ${data.deliveryEnabled ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/20 bg-white/10"}`}>
                     {data.deliveryEnabled ? "✓" : ""}
                   </span>
                   Prepare Delivery Checklist for F&amp;I
@@ -610,9 +610,9 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                 <button
                   type="button"
                   onClick={() => updateField("hasCoOwner", !data.hasCoOwner)}
-                  className={`flex min-h-12 items-center gap-3 border px-4 text-sm font-bold transition ${data.hasCoOwner ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]" : "border-[var(--border)] bg-white text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--foreground)]"}`}
+                  className={`flex min-h-12 items-center gap-3 border px-4 text-sm font-bold transition ${data.hasCoOwner ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]" : "border-white/10 bg-white/10 text-white/60 hover:border-[var(--accent)] hover:text-white"}`}
                 >
-                  <span className={`flex h-5 w-5 items-center justify-center border text-xs ${data.hasCoOwner ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-[var(--border)] bg-white"}`}>
+                  <span className={`flex h-5 w-5 items-center justify-center border text-xs ${data.hasCoOwner ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/20 bg-white/10"}`}>
                     {data.hasCoOwner ? "✓" : ""}
                   </span>
                   Co-owner on this deal
@@ -620,11 +620,11 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
               </div>
 
               {data.deliveryEnabled ? (
-                <section className="mt-5 border border-[var(--border)] bg-[var(--panel)] p-4">
-                  <h4 className="text-lg font-bold text-[var(--foreground)]">
+                <section className="mt-5 border border-white/10 bg-[#1c1c1e] p-4">
+                  <h4 className="text-lg font-bold text-white">
                     Delivery Checklist Items
                   </h4>
-                  <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                  <p className="mt-2 text-sm leading-6 text-white/40">
                     Check items for this deal. These carry over to the printed
                     checklist.
                   </p>
@@ -634,7 +634,7 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                         key={item.key}
                         className="inline-flex items-center gap-3"
                       >
-                        <label className="inline-flex items-center gap-3 text-sm font-semibold text-[var(--foreground)]">
+                        <label className="inline-flex items-center gap-3 text-sm font-semibold text-white">
                           <input
                             type="checkbox"
                             checked={data.deliveryChecklist[item.key]}
@@ -654,7 +654,7 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                             onChange={(event) =>
                               updateField("mileage", event.currentTarget.value)
                             }
-                            className="ml-1 h-8 w-32 border border-[var(--border)] bg-white px-2 text-sm text-[var(--foreground)]"
+                            className="ml-1 h-8 w-32 border border-white/10 bg-white px-2 text-sm text-[var(--foreground)]"
                           />
                         )}
                         {item.key === "etchNumbers" && (
@@ -665,7 +665,7 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                             onChange={(event) =>
                               updateField("etchNumbers", event.currentTarget.value)
                             }
-                            className="ml-1 h-8 w-32 border border-[var(--border)] bg-white px-2 text-sm text-[var(--foreground)]"
+                            className="ml-1 h-8 w-32 border border-white/10 bg-white px-2 text-sm text-[var(--foreground)]"
                           />
                         )}
                       </div>
@@ -674,7 +674,7 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
 
                   <div className="mt-3 flex flex-wrap items-center gap-6">
                     <div className="inline-flex items-center gap-3">
-                      <span className="text-sm font-semibold text-[var(--foreground)]">
+                      <span className="text-sm font-semibold text-white">
                         Tax %
                       </span>
                       <input
@@ -685,10 +685,10 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                         onChange={(event) =>
                           updateField("taxPercent", event.currentTarget.value)
                         }
-                        className="h-8 w-28 border border-[var(--border)] bg-white px-2 text-sm text-[var(--foreground)]"
+                        className="h-8 w-28 border border-white/10 bg-white px-2 text-sm text-[var(--foreground)]"
                       />
                     </div>
-                    <label className="inline-flex items-center gap-3 text-sm font-semibold text-[var(--foreground)]">
+                    <label className="inline-flex items-center gap-3 text-sm font-semibold text-white">
                       <input
                         type="checkbox"
                         checked={data.payoffVerified}
@@ -707,20 +707,20 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                 <button
                   type="button"
                   onClick={saveNow}
-                  className="inline-flex min-h-12 items-center justify-center border border-[var(--foreground)] bg-white px-5 text-sm font-bold uppercase tracking-[0.08em] text-[var(--foreground)]"
+                  className="inline-flex min-h-12 items-center justify-center border border-white/20 bg-white/10 px-5 text-sm font-bold uppercase tracking-[0.08em] text-white"
                 >
                   Save Session
                 </button>
                 <button
                   type="button"
                   onClick={clearSessionNow}
-                  className="inline-flex min-h-12 items-center justify-center border border-[var(--foreground)] bg-white px-5 text-sm font-bold uppercase tracking-[0.08em] text-[var(--foreground)]"
+                  className="inline-flex min-h-12 items-center justify-center border border-white/20 bg-white/10 px-5 text-sm font-bold uppercase tracking-[0.08em] text-white"
                 >
                   New Deal
                 </button>
               </div>
 
-              <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+              <p className="mt-4 text-sm leading-6 text-white/40">
                 Deal data is stored in the current browser session only.
               </p>
             </div>
@@ -743,7 +743,7 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
         )}
 
         {/* ── Available Documents ── */}
-        <section className="overflow-hidden border border-black/10 shadow-[0_18px_44px_rgba(35,23,12,0.08)]">
+        <section className="overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_18px_44px_rgba(0,0,0,0.25)]">
           <button
             type="button"
             onClick={() => toggleSection("documents")}
@@ -762,7 +762,7 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
             </div>
           </button>
           {openSections.documents && (
-            <div className="border-t border-[var(--border)] bg-white px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
+            <div className="border-t border-white/10 bg-[#2a2a2e] px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
@@ -781,29 +781,29 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                 <button
                   type="button"
                   onClick={printBlank}
-                  className="inline-flex min-h-12 items-center justify-center border border-[var(--foreground)] bg-white px-5 text-sm font-bold uppercase tracking-[0.08em] text-[var(--foreground)]"
+                  className="inline-flex min-h-12 items-center justify-center border border-white/20 bg-white/10 px-5 text-sm font-bold uppercase tracking-[0.08em] text-white"
                 >
                   Print Blank
                 </button>
                 <button
                   type="button"
                   onClick={saveBlankPdf}
-                  className="inline-flex min-h-12 items-center justify-center border border-[var(--foreground)] bg-white px-5 text-sm font-bold uppercase tracking-[0.08em] text-[var(--foreground)]"
+                  className="inline-flex min-h-12 items-center justify-center border border-white/20 bg-white/10 px-5 text-sm font-bold uppercase tracking-[0.08em] text-white"
                 >
                   Save Blank to PDF
                 </button>
               </div>
               <div className="mt-4 grid gap-3">
-                {DOCUMENT_LIBRARY.filter((doc) => !isNewDeal || doc.slug !== "buyers-guide").map((doc) => (
+                {DOCUMENT_LIBRARY.filter((doc) => doc.slug !== "pain-points" && (!isNewDeal || doc.slug !== "buyers-guide")).map((doc) => (
                   <div
                     key={doc.slug}
-                    className="flex flex-wrap items-center justify-between gap-3 border border-[var(--border)] bg-[var(--panel)] px-4 py-3"
+                    className="flex flex-wrap items-center justify-between gap-3 border border-white/10 bg-[#1c1c1e] px-4 py-3"
                   >
                     <div>
-                      <p className="text-sm font-bold text-[var(--foreground)]">
+                      <p className="text-sm font-bold text-white">
                         {doc.title}
                       </p>
-                      <p className="text-sm text-[var(--muted)]">{doc.description}</p>
+                      <p className="text-sm text-white/40">{doc.description}</p>
                     </div>
                     {doc.ready ? (
                       <Link
@@ -814,7 +814,7 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                         Open
                       </Link>
                     ) : (
-                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/40">
                         Queued
                       </span>
                     )}

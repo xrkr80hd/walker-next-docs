@@ -79,15 +79,15 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <DisclosureGate>
         {isDocumentRoute ? (
           <div className="min-h-screen overflow-x-auto px-0 pb-8 pt-4 sm:px-2 lg:px-4">
-            <div className="mx-auto mb-3 flex w-full max-w-[8.5in] flex-wrap items-center justify-between gap-3 border border-black/10 bg-white/90 px-4 py-3 shadow-[0_14px_40px_rgba(0,0,0,0.08)]">
+            <div className="mx-auto mb-3 flex w-full max-w-[8.5in] flex-wrap items-center justify-between gap-3 border border-white/10 bg-[#2a2a2e] px-4 py-3 shadow-[0_14px_40px_rgba(0,0,0,0.2)]">
               <button
                 type="button"
                 onClick={backToPrevious}
-                className="inline-flex min-h-10 items-center justify-center border border-[var(--foreground)] bg-white px-4 text-sm font-bold text-[var(--foreground)]"
+                className="inline-flex min-h-10 items-center justify-center border border-white/20 bg-white/10 px-4 text-sm font-bold text-white transition hover:bg-white/20"
               >
                 Back
               </button>
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/50">
                 {breadcrumb}
               </p>
             </div>
@@ -96,18 +96,18 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         ) : (
           <div className="min-h-screen">
             <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-8 pt-4 sm:px-6 lg:px-8">
-              <header className="border border-black/10 bg-[var(--panel)] shadow-[0_24px_60px_rgba(35,23,12,0.12)]">
+              <header className="border border-white/10 bg-[#2a2a2e] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center shadow-[0_24px_60px_rgba(0,0,0,0.3)]">
                 <div className="flex flex-col gap-4 px-5 py-4 sm:px-6">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.24em] text-[var(--muted)]">
+                      <p className="text-xs font-bold uppercase tracking-[0.24em] text-white/50">
                         Walker Automotive
                       </p>
-                      <h1 className="text-2xl font-extrabold tracking-[0.01em] text-[var(--foreground)]">
+                      <h1 className="text-2xl font-extrabold tracking-[0.01em] text-white">
                         Walker Docs
                       </h1>
                     </div>
-                    <div className="rounded-full border border-[var(--border)] bg-[var(--panel-strong)] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
+                    <div className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
                       Beta
                     </div>
                   </div>
@@ -117,14 +117,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                       href="/dashboard"
                       className={`inline-flex min-h-11 items-center justify-center border px-4 text-sm font-bold uppercase tracking-[0.08em] ${!isAdminRoute
                         ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-                        : "border-[var(--foreground)] bg-white text-[var(--foreground)]"
+                        : "border-white/20 bg-white/10 text-white transition hover:bg-white/20"
                         }`}
                     >
                       Dashboard
                     </Link>
                     <Link
                       href="/documents"
-                      className="inline-flex min-h-11 items-center justify-center border border-[var(--foreground)] bg-white px-4 text-sm font-bold uppercase tracking-[0.08em] text-[var(--foreground)]"
+                      className="inline-flex min-h-11 items-center justify-center border border-white/20 bg-white/10 px-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:bg-white/20"
                     >
                       Documents
                     </Link>
@@ -133,7 +133,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                         href="/admin"
                         className={`inline-flex min-h-11 items-center justify-center border px-4 text-sm font-bold uppercase tracking-[0.08em] ${isAdminRoute
                           ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-                          : "border-[var(--foreground)] bg-white text-[var(--foreground)]"
+                          : "border-white/20 bg-white/10 text-white transition hover:bg-white/20"
                           }`}
                       >
                         Admin

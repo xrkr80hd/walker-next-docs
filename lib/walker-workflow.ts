@@ -70,9 +70,9 @@ export const DOCUMENT_LIBRARY = [
   },
   {
     slug: "pain-points",
-    title: "Space Sheet",
+    title: "SPACED Sheet",
     description:
-      "Priority selling points and customer concerns.",
+      "Standalone sales tool — priority selling points and customer concerns.",
     href: "/documents/pain-points",
     printHref: "/print/pain-points",
     stage: "Deal Form",
@@ -171,6 +171,17 @@ export type WorkflowData = {
   payoffVerified: boolean;
   deliveryEnabled: boolean;
   deliveryChecklist: Record<ChecklistKey, boolean>;
+  tradeIn: "" | "yes" | "no";
+  approxBalance: string;
+  currentPayment: string;
+  newBudget: string;
+  prioritySafety: string;
+  priorityPerformance: string;
+  priorityAppearance: string;
+  priorityComfort: string;
+  priorityEconomy: string;
+  priorityDependability: string;
+  priorityOther: string;
 };
 
 export type DeliveryChecklistNotes = Partial<
@@ -292,6 +303,17 @@ export function createDefaultWorkflowData(): WorkflowData {
     payoffVerified: false,
     deliveryEnabled: true,
     deliveryChecklist: createEmptyChecklist(),
+    tradeIn: "",
+    approxBalance: "",
+    currentPayment: "",
+    newBudget: "",
+    prioritySafety: "",
+    priorityPerformance: "",
+    priorityAppearance: "",
+    priorityComfort: "",
+    priorityEconomy: "",
+    priorityDependability: "",
+    priorityOther: "",
   };
 }
 
@@ -351,6 +373,17 @@ export function normalizeWorkflowData(value: unknown): WorkflowData {
     deliveryEnabled:
       typeof value.deliveryEnabled === "boolean" ? value.deliveryEnabled : true,
     deliveryChecklist: nextChecklist,
+    tradeIn: safeTrim(value.tradeIn) === "yes" ? "yes" : safeTrim(value.tradeIn) === "no" ? "no" : "",
+    approxBalance: safeTrim(value.approxBalance),
+    currentPayment: safeTrim(value.currentPayment),
+    newBudget: safeTrim(value.newBudget),
+    prioritySafety: safeTrim(value.prioritySafety),
+    priorityPerformance: safeTrim(value.priorityPerformance),
+    priorityAppearance: safeTrim(value.priorityAppearance),
+    priorityComfort: safeTrim(value.priorityComfort),
+    priorityEconomy: safeTrim(value.priorityEconomy),
+    priorityDependability: safeTrim(value.priorityDependability),
+    priorityOther: safeTrim(value.priorityOther),
   };
 }
 
