@@ -44,3 +44,13 @@ next-env.d.ts
 # local tooling & output
 /output/
 .playwright-cli/
+
+# internal docs & agent configs (local only)
+AGENTS.md
+CLAUDE.md
+SOURCE_OF_TRUTH.md
+WORK_LOG.md
+PLANNED_WORK_LOG.md
+COMPLETED_WORK_LOG.md
+/agents/
+/build_profiles/
