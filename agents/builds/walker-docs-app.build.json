@@ -19,7 +19,10 @@
   "governingReferences": [
     "AGENTS.md",
     ".github/copilot-instructions.md",
-    "agents/AGENT_PERMISSIONS_ACTIONS_ONE_SHEET.md"
+    "agents/AGENT_PERMISSIONS_ACTIONS_ONE_SHEET.md",
+    "agents/AGENT_HARD_LOCK_RULES.md",
+    "PLANNED_WORK_LOG.md",
+    "COMPLETED_WORK_LOG.md"
   ],
   "naming": {
     "canonicalProjectName": "Walker Docs App",

@@ -114,13 +114,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
                   <nav className="flex flex-wrap gap-2">
                     <Link
-                      href="/workflow"
+                      href="/dashboard"
                       className={`inline-flex min-h-11 items-center justify-center border px-4 text-sm font-bold uppercase tracking-[0.08em] ${!isAdminRoute
-                          ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-                          : "border-[var(--foreground)] bg-white text-[var(--foreground)]"
+                        ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                        : "border-[var(--foreground)] bg-white text-[var(--foreground)]"
                         }`}
                     >
-                      Workflow
+                      Dashboard
                     </Link>
                     <Link
                       href="/documents"
@@ -132,8 +132,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                       <Link
                         href="/admin"
                         className={`inline-flex min-h-11 items-center justify-center border px-4 text-sm font-bold uppercase tracking-[0.08em] ${isAdminRoute
-                            ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-                            : "border-[var(--foreground)] bg-white text-[var(--foreground)]"
+                          ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                          : "border-[var(--foreground)] bg-white text-[var(--foreground)]"
                           }`}
                       >
                         Admin

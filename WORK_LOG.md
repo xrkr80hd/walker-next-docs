@@ -194,3 +194,54 @@ All editable fields use `contentEditable` with `suppressContentEditableWarning` 
 | # | Task | Status |
 |---|------|--------|
 | 28 | VIN toast: no VIN → "Please enter your VIN" (blocks action). VIN present → "Verify VIN" with VIN displayed for confirmation. Universal across all print/PDF flows. | Done |
+
+---
+
+## Phase 6 — NEW Vehicle Workflow
+
+**Goal:** Clone the existing USED workflow into a separate `/workflow/new` route. Only difference: NEW omits the Buyer's Guide. USED stays untouched at `/workflow`.
+
+| # | Task | Status |
+|---|------|--------|
+| 1 | Create `components/documents/all-new-print-screen.tsx` — Print All for NEW deals (no Buyer's Guide) | Done |
+| 2 | Create `app/(print)/print/all-new/page.tsx` — route for NEW print-all | Done |
+| 3 | Add `dealType` prop to `WorkflowScreen` (defaults to `"used"`) | Done |
+| 4 | Filter document list + conditional print route based on `dealType` | Done |
+| 5 | Add Used/New tab links at top of workflow screen | Done |
+| 6 | Create `app/(app)/workflow/new/page.tsx` — NEW workflow route | Done |
+| 7 | Build & verify zero errors, both workflows functional | Done |
+
+### Build Verification (Phase 6)
+
+- **Next.js build**: Clean — 28/28 routes compiled, zero TypeScript errors
+- **New routes**: `/workflow/new` (NEW workflow), `/print/all-new` (NEW print-all without Buyer's Guide)
+- **Existing routes**: All unchanged — `/workflow`, `/print/all`, all document + print routes intact
+- **USED workflow**: Untouched — all 6 documents, Buyer's Guide included in doc list + Print All
+- **NEW workflow**: 5 documents, Buyer's Guide excluded from doc list + Print All
+- **Shared localStorage**: Both workflows use the same deal data
+
+---
+
+## Phase 7 — Workflow UI Cleanup
+
+**Goal:** Clean up button placement, remove redundant buttons, wrap documents in accordion, add blank form printing.
+
+| # | Task | Status |
+|---|------|--------|
+| 1 | Remove redundant Print (delivery-checklist-only) and Save to PDF (delivery-checklist-only) buttons | Done |
+| 2 | Move Save Session + New Deal buttons inside Deal accordion (bottom of form) | Done |
+| 3 | Move status message out of Deal accordion — always visible between Deal and Documents sections | Done |
+| 4 | Wrap Available Documents in collapsible red-header accordion (same pattern as Dealer/Consultant/Deal) | Done |
+| 5 | Add `documents` key to `openSections` state + clearSession reset | Done |
+| 6 | Place Print All + Save All to PDF inside Documents accordion (top of list) | Done |
+| 7 | Upgrade status message from plain text to full-width alert banner (colored border, tinted background, icon) | Done |
+| 8 | Add Print Blank + Save Blank to PDF buttons (empty forms, no validation, no VIN check) | Done |
+| 9 | Add `?blank=1` query param support to `AllPrintScreen` and `AllNewPrintScreen` — uses `createDefaultWorkflowData()` | Done |
+
+### Build Verification (Phase 7)
+
+- **Zero TypeScript errors** across all modified files
+- **Buttons**: 4 in Documents accordion (Print All, Save All to PDF, Print Blank, Save Blank to PDF), 2 in Deal accordion (Save Session, New Deal)
+- **Status banner**: Always visible between Deal and Documents sections, hidden when no message
+- **Blank forms**: Both Used and New workflows can print/save empty templates via `?blank=1`
+- **Both workflows**: `/workflow` and `/workflow/new` share all UI changes

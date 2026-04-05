@@ -5,6 +5,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { BuyersGuideReverseSheet } from "@/components/documents/buyers-guide-reverse-sheet";
 import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
+import { getWorkflowReturnPath } from "@/components/workflow/workflow-screen";
 import {
   loadConsultant,
   loadDealer,
@@ -57,7 +58,7 @@ export function BuyersGuideReverseScreen() {
       <div className="mx-auto flex w-full max-w-[8.5in] flex-col">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border border-black/10 bg-white/90 px-4 py-3 shadow-[0_14px_40px_rgba(0,0,0,0.08)]">
           <Link
-            href="/workflow"
+            href={getWorkflowReturnPath()}
             className="inline-flex min-h-10 items-center justify-center border border-[var(--foreground)] bg-white px-4 text-sm font-bold text-[var(--foreground)]"
           >
             Back to Workflow

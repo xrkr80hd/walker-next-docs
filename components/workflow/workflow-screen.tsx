@@ -2,16 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
 import {
-  createDefaultConsultant,
-  createDefaultDealer,
   loadConsultant,
   loadDealer,
-  saveConsultant,
-  saveDealer,
   type ConsultantInfo,
   type DealerInfo,
 } from "@/lib/dealer-consultant";
@@ -24,7 +20,7 @@ import {
   normalizeVin,
   saveWorkflow,
   subscribeToWorkflowSessionClear,
-  type WorkflowData,
+  type WorkflowData
 } from "@/lib/walker-workflow";
 
 const CUSTOMER_FIELDS = [
@@ -56,6 +52,7 @@ const WORKFLOW_VIEW_STATE_KEY = "walker.workflow.view.v1";
 
 type WorkflowViewState = {
   openSections: Record<string, boolean>;
+  returnPath?: string;
   scrollY: number;
 };
 
@@ -105,13 +102,26 @@ function clearWorkflowViewState() {
   window.sessionStorage.removeItem(WORKFLOW_VIEW_STATE_KEY);
 }
 
-export function WorkflowScreen() {
+export function getWorkflowReturnPath(): string {
+  if (typeof window === "undefined") return "/workflow";
+  try {
+    const raw = window.sessionStorage.getItem(WORKFLOW_VIEW_STATE_KEY);
+    if (!raw) return "/workflow";
+    const parsed = JSON.parse(raw) as Partial<WorkflowViewState>;
+    return parsed.returnPath || "/workflow";
+  } catch {
+    return "/workflow";
+  }
+}
+
+export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new" } = {}) {
+  const isNewDeal = dealType === "new";
+  const printAllPath = isNewDeal ? "/print/all-new" : "/print/all";
+  const workflowPath = isNewDeal ? "/workflow/new" : "/workflow";
   const { confirmVinAction, dialog } = useVinConfirmation();
   const [data, setData] = useState<WorkflowData>(() => loadWorkflow());
-  const [dealer, setDealer] = useState<DealerInfo>(() => loadDealer());
-  const [consultant, setConsultant] = useState<ConsultantInfo>(() =>
-    loadConsultant(),
-  );
+  const [dealer] = useState<DealerInfo>(() => loadDealer());
+  const [consultant] = useState<ConsultantInfo>(() => loadConsultant());
   const [mailingSameAsPhysical, setMailingSameAsPhysical] = useState(true);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const savedSections = loadWorkflowViewState()?.openSections ?? {};
@@ -119,26 +129,15 @@ export function WorkflowScreen() {
       dealer: false,
       consultant: false,
       deal: false,
+      documents: false,
       ...savedSections,
     };
   });
   const [status, setStatus] = useState("");
   const [tone, setTone] = useState<StatusTone>("");
-  const [settingsOpen, setSettingsOpen] = useState(false);
-
-  const closeSettings = useCallback(() => setSettingsOpen(false), []);
-
   useEffect(() => {
     saveWorkflow(data);
   }, [data]);
-
-  useEffect(() => {
-    saveDealer(dealer);
-  }, [dealer]);
-
-  useEffect(() => {
-    saveConsultant(consultant);
-  }, [consultant]);
 
   useEffect(() => {
     // Initialise mailing toggle based on saved data
@@ -173,9 +172,18 @@ export function WorkflowScreen() {
       return;
     }
 
-    window.requestAnimationFrame(() => {
-      window.scrollTo({ top: saved.scrollY, behavior: "auto" });
-    });
+    // Retry scroll restore — accordion content may not be in the DOM on the first frame
+    let attempts = 0;
+    const maxAttempts = 10;
+    const targetY = saved.scrollY;
+    function tryScroll() {
+      attempts++;
+      window.scrollTo({ top: targetY, behavior: "auto" });
+      if (Math.abs(window.scrollY - targetY) > 2 && attempts < maxAttempts) {
+        window.requestAnimationFrame(tryScroll);
+      }
+    }
+    window.requestAnimationFrame(tryScroll);
   }, []);
 
   useEffect(() => {
@@ -221,6 +229,7 @@ export function WorkflowScreen() {
   function persistWorkflowViewState() {
     saveWorkflowViewState({
       openSections,
+      returnPath: workflowPath,
       scrollY: typeof window === "undefined" ? 0 : window.scrollY,
     });
   }
@@ -281,54 +290,8 @@ export function WorkflowScreen() {
     }));
   }
 
-  function updateDealer(field: keyof DealerInfo, value: string) {
-    setDealer((current) => ({ ...current, [field]: value }));
-  }
-
-  function updateConsultant(field: keyof ConsultantInfo, value: string) {
-    setConsultant((current) => ({ ...current, [field]: value }));
-  }
-
   function toggleSection(key: string) {
     setOpenSections((current) => ({ ...current, [key]: !current[key] }));
-  }
-
-  function saveDealerNow() {
-    saveDealer(dealer);
-    setStatusMessage("Dealership saved.", "success");
-  }
-
-  function clearDealerNow() {
-    const blank = createDefaultDealer();
-    setDealer(blank);
-    saveDealer(blank);
-    setStatusMessage("Dealership cleared.", "success");
-  }
-
-  function deleteDealerNow() {
-    const blank = createDefaultDealer();
-    setDealer(blank);
-    if (typeof window !== "undefined") localStorage.removeItem("walker.dealer.v1");
-    setStatusMessage("Dealership deleted.", "success");
-  }
-
-  function saveConsultantNow() {
-    saveConsultant(consultant);
-    setStatusMessage("Salesperson saved.", "success");
-  }
-
-  function clearConsultantNow() {
-    const blank = createDefaultConsultant();
-    setConsultant(blank);
-    saveConsultant(blank);
-    setStatusMessage("Salesperson cleared.", "success");
-  }
-
-  function deleteConsultantNow() {
-    const blank = createDefaultConsultant();
-    setConsultant(blank);
-    if (typeof window !== "undefined") localStorage.removeItem("walker.consultant.v1");
-    setStatusMessage("Salesperson deleted.", "success");
   }
 
   function saveNow() {
@@ -344,7 +307,7 @@ export function WorkflowScreen() {
     clearWorkflowSession();
     clearWorkflowViewState();
     setData(loadWorkflow());
-    setOpenSections({ dealer: false, consultant: false, deal: false });
+    setOpenSections({ dealer: false, consultant: false, deal: false, documents: false });
     setStatusMessage(
       "Session cleared. Ready for a new deal.",
       "success",
@@ -426,7 +389,7 @@ export function WorkflowScreen() {
     }
 
     persistWorkflowViewState();
-    window.open("/print/all?autoprint=1&vinchecked=1", "_blank");
+    window.open(`${printAllPath}?autoprint=1&vinchecked=1`, "_blank");
     setStatusMessage(
       "Print All window opened.",
       "success",
@@ -443,11 +406,21 @@ export function WorkflowScreen() {
     }
 
     persistWorkflowViewState();
-    window.open("/print/all?autoprint=1&vinchecked=1&mode=save", "_blank");
+    window.open(`${printAllPath}?autoprint=1&vinchecked=1&mode=save`, "_blank");
     setStatusMessage(
       "PDF downloading…",
       "success",
     );
+  }
+
+  function printBlank() {
+    window.open(`${printAllPath}?autoprint=1&vinchecked=1&blank=1`, "_blank");
+    setStatusMessage("Blank forms print window opened.", "success");
+  }
+
+  function saveBlankPdf() {
+    window.open(`${printAllPath}?autoprint=1&vinchecked=1&blank=1&mode=save`, "_blank");
+    setStatusMessage("Blank PDF downloading…", "success");
   }
 
   return (
@@ -469,7 +442,7 @@ export function WorkflowScreen() {
                 Walker Docs
               </p>
               <h2 className="mt-2 text-3xl font-extrabold leading-tight tracking-[0.01em] text-white drop-shadow-sm sm:text-4xl print:text-[var(--foreground)] print:drop-shadow-none">
-                Deal Workflow
+                {isNewDeal ? "New Vehicle Workflow" : "Used Vehicle Workflow"}
               </h2>
               <p className="mt-2 text-sm font-bold text-white/90 print:text-[var(--foreground)]">
                 Last 8: <span className="font-mono">{getLast8(data.vin) || "-"}</span>
@@ -478,16 +451,16 @@ export function WorkflowScreen() {
                 Enter customer and vehicle information once, then generate all
                 required documents from a single source.
               </p>
-              <button
-                type="button"
-                onClick={() => setSettingsOpen(true)}
-                className="mx-auto mt-4 inline-flex items-center gap-2 border border-white/30 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white backdrop-blur-sm transition hover:border-white/60 hover:bg-white/20 print:border-[var(--border)] print:bg-white print:text-[var(--foreground)] print:backdrop-blur-none"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                  <path fillRule="evenodd" d="M7.84 1.804A1 1 0 0 1 8.82 1h2.36a1 1 0 0 1 .98.804l.331 1.652a6.993 6.993 0 0 1 1.929 1.115l1.598-.54a1 1 0 0 1 1.186.447l1.18 2.044a1 1 0 0 1-.205 1.251l-1.267 1.113a7.047 7.047 0 0 1 0 2.228l1.267 1.113a1 1 0 0 1 .206 1.25l-1.18 2.045a1 1 0 0 1-1.187.447l-1.598-.54a6.993 6.993 0 0 1-1.929 1.115l-.33 1.652a1 1 0 0 1-.98.804H8.82a1 1 0 0 1-.98-.804l-.331-1.652a6.993 6.993 0 0 1-1.929-1.115l-1.598.54a1 1 0 0 1-1.186-.447l-1.18-2.044a1 1 0 0 1 .205-1.251l1.267-1.114a7.05 7.05 0 0 1 0-2.227L1.821 7.773a1 1 0 0 1-.206-1.25l1.18-2.045a1 1 0 0 1 1.187-.447l1.598.54A6.992 6.992 0 0 1 7.51 3.456l.33-1.652ZM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clipRule="evenodd" />
-                </svg>
-                Settings
-              </button>
+
+              <div className="mt-5 print:hidden">
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.08em] text-white/70 transition hover:text-white"
+                >
+                  <span aria-hidden="true">&larr;</span>
+                  Back to Dashboard
+                </Link>
+              </div>
             </div>
           </div>
         </section>
@@ -585,79 +558,65 @@ export function WorkflowScreen() {
               </div>
 
               {/* Mailing Address */}
-              <div className="mt-4 grid gap-3 md:col-span-2">
-                <p className="text-sm font-semibold text-[var(--foreground)]">
-                  Mailing address is the same as the physical address
-                </p>
-                <div className="flex items-center gap-6">
-                  <label className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
-                    <input
-                      type="checkbox"
-                      checked={mailingSameAsPhysical}
-                      onChange={() => setMailingSameAsPhysical(true)}
-                      className="h-5 w-5 accent-[var(--accent)]"
-                    />
-                    Yes
-                  </label>
-                  <label className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
-                    <input
-                      type="checkbox"
-                      checked={!mailingSameAsPhysical}
-                      onChange={() => setMailingSameAsPhysical(false)}
-                      className="h-5 w-5 accent-[var(--accent)]"
-                    />
-                    No
-                  </label>
+              <div className="mt-5 border-t border-[var(--border)] pt-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Mailing Address</span>
+                  <button
+                    type="button"
+                    onClick={() => setMailingSameAsPhysical(!mailingSameAsPhysical)}
+                    className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors ${mailingSameAsPhysical ? "bg-[var(--border)]" : "bg-[var(--accent)]"}`}
+                  >
+                    <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${mailingSameAsPhysical ? "translate-x-0.5" : "translate-x-[22px]"}`} />
+                  </button>
                 </div>
-                {!mailingSameAsPhysical && (
-                  <div className="grid gap-4 border border-[var(--border)] bg-white p-4">
+                <p className="mt-1 text-xs text-[var(--muted)]">
+                  {mailingSameAsPhysical ? "Same as physical address" : "Enter a separate mailing address"}
+                </p>
+                <div className={`mt-3 grid gap-4 transition-opacity ${mailingSameAsPhysical ? "pointer-events-none opacity-40" : "opacity-100"}`}>
+                  <label className="grid gap-2">
+                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Street Address</span>
+                    <input type="text" value={mailingSameAsPhysical ? data.homeAddress : data.mailingAddress} onChange={(e) => updateField("mailingAddress", e.currentTarget.value)} disabled={mailingSameAsPhysical} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[var(--panel)] disabled:text-[var(--muted)]" />
+                  </label>
+                  <div className="grid gap-4 md:grid-cols-3">
                     <label className="grid gap-2">
-                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Street Address</span>
-                      <input type="text" value={data.mailingAddress} onChange={(e) => updateField("mailingAddress", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
+                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">City</span>
+                      <input type="text" value={mailingSameAsPhysical ? data.homeCity : data.mailingCity} onChange={(e) => updateField("mailingCity", e.currentTarget.value)} disabled={mailingSameAsPhysical} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[var(--panel)] disabled:text-[var(--muted)]" />
                     </label>
-                    <div className="grid gap-4 md:grid-cols-3">
-                      <label className="grid gap-2">
-                        <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">City</span>
-                        <input type="text" value={data.mailingCity} onChange={(e) => updateField("mailingCity", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
-                      </label>
-                      <label className="grid gap-2">
-                        <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">State</span>
-                        <select value={data.mailingState} onChange={(e) => updateField("mailingState", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]">
-                          {US_STATES.map((s) => <option key={s} value={s}>{s || "Select"}</option>)}
-                        </select>
-                      </label>
-                      <label className="grid gap-2">
-                        <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Zip</span>
-                        <input type="text" value={data.mailingZip} onChange={(e) => updateField("mailingZip", e.currentTarget.value)} maxLength={10} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
-                      </label>
-                    </div>
+                    <label className="grid gap-2">
+                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">State</span>
+                      <select value={mailingSameAsPhysical ? data.homeState : data.mailingState} onChange={(e) => updateField("mailingState", e.currentTarget.value)} disabled={mailingSameAsPhysical} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[var(--panel)] disabled:text-[var(--muted)]">
+                        {US_STATES.map((s) => <option key={s} value={s}>{s || "Select"}</option>)}
+                      </select>
+                    </label>
+                    <label className="grid gap-2">
+                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Zip</span>
+                      <input type="text" value={mailingSameAsPhysical ? data.homeZip : data.mailingZip} onChange={(e) => updateField("mailingZip", e.currentTarget.value)} disabled={mailingSameAsPhysical} maxLength={10} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[var(--panel)] disabled:text-[var(--muted)]" />
+                    </label>
                   </div>
-                )}
+                </div>
               </div>
 
-              <div className="mt-5 flex flex-wrap gap-4 border-t border-[var(--border)] pt-4">
-                <label className="inline-flex items-center gap-3 text-sm font-semibold text-[var(--foreground)]">
-                  <input
-                    type="checkbox"
-                    checked={data.deliveryEnabled}
-                    onChange={(event) =>
-                      updateField("deliveryEnabled", event.currentTarget.checked)
-                    }
-                    className="h-5 w-5 accent-[var(--accent)]"
-                  />
+              <div className="mt-5 grid gap-3 border-t border-[var(--border)] pt-4 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => updateField("deliveryEnabled", !data.deliveryEnabled)}
+                  className={`flex min-h-12 items-center gap-3 border px-4 text-sm font-bold transition ${data.deliveryEnabled ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]" : "border-[var(--border)] bg-white text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--foreground)]"}`}
+                >
+                  <span className={`flex h-5 w-5 items-center justify-center border text-xs ${data.deliveryEnabled ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-[var(--border)] bg-white"}`}>
+                    {data.deliveryEnabled ? "✓" : ""}
+                  </span>
                   Prepare Delivery Checklist for F&amp;I
-                </label>
-                <label className="inline-flex items-center gap-3 text-sm font-semibold text-[var(--foreground)]">
-                  <input
-                    type="checkbox"
-                    checked={data.hasCoOwner}
-                    onChange={(event) =>
-                      updateField("hasCoOwner", event.currentTarget.checked)
-                    }
-                    className="h-5 w-5 accent-[var(--accent)]"
-                  />
-                  Is there a co-owner?
-                </label>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateField("hasCoOwner", !data.hasCoOwner)}
+                  className={`flex min-h-12 items-center gap-3 border px-4 text-sm font-bold transition ${data.hasCoOwner ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]" : "border-[var(--border)] bg-white text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--foreground)]"}`}
+                >
+                  <span className={`flex h-5 w-5 items-center justify-center border text-xs ${data.hasCoOwner ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-[var(--border)] bg-white"}`}>
+                    {data.hasCoOwner ? "✓" : ""}
+                  </span>
+                  Co-owner on this deal
+                </button>
               </div>
 
               {data.deliveryEnabled ? (
@@ -759,20 +718,52 @@ export function WorkflowScreen() {
                 >
                   New Deal
                 </button>
-                <button
-                  type="button"
-                  onClick={openPrintFlow}
-                  className="inline-flex min-h-12 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-5 text-sm font-bold uppercase tracking-[0.08em] text-white"
-                >
-                  Print
-                </button>
-                <button
-                  type="button"
-                  onClick={savePdf}
-                  className="inline-flex min-h-12 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-5 text-sm font-bold uppercase tracking-[0.08em] text-white"
-                >
-                  Save to PDF
-                </button>
+              </div>
+
+              <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+                Deal data is stored in the current browser session only.
+              </p>
+            </div>
+          )}
+        </section>
+
+        {/* ── Status Message (always visible) ── */}
+        {status && (
+          <div
+            className={`flex items-center gap-3 border px-5 py-3 text-sm font-bold ${tone === "success"
+              ? "border-[var(--success)] bg-[var(--success)]/10 text-[var(--success)]"
+              : tone === "warn"
+                ? "border-[var(--warn)] bg-[var(--warn)]/10 text-[var(--warn)]"
+                : "border-[var(--border)] bg-[var(--panel)] text-[var(--muted)]"
+              }`}
+          >
+            <span className="text-lg">{tone === "warn" ? "⚠" : tone === "success" ? "✓" : "ℹ"}</span>
+            {status}
+          </div>
+        )}
+
+        {/* ── Available Documents ── */}
+        <section className="overflow-hidden border border-black/10 shadow-[0_18px_44px_rgba(35,23,12,0.08)]">
+          <button
+            type="button"
+            onClick={() => toggleSection("documents")}
+            className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center p-5 text-left sm:p-6 print:bg-none"
+          >
+            <div>
+              <h3 className="text-2xl font-bold text-white">
+                Available Documents
+              </h3>
+              <p className="mt-1 text-sm text-white/70">
+                {isNewDeal ? "New vehicle documents" : "Used vehicle documents"}
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className={`text-xl text-white/70 transition-transform ${openSections.documents ? "rotate-180" : ""}`}>▾</span>
+            </div>
+          </button>
+          {openSections.documents && (
+            <div className="border-t border-[var(--border)] bg-white px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
+              <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={printAll}
@@ -787,191 +778,53 @@ export function WorkflowScreen() {
                 >
                   Save All to PDF
                 </button>
+                <button
+                  type="button"
+                  onClick={printBlank}
+                  className="inline-flex min-h-12 items-center justify-center border border-[var(--foreground)] bg-white px-5 text-sm font-bold uppercase tracking-[0.08em] text-[var(--foreground)]"
+                >
+                  Print Blank
+                </button>
+                <button
+                  type="button"
+                  onClick={saveBlankPdf}
+                  className="inline-flex min-h-12 items-center justify-center border border-[var(--foreground)] bg-white px-5 text-sm font-bold uppercase tracking-[0.08em] text-[var(--foreground)]"
+                >
+                  Save Blank to PDF
+                </button>
               </div>
-
-              <p
-                className={`mt-4 min-h-6 text-sm font-bold ${tone === "success"
-                  ? "text-[var(--success)]"
-                  : tone === "warn"
-                    ? "text-[var(--warn)]"
-                    : "text-[var(--muted)]"
-                  }`}
-              >
-                {status}
-              </p>
-
-              {/* Available Documents */}
-              <div className="mt-5 border-t border-[var(--border)] pt-5">
-                <h4 className="text-lg font-bold text-[var(--foreground)]">
-                  Available Documents
-                </h4>
-                <div className="mt-3 grid gap-3">
-                  {DOCUMENT_LIBRARY.map((doc) => (
-                    <div
-                      key={doc.slug}
-                      className="flex flex-wrap items-center justify-between gap-3 border border-[var(--border)] bg-[var(--panel)] px-4 py-3"
-                    >
-                      <div>
-                        <p className="text-sm font-bold text-[var(--foreground)]">
-                          {doc.title}
-                        </p>
-                        <p className="text-sm text-[var(--muted)]">{doc.description}</p>
-                      </div>
-                      {doc.ready ? (
-                        <Link
-                          href={doc.href}
-                          onClick={persistWorkflowViewState}
-                          className="inline-flex min-h-10 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-4 text-xs font-bold uppercase tracking-[0.08em] text-white"
-                        >
-                          Open
-                        </Link>
-                      ) : (
-                        <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
-                          Queued
-                        </span>
-                      )}
+              <div className="mt-4 grid gap-3">
+                {DOCUMENT_LIBRARY.filter((doc) => !isNewDeal || doc.slug !== "buyers-guide").map((doc) => (
+                  <div
+                    key={doc.slug}
+                    className="flex flex-wrap items-center justify-between gap-3 border border-[var(--border)] bg-[var(--panel)] px-4 py-3"
+                  >
+                    <div>
+                      <p className="text-sm font-bold text-[var(--foreground)]">
+                        {doc.title}
+                      </p>
+                      <p className="text-sm text-[var(--muted)]">{doc.description}</p>
                     </div>
-                  ))}
-                </div>
+                    {doc.ready ? (
+                      <Link
+                        href={doc.href}
+                        onClick={persistWorkflowViewState}
+                        className="inline-flex min-h-10 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-4 text-xs font-bold uppercase tracking-[0.08em] text-white"
+                      >
+                        Open
+                      </Link>
+                    ) : (
+                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+                        Queued
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
-
-              <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
-                Deal data is stored in the current browser session only.
-              </p>
             </div>
           )}
         </section>
       </div>
-
-      {/* ── Settings Drawer (Dealership + Salesperson) ── */}
-      {settingsOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={closeSettings}
-            onKeyDown={(e) => { if (e.key === "Escape") closeSettings(); }}
-            role="button"
-            tabIndex={-1}
-            aria-label="Close settings"
-          />
-          {/* Drawer panel */}
-          <aside className="relative z-10 flex h-full w-full max-w-md flex-col overflow-y-auto bg-white shadow-2xl sm:max-w-lg">
-            {/* Drawer header */}
-            <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--accent)] bg-[url('/bg-drawer-9x16.jpg')] bg-cover bg-top px-5 py-4 print:bg-none">
-              <h2 className="text-xl font-bold text-white">Settings</h2>
-              <button
-                type="button"
-                onClick={closeSettings}
-                className="inline-flex h-8 w-8 items-center justify-center text-white/80 transition hover:text-white"
-                aria-label="Close settings"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-                  <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="grid gap-6 p-5 sm:p-6">
-              {/* ── Dealership ── */}
-              <section>
-                <button
-                  type="button"
-                  onClick={() => toggleSection("dealer")}
-                  className="flex w-full items-center justify-between pb-3 text-left"
-                >
-                  <div>
-                    <h3 className="text-lg font-bold text-[var(--foreground)]">Dealership</h3>
-                    <p className="text-sm text-[var(--muted)]">{dealer.dealershipName || "Not set"}</p>
-                  </div>
-                  <span className={`text-lg text-[var(--muted)] transition-transform ${openSections.dealer ? "rotate-180" : ""}`}>▾</span>
-                </button>
-                {openSections.dealer && (
-                  <div className="border-t border-[var(--border)] pt-4">
-                    <p className="mb-4 text-sm leading-6 text-[var(--muted)]">
-                      Saved to this device. Shared across all deals.
-                    </p>
-                    <div className="grid gap-4">
-                      <label className="grid gap-2">
-                        <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Dealership Name</span>
-                        <input type="text" value={dealer.dealershipName} onChange={(e) => updateDealer("dealershipName", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
-                      </label>
-                      <label className="grid gap-2">
-                        <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Street Address</span>
-                        <input type="text" value={dealer.street} onChange={(e) => updateDealer("street", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
-                      </label>
-                      <div className="grid grid-cols-3 gap-4">
-                        <label className="grid gap-2">
-                          <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">City</span>
-                          <input type="text" value={dealer.city} onChange={(e) => updateDealer("city", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
-                        </label>
-                        <label className="grid gap-2">
-                          <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">State</span>
-                          <input type="text" value={dealer.state} onChange={(e) => updateDealer("state", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
-                        </label>
-                        <label className="grid gap-2">
-                          <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">ZIP</span>
-                          <input type="text" value={dealer.zip} onChange={(e) => updateDealer("zip", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
-                        </label>
-                      </div>
-                    </div>
-                    <div className="mt-5 flex flex-wrap gap-3">
-                      <button type="button" onClick={saveDealerNow} className="inline-flex min-h-10 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-4 text-xs font-bold uppercase tracking-[0.08em] text-white">Save</button>
-                      <button type="button" onClick={clearDealerNow} className="inline-flex min-h-10 items-center justify-center border border-[var(--foreground)] bg-white px-4 text-xs font-bold uppercase tracking-[0.08em] text-[var(--foreground)]">Clear</button>
-                      <button type="button" onClick={deleteDealerNow} className="inline-flex min-h-10 items-center justify-center border border-[var(--accent)] bg-white px-4 text-xs font-bold uppercase tracking-[0.08em] text-[var(--accent)]">Delete</button>
-                    </div>
-                  </div>
-                )}
-              </section>
-
-              {/* ── Salesperson ── */}
-              <section>
-                <button
-                  type="button"
-                  onClick={() => toggleSection("consultant")}
-                  className="flex w-full items-center justify-between pb-3 text-left"
-                >
-                  <div>
-                    <h3 className="text-lg font-bold text-[var(--foreground)]">Salesperson</h3>
-                    <p className="text-sm text-[var(--muted)]">{consultant.name || "Not set"}</p>
-                  </div>
-                  <span className={`text-lg text-[var(--muted)] transition-transform ${openSections.consultant ? "rotate-180" : ""}`}>▾</span>
-                </button>
-                {openSections.consultant && (
-                  <div className="border-t border-[var(--border)] pt-4">
-                    <p className="mb-4 text-sm leading-6 text-[var(--muted)]">
-                      Saved to this device. Populates salesperson fields on documents.
-                    </p>
-                    <div className="grid gap-4">
-                      <label className="grid gap-2">
-                        <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Name</span>
-                        <input type="text" value={consultant.name} onChange={(e) => updateConsultant("name", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
-                      </label>
-                      <label className="grid gap-2">
-                        <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Salesperson #</span>
-                        <input type="text" value={consultant.salespersonNumber} onChange={(e) => updateConsultant("salespersonNumber", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
-                      </label>
-                      <label className="grid gap-2">
-                        <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Phone Number</span>
-                        <input type="tel" value={consultant.phone} onChange={(e) => updateConsultant("phone", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
-                      </label>
-                      <label className="grid gap-2">
-                        <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Email</span>
-                        <input type="email" value={consultant.email} onChange={(e) => updateConsultant("email", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
-                      </label>
-                    </div>
-                    <div className="mt-5 flex flex-wrap gap-3">
-                      <button type="button" onClick={saveConsultantNow} className="inline-flex min-h-10 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-4 text-xs font-bold uppercase tracking-[0.08em] text-white">Save</button>
-                      <button type="button" onClick={clearConsultantNow} className="inline-flex min-h-10 items-center justify-center border border-[var(--foreground)] bg-white px-4 text-xs font-bold uppercase tracking-[0.08em] text-[var(--foreground)]">Clear</button>
-                      <button type="button" onClick={deleteConsultantNow} className="inline-flex min-h-10 items-center justify-center border border-[var(--accent)] bg-white px-4 text-xs font-bold uppercase tracking-[0.08em] text-[var(--accent)]">Delete</button>
-                    </div>
-                  </div>
-                )}
-              </section>
-            </div>
-          </aside>
-        </div>
-      )}
 
       {dialog}
     </>

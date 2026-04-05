@@ -68,3 +68,13 @@ Use this file when a visual, workflow, print, or implementation rule must stay s
 - shared field/data contracts are sensitive
 - framework migrations need a staged plan first
 - if effects push the ratio, ask first
+
+### Work Log Rule
+
+- every implementation session MUST use `PLANNED_WORK_LOG.md` and `COMPLETED_WORK_LOG.md`
+- BEFORE any code change: READ `PLANNED_WORK_LOG.md` and `COMPLETED_WORK_LOG.md` FIRST to understand current state
+- step A: log all planned tasks in `PLANNED_WORK_LOG.md` BEFORE starting any code changes
+- step B: after finishing, move completed work to `COMPLETED_WORK_LOG.md` with build verification
+- both steps are mandatory, not optional
+- checking the logs FIRST is mandatory — do not start work blind
+- skipping any step is a guardrail violation
