@@ -82,7 +82,7 @@ export function SpaceSheet({ workflow }: SpaceSheetProps) {
       <div className={styles.fieldGrid}>
         <span className={styles.fieldLabel}>Vehicle of Interest:</span>
         <div className={styles.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>
-          {getYearMakeModel(workflow)}
+          {workflow.vehicleOfInterest || getYearMakeModel(workflow)}
         </div>
       </div>
 

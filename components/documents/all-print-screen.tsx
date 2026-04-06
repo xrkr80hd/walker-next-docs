@@ -11,7 +11,6 @@ import { DeliveryChecklistSheet } from "@/components/documents/delivery-checklis
 import { PayoffFormSheet } from "@/components/documents/payoff-form-sheet";
 import { SpaceSheet } from "@/components/documents/space-sheet-sheet";
 import { VinVerificationSheet } from "@/components/documents/vin-verification-sheet";
-import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
 import {
   loadConsultant,
   loadDealer,
@@ -31,7 +30,6 @@ import {
 export function AllPrintScreen() {
   const searchParams = useSearchParams();
   const isBlank = searchParams.get("blank") === "1";
-  const { confirmVinAction, dialog } = useVinConfirmation();
   const [workflow, setWorkflow] = useState<WorkflowData>(() => isBlank ? createDefaultWorkflowData() : loadWorkflow());
   const [dealer] = useState<DealerInfo>(() => loadDealer());
   const [consultant] = useState<ConsultantInfo>(() => loadConsultant());
@@ -66,18 +64,12 @@ export function AllPrintScreen() {
     if (printedRef.current || searchParams.get("autoprint") !== "1") return;
     printedRef.current = true;
     const timeout = window.setTimeout(async () => {
-      const vinChecked = searchParams.get("vinchecked") === "1";
-      const proceed = vinChecked
-        ? true
-        : await confirmVinAction(workflow.vin, isSaveMode ? "saving all forms to PDF" : "printing all forms");
-      if (!proceed) return;
       await collectAndOutput();
     }, 400);
     return () => window.clearTimeout(timeout);
-  }, [collectAndOutput, confirmVinAction, searchParams, workflow, isSaveMode]);
+  }, [collectAndOutput, searchParams, workflow, isSaveMode]);
 
   async function handleAction() {
-    if (!isBlank && !(await confirmVinAction(workflow.vin, isSaveMode ? "saving all forms to PDF" : "printing all forms"))) return;
     await collectAndOutput();
   }
 
@@ -123,7 +115,6 @@ export function AllPrintScreen() {
         <div className="mt-6" />
         <VinVerificationSheet workflow={workflow} consultant={consultant} />
       </div>
-      {dialog}
     </>
   );
 }

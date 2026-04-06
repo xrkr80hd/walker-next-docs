@@ -210,6 +210,9 @@
   font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
+  min-width: 80px;
+  border-bottom: 1.2px solid var(--ink);
+  margin-left: 4px;
 }
 
 .fillLine {

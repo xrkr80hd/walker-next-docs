@@ -15,8 +15,8 @@ import {
 } from "@/lib/walker-workflow";
 
 export function BuyersGuideReversePrintScreen() {
-  const searchParams = useSearchParams();
   const { confirmVinAction, dialog } = useVinConfirmation();
+  const searchParams = useSearchParams();
   const [workflow, setWorkflow] = useState<WorkflowData>(() => loadWorkflow());
   const [dealer] = useState<DealerInfo>(() => loadDealer());
   const [consultant] = useState<ConsultantInfo>(() => loadConsultant());
@@ -29,15 +29,15 @@ export function BuyersGuideReversePrintScreen() {
   useEffect(() => {
     if (printedRef.current || searchParams.get("autoprint") !== "1") return;
     printedRef.current = true;
+    const vinChecked = searchParams.get("vinchecked") === "1";
     const timeout = window.setTimeout(async () => {
-      const vinChecked = searchParams.get("vinchecked") === "1";
       const proceed = vinChecked ? true : await confirmVinAction(workflow.vin, "printing");
       if (!proceed) return;
       const target = document.querySelector('[data-print-sheet="buyers-guide-reverse"]');
       if (target instanceof HTMLElement) await printElementExact(target);
     }, 260);
     return () => window.clearTimeout(timeout);
-  }, [confirmVinAction, searchParams, workflow]);
+  }, [searchParams, workflow, confirmVinAction]);
 
   async function handlePrint() {
     if (!(await confirmVinAction(workflow.vin, "printing"))) return;

@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { DeliveryChecklistSheet } from "@/components/documents/delivery-checklist-sheet";
-import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
 import { loadConsultant, type ConsultantInfo } from "@/lib/dealer-consultant";
 import { printCurrentWindowAndClear, printElementExact } from "@/lib/exact-print";
 import {
@@ -18,7 +17,6 @@ import {
 
 export function DeliveryChecklistPrintScreen() {
   const searchParams = useSearchParams();
-  const { confirmVinAction, dialog } = useVinConfirmation();
   const [workflow, setWorkflow] = useState<WorkflowData>(() => loadWorkflow());
   const [consultant] = useState<ConsultantInfo>(() => loadConsultant());
   const [notes, setNotes] = useState<DeliveryChecklistNotes>(() =>
@@ -42,14 +40,6 @@ export function DeliveryChecklistPrintScreen() {
 
     printedRef.current = true;
     const timeout = window.setTimeout(async () => {
-      const vinChecked = searchParams.get("vinchecked") === "1";
-      const proceed = vinChecked
-        ? true
-        : await confirmVinAction(workflow.vin, isSaveMode ? "saving to PDF" : "printing");
-      if (!proceed) {
-        return;
-      }
-
       if (isSaveMode) {
         printCurrentWindowAndClear();
         return;
@@ -62,13 +52,9 @@ export function DeliveryChecklistPrintScreen() {
     }, 260);
 
     return () => window.clearTimeout(timeout);
-  }, [confirmVinAction, searchParams, workflow, isSaveMode]);
+  }, [searchParams, workflow, isSaveMode]);
 
   async function handleAction() {
-    if (!(await confirmVinAction(workflow.vin, isSaveMode ? "saving to PDF" : "printing"))) {
-      return;
-    }
-
     if (isSaveMode) {
       printCurrentWindowAndClear();
       return;
@@ -103,7 +89,6 @@ export function DeliveryChecklistPrintScreen() {
         <DeliveryChecklistSheet workflow={workflow} consultant={consultant} notes={notes} />
       </div>
 
-      {dialog}
     </>
   );
 }

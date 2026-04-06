@@ -2,7 +2,7 @@
 
 import type { Session } from "@supabase/supabase-js";
 import Image from "next/image";
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type FormEvent, type ReactNode } from "react";
 
 import {
   getSessionLabel,
@@ -11,14 +11,35 @@ import {
   isSupabaseConfigured
 } from "@/lib/supabase-browser";
 
+/* ───── Session Context ───── */
+
+type SessionContextValue = {
+  sessionLabel: string;
+  signOut: () => void;
+};
+
+const SessionContext = createContext<SessionContextValue | null>(null);
+
+export function useSession(): SessionContextValue {
+  const ctx = useContext(SessionContext);
+  if (!ctx) {
+    throw new Error("useSession must be used inside SupabaseSessionGate");
+  }
+  return ctx;
+}
+
+/* ───── Gate Component ───── */
+
 type SupabaseSessionGateProps = {
   children: ReactNode;
   surface?: "app" | "print";
+  renderBar?: boolean;
 };
 
 export function SupabaseSessionGate({
   children,
   surface = "app",
+  renderBar = true,
 }: SupabaseSessionGateProps) {
   const authDisabled = process.env.NEXT_PUBLIC_DISABLE_AUTH === "1";
 
@@ -298,33 +319,40 @@ export function SupabaseSessionGate({
     return <>{children}</>;
   }
 
+  const sessionCtx: SessionContextValue = {
+    sessionLabel: getSessionLabel(session),
+    signOut: handleSignOut,
+  };
+
   return (
-    <>
-      <div className="mx-auto w-full max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-3 border border-white/10 bg-[#2a2a2e] px-4 py-3 shadow-[0_18px_44px_rgba(0,0,0,0.2)]">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/50">
-              Authorized Session
-            </p>
-            <p className="text-sm font-semibold text-white">
-              {getSessionLabel(session)}
-            </p>
+    <SessionContext.Provider value={sessionCtx}>
+      {renderBar && (
+        <div className="mx-auto w-full max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center justify-between gap-3 border border-white/10 bg-[#2a2a2e] px-4 py-3 shadow-[0_18px_44px_rgba(0,0,0,0.2)]">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/50">
+                Authorized Session
+              </p>
+              <p className="text-sm font-semibold text-white">
+                {sessionCtx.sessionLabel}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="inline-flex min-h-11 items-center justify-center border border-white/20 bg-white/10 px-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:bg-white/20"
+            >
+              Sign Out
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="inline-flex min-h-11 items-center justify-center border border-white/20 bg-white/10 px-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:bg-white/20"
-          >
-            Sign Out
-          </button>
+          {error ? (
+            <p className="mt-3 border border-red-900/20 bg-red-50 px-4 py-3 text-sm font-medium text-red-900">
+              {error}
+            </p>
+          ) : null}
         </div>
-        {error ? (
-          <p className="mt-3 border border-red-900/20 bg-red-50 px-4 py-3 text-sm font-medium text-red-900">
-            {error}
-          </p>
-        ) : null}
-      </div>
+      )}
       {children}
-    </>
+    </SessionContext.Provider>
   );
 }

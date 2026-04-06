@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { VinVerificationSheet } from "@/components/documents/vin-verification-sheet";
-import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
 import { loadConsultant, type ConsultantInfo } from "@/lib/dealer-consultant";
 import { printElementExact } from "@/lib/exact-print";
 import {
@@ -16,7 +15,6 @@ import {
 
 export function VinVerificationPrintScreen() {
   const searchParams = useSearchParams();
-  const { confirmVinAction, dialog } = useVinConfirmation();
   const [workflow, setWorkflow] = useState<WorkflowData>(() => loadWorkflow());
   const [consultant] = useState<ConsultantInfo>(() => loadConsultant());
   const printedRef = useRef(false);
@@ -29,17 +27,13 @@ export function VinVerificationPrintScreen() {
     if (printedRef.current || searchParams.get("autoprint") !== "1") return;
     printedRef.current = true;
     const timeout = window.setTimeout(async () => {
-      const vinChecked = searchParams.get("vinchecked") === "1";
-      const proceed = vinChecked ? true : await confirmVinAction(workflow.vin, "printing");
-      if (!proceed) return;
       const target = document.querySelector('[data-print-sheet="vin-verification"]');
       if (target instanceof HTMLElement) await printElementExact(target);
     }, 260);
     return () => window.clearTimeout(timeout);
-  }, [confirmVinAction, searchParams, workflow]);
+  }, [searchParams, workflow]);
 
   async function handlePrint() {
-    if (!(await confirmVinAction(workflow.vin, "printing"))) return;
     const target = document.querySelector('[data-print-sheet="vin-verification"]');
     if (target instanceof HTMLElement) await printElementExact(target);
   }
@@ -57,7 +51,6 @@ export function VinVerificationPrintScreen() {
         </div>
         <VinVerificationSheet workflow={workflow} consultant={consultant} />
       </div>
-      {dialog}
     </>
   );
 }

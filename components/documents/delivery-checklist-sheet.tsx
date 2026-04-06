@@ -10,8 +10,8 @@ import {
   DELIVERY_CHECKLIST_ENTRY_FIELDS,
   formatDate,
   getCustomerDisplayName,
+  getFullStockNumber,
   getLast8,
-  getYearMakeModel,
   normalizeVin,
   type DeliveryChecklistNoteKey,
   type DeliveryChecklistNotes,
@@ -140,7 +140,7 @@ export function DeliveryChecklistSheet({
             </div>
             <div className={styles.headerLabel}>STOCK#:</div>
             <div className={`${styles.headerFill} ${styles.headerFillStock}`}>
-              {workflow.stockNumber}
+              {getFullStockNumber(workflow)}
             </div>
             <div className={styles.headerLabel}>EMAIL:</div>
             <div className={`${styles.headerFill} ${styles.headerFillEmail}`}>
@@ -171,12 +171,12 @@ export function DeliveryChecklistSheet({
                     }`}
                 />
                 <span>{item.label}</span>
-                {item.key === "miles" && workflow.mileage ? (
-                  <span className={styles.lineItemValue}>{workflow.mileage}</span>
-                ) : null}
-                {item.key === "etchNumbers" && workflow.etchNumbers ? (
-                  <span className={styles.lineItemValue}>{workflow.etchNumbers}</span>
-                ) : null}
+                {item.key === "miles" && (
+                  <span className={styles.lineItemValue} contentEditable suppressContentEditableWarning>{workflow.mileage}</span>
+                )}
+                {item.key === "etchNumbers" && (
+                  <span className={styles.lineItemValue} contentEditable suppressContentEditableWarning>{workflow.etchNumbers}</span>
+                )}
               </div>
             ))}
           </div>
@@ -221,13 +221,13 @@ export function DeliveryChecklistSheet({
           <div className={styles.stackedLines}>
             <div className={`${styles.fieldRow} ${styles.fieldRowCompact}`}>
               <div className={`${styles.fieldLine} ${styles.fieldLineSm}`}>
-                {getYearMakeModel(workflow)}
+                {[workflow.tradeYear, workflow.tradeMake, workflow.tradeModel].filter(Boolean).join(" ")}
               </div>
               <div>Year, Make, Model</div>
             </div>
             <div className={`${styles.fieldRow} ${styles.fieldRowCompact}`}>
               <div className={`${styles.fieldLine} ${styles.fieldLineSm}`}>
-                {normalizeVin(workflow.vin)}
+                {normalizeVin(workflow.tradeVin)}
               </div>
               <div>VIN/Serial Number</div>
             </div>
@@ -265,7 +265,7 @@ export function DeliveryChecklistSheet({
             </div>
             <div className={`${styles.fieldRow} ${styles.fieldRowCompact}`}>
               <div className={`${styles.fieldLine} ${styles.fieldLineSm}`}>
-                {workflow.mileage}
+                {[workflow.tradeColor, workflow.tradeMileage].filter(Boolean).join(" / ")}
               </div>
               <div>Color/Miles</div>
             </div>

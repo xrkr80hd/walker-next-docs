@@ -63,58 +63,45 @@ export function BuyersGuideSheet({ workflow }: BuyersGuideSheetProps) {
       <section className={styles.frame} aria-label="Buyers Guide content">
         <h1 className={styles.docTitle}>Buyers Guide</h1>
 
+        <div className={styles.solidLine} />
+
         <p className={styles.importantNote}>
           <span className={styles.importantLabel}>IMPORTANT:</span> Spoken
           promises are difficult to enforce. Ask the dealer to put all promises
           in writing. Keep this form.
         </p>
 
-        <div className={styles.vehicleBar}>
-          <div className={styles.vehicleBarCell}>
-            <span className={styles.vehicleBarLabel}>Vehicle Make</span>
-            <span className={styles.vehicleBarValue}>
-              {workflow.vehicleMake}
-            </span>
-          </div>
-          <div className={styles.vehicleBarCell}>
-            <span className={styles.vehicleBarLabel}>Model</span>
-            <span className={styles.vehicleBarValue}>
-              {workflow.vehicleModel}
-            </span>
-          </div>
-          <div className={styles.vehicleBarCell}>
-            <span className={styles.vehicleBarLabel}>Year</span>
-            <span className={styles.vehicleBarValue}>
-              {workflow.vehicleYear}
-            </span>
-          </div>
-          <div className={styles.vehicleBarCell}>
-            <span className={styles.vehicleBarLabel}>
-              Vehicle Identification Number (VIN)
-            </span>
-            <span className={styles.vehicleBarValue}>
-              {normalizeVin(workflow.vin)}
-            </span>
-          </div>
+        <div className={styles.vehicleValuesRow}>
+          <span className={styles.vehicleValue}>{workflow.vehicleMake}</span>
+          <span className={styles.vehicleValue}>{workflow.vehicleModel}</span>
+          <span className={styles.vehicleValue}>{workflow.vehicleYear}</span>
+          <span className={styles.vehicleValue}>{normalizeVin(workflow.vin)}</span>
         </div>
 
-        <h2 className={styles.warrantyTitle}>
-          Warranties For This Vehicle:
-        </h2>
+        <div className={styles.solidLine} />
+
+        <div className={styles.vehicleLabelRow}>
+          <span className={styles.vehicleBarLabel}>Vehicle Make</span>
+          <span className={styles.vehicleBarLabel}>Model</span>
+          <span className={styles.vehicleBarLabel}>Year</span>
+          <span className={styles.vehicleBarLabel}>Vehicle Identification Number (VIN)</span>
+        </div>
 
         <div className={styles.spacerMd} />
+
+        <h2 className={styles.warrantyTitle}>
+          WARRANTIES FOR THIS VEHICLE:
+        </h2>
+
+        <div className={styles.boldLine} />
 
         <div className={styles.sectionRow}>
           <Box k="implied" lg />
           <div>
-            <p className={styles.impliedTitle}>Implied Warranties Only</p>
+            <p className={styles.impliedTitle}>AS IS - NO DEALER WARRANTY</p>
             <div className={styles.spacerSm} />
-            <p className={styles.bodyText}>
-              The dealer doesn&rsquo;t make any promises to fix things that need
-              repair when you buy the vehicle or afterward. But{" "}
-              <em>implied warranties</em> under your state&rsquo;s laws may give
-              you some rights to have the dealer take care of serious problems
-              that were not apparent when you bought the vehicle.
+            <p className={styles.asIsSubtitle}>
+              THE DEALER DOES NOT PROVIDE A WARRANTY FOR ANY REPAIRS AFTER SALE.
             </p>
           </div>
         </div>
@@ -154,97 +141,91 @@ export function BuyersGuideSheet({ workflow }: BuyersGuideSheetProps) {
             <p className={styles.systemsCoveredLabel}>Systems Covered:</p>
             <div className={styles.underlineFill} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
             <div className={styles.underlineFill} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+            <div className={styles.underlineFill} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+            <div className={styles.underlineFill} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+            <div className={styles.underlineFill} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
           </div>
           <div>
             <p className={styles.systemsCoveredLabel}>Duration:</p>
             <div className={styles.underlineFill} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
             <div className={styles.underlineFill} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+            <div className={styles.underlineFill} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+            <div className={styles.underlineFill} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+            <div className={styles.underlineFill} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
           </div>
         </div>
 
         <div className={styles.spacerMd} />
 
-        <h3 className={styles.nonDealerTitle}>
-          Non-Dealer Warranties For This Vehicle:
-        </h3>
+        <div className={styles.lowerSection}>
+          <h3 className={styles.nonDealerTitle}>
+            Non-Dealer Warranties For This Vehicle:
+          </h3>
 
-        <div className={styles.spacerSm} />
+          <div className={styles.warrantyCheckRow}>
+            <Box k="mfgWarranty" />
+            <span className={styles.bodyText}>
+              MANUFACTURER&rsquo;S WARRANTY STILL APPLIES. The
+              manufacturer&rsquo;s original warranty has not expired on some
+              components of the vehicle.
+            </span>
+          </div>
 
-        <div className={styles.warrantyCheckRow}>
-          <Box k="mfgWarranty" />
-          <span className={styles.bodyText}>
-            MANUFACTURER&rsquo;S WARRANTY STILL APPLIES. The
-            manufacturer&rsquo;s original warranty has not expired on some
-            components of the vehicle.
-          </span>
+          <div className={styles.warrantyCheckRow}>
+            <Box k="mfgUsedWarranty" />
+            <span className={styles.bodyText}>
+              MANUFACTURER&rsquo;S USED VEHICLE WARRANTY APPLIES.
+            </span>
+          </div>
+
+          <div className={styles.warrantyCheckRow}>
+            <Box k="otherWarranty" />
+            <span className={styles.bodyText}>
+              OTHER USED VEHICLE WARRANTY APPLIES.
+            </span>
+          </div>
+
+          <p className={styles.bodyText}>
+            Ask the dealer for a copy of the warranty document and an explanation
+            of warranty coverage, exclusions, and repair obligations.
+          </p>
+
+          <div className={styles.warrantyCheckRow}>
+            <Box k="serviceContract" />
+            <span className={styles.bodyText}>
+              SERVICE CONTRACT. A service contract on this vehicle is available for
+              an extra charge. Ask for details about coverage, deductible, price,
+              and exclusions. If you buy a service contract within 90 days of your
+              purchase of this vehicle, <em>implied warranties</em> under your
+              state&rsquo;s laws may give you additional rights.
+            </span>
+          </div>
+
+          <div className={styles.solidLine} />
+
+          <p className={styles.boldText}>
+            ASK THE DEALER IF YOUR MECHANIC CAN INSPECT THE VEHICLE ON OR OFF THE
+            LOT.
+          </p>
+
+          <p className={styles.bodyText}>
+            <strong>OBTAIN A VEHICLE HISTORY REPORT AND CHECK FOR OPEN SAFETY RECALLS.</strong> For
+            information on how to obtain a vehicle history report, visit
+            ftc.gov/usedcars. To check for open safety recalls, visit
+            safercar.gov. You will need the vehicle identification number (VIN)
+            shown above to make the best use of the resources on these sites.
+          </p>
+
+          <p className={styles.seeOther}>
+            SEE OTHER SIDE for important additional information, including a list
+            of major defects that may occur in used motor vehicles.
+          </p>
+
+          <p className={styles.spanishNote}>
+            Si el concesionario gestiona la venta en espa&ntilde;ol, p&iacute;dale
+            una copia de la Gu&iacute;a del Comprador en espa&ntilde;ol.
+          </p>
         </div>
-
-        <div className={styles.spacerSm} />
-
-        <div className={styles.warrantyCheckRow}>
-          <Box k="mfgUsedWarranty" />
-          <span className={styles.bodyText}>
-            MANUFACTURER&rsquo;S USED VEHICLE WARRANTY APPLIES.
-          </span>
-        </div>
-
-        <div className={styles.spacerSm} />
-
-        <div className={styles.warrantyCheckRow}>
-          <Box k="otherWarranty" />
-          <span className={styles.bodyText}>
-            OTHER USED VEHICLE WARRANTY APPLIES.
-          </span>
-        </div>
-
-        <div className={styles.spacerSm} />
-
-        <p className={styles.bodyText}>
-          Ask the dealer for a copy of the warranty document and an explanation
-          of warranty coverage, exclusions, and repair obligations.
-        </p>
-
-        <div className={styles.spacerMd} />
-
-        <div className={styles.warrantyCheckRow}>
-          <Box k="serviceContract" />
-          <span className={styles.bodyText}>
-            SERVICE CONTRACT. A service contract on this vehicle is available for
-            an extra charge. Ask for details about coverage, deductible, price,
-            and exclusions. If you buy a service contract within 90 days of your
-            purchase of this vehicle, <em>implied warranties</em> under your
-            state&rsquo;s laws may give you additional rights.
-          </span>
-        </div>
-
-        <div className={styles.solidLine} />
-
-        <p className={styles.boldText}>
-          ASK THE DEALER IF YOUR MECHANIC CAN INSPECT THE VEHICLE ON OR OFF THE
-          LOT.
-        </p>
-
-        <div className={styles.spacerSm} />
-
-        <p className={styles.bodyText}>
-          OBTAIN A VEHICLE HISTORY REPORT AND CHECK FOR OPEN SAFETY RECALLS. For
-          information on how to obtain a vehicle history report, visit
-          ftc.gov/usedcars. To check for open safety recalls, visit
-          safercar.gov. You will need the vehicle identification number (VIN)
-          shown above to make the best use of the resources on these sites.
-        </p>
-
-        <div className={styles.spacerMd} />
-
-        <p className={styles.seeOther}>
-          SEE OTHER SIDE for important additional information, including a list
-          of major defects that may occur in used motor vehicles.
-        </p>
-
-        <p className={styles.spanishNote}>
-          Si el concesionario gestiona la venta en espa&ntilde;ol, p&iacute;dale
-          una copia de la Gu&iacute;a del Comprador en espa&ntilde;ol.
-        </p>
       </section>
       <span style={{ position: "absolute", bottom: 4, right: 8, fontSize: 7, color: "#bbb" }}>v1.0 • Buyers Guide</span>
     </main>

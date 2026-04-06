@@ -23,25 +23,39 @@
   border: var(--frameStroke);
   padding: 0.2in 0.22in 0.22in;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .docTitle {
   margin: 0;
   text-align: center;
   text-transform: uppercase;
-  font-size: 28px;
+  font-size: 33px;
   font-weight: 900;
   letter-spacing: 0.04em;
 }
 
 .importantNote {
-  margin: 6px 0 0;
+  margin: 4px 0 6px;
   font-size: 12px;
   line-height: 1.4;
+  text-align: left;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
 }
 
 .importantLabel {
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.importantField {
+  flex: 1;
+  border-bottom: 1.5px solid var(--ink);
+  min-width: 60%;
+  display: inline-block;
 }
 
 .vehicleBar {
@@ -53,6 +67,38 @@
   border-bottom: 1.5px solid var(--ink);
   padding: 4px 0;
   font-size: 11px;
+}
+
+.vehicleValuesRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.6fr 1.6fr;
+  gap: 0;
+  padding: 2px 0 1px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.vehicleValue {
+  min-height: 14px;
+}
+
+.vehicleLabelRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.6fr 1.6fr;
+  gap: 0;
+  padding: 2px 0 0;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.solidLine {
+  border-top: 1.5px solid var(--ink);
+  margin: 6px -0.22in;
+}
+
+.boldLine {
+  border-top: 3px solid var(--ink);
+  margin: 2px 0 6px;
 }
 
 .vehicleBarCell {
@@ -75,17 +121,18 @@
 
 .warrantyTitle {
   margin: 0;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   text-transform: uppercase;
+  text-align: left;
 }
 
 .spacerSm {
-  height: 4px;
+  height: 2px;
 }
 
 .spacerMd {
-  height: 8px;
+  height: 4px;
 }
 
 .spacerLg {
@@ -112,23 +159,32 @@
 }
 
 .checkboxLg {
-  flex: 0 0 24px;
-  width: 24px;
-  height: 24px;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
   border: 1.5px solid var(--ink);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 800;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .impliedTitle {
-  font-size: 24px;
+  font-size: 33px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.asIsSubtitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1.4;
+  margin: 0;
 }
 
 .bodyText {
@@ -139,16 +195,16 @@
 
 .dashedLine {
   border-top: 1.5px dashed var(--ink);
-  margin: 8px 0;
+  margin: 4px 0;
 }
 
 .solidLine {
   border-top: 1.5px solid var(--ink);
-  margin: 6px 0;
+  margin: 4px 0;
 }
 
 .dealerWarrantyTitle {
-  font-size: 22px;
+  font-size: 33px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.02em;
@@ -195,18 +251,17 @@
 
 .underlineFill {
   border-bottom: 1.2px solid var(--ink);
-  height: 1.2em;
-  margin-top: 6px;
+  height: 1.1em;
+  margin-top: 4px;
 }
 
 .nonDealerTitle {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.01em;
-  border-top: 1.5px solid var(--ink);
+  letter-spacing: 0.08em;
   border-bottom: 1.5px solid var(--ink);
-  padding: 4px 0;
+  padding: 2px 0;
   margin: 0;
 }
 
@@ -227,7 +282,14 @@
 .spanishNote {
   font-size: 11px;
   line-height: 1.45;
-  margin: 8px 0 0;
+  margin: 0;
+}
+
+.lowerSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 @media print {

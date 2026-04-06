@@ -16,7 +16,7 @@ import {
 export function SettingsDrawer({ onClose }: { onClose: () => void }) {
   const [dealer, setDealer] = useState<DealerInfo>(() => loadDealer());
   const [consultant, setConsultant] = useState<ConsultantInfo>(() => loadConsultant());
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({ dealer: false, consultant: false });
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({ dealer: false, consultant: false, fni: false });
   const [status, setStatus] = useState("");
 
   function toggleSection(key: string) {
@@ -192,6 +192,35 @@ export function SettingsDrawer({ onClose }: { onClose: () => void }) {
                   <button type="button" onClick={saveConsultantNow} className="inline-flex min-h-10 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-4 text-xs font-bold uppercase tracking-[0.08em] text-white">Save</button>
                   <button type="button" onClick={clearConsultantNow} className="inline-flex min-h-10 items-center justify-center border border-[var(--foreground)] bg-white px-4 text-xs font-bold uppercase tracking-[0.08em] text-[var(--foreground)]">Clear</button>
                   <button type="button" onClick={deleteConsultantNow} className="inline-flex min-h-10 items-center justify-center border border-[var(--accent)] bg-white px-4 text-xs font-bold uppercase tracking-[0.08em] text-[var(--accent)]">Delete</button>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* ── F&I Manager ── */}
+          <section>
+            <button
+              type="button"
+              onClick={() => toggleSection("fni")}
+              className="flex w-full items-center justify-between pb-3 text-left"
+            >
+              <div>
+                <h3 className="text-lg font-bold text-[var(--foreground)]">F&amp;I Manager</h3>
+                <p className="text-sm text-[var(--muted)]">{dealer.fniEmail || "Not set"}</p>
+              </div>
+              <span className={`text-lg text-[var(--muted)] transition-transform ${openSections.fni ? "rotate-180" : ""}`}>▾</span>
+            </button>
+            {openSections.fni && (
+              <div className="border-t border-[var(--border)] pt-4">
+                <p className="mb-4 text-sm leading-6 text-[var(--muted)]">
+                  Saved to this device. Used for emailing documents to F&amp;I.
+                </p>
+                <label className="grid gap-2">
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Email</span>
+                  <input type="email" value={dealer.fniEmail} onChange={(e) => updateDealer("fniEmail", e.currentTarget.value)} className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
+                </label>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <button type="button" onClick={saveDealerNow} className="inline-flex min-h-10 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-4 text-xs font-bold uppercase tracking-[0.08em] text-white">Save</button>
                 </div>
               </div>
             )}

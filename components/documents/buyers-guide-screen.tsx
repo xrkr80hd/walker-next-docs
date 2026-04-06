@@ -1,12 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { BuyersGuideReverseSheet } from "@/components/documents/buyers-guide-reverse-sheet";
 import { BuyersGuideSheet } from "@/components/documents/buyers-guide-sheet";
+import { DocToolbar } from "@/components/documents/doc-toolbar";
 import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
-import { getWorkflowReturnPath } from "@/components/workflow/workflow-screen";
 import {
   loadConsultant,
   loadDealer,
@@ -14,7 +13,6 @@ import {
   type DealerInfo,
 } from "@/lib/dealer-consultant";
 import {
-  getLast8,
   loadWorkflow,
   subscribeToWorkflowSessionClear,
   type WorkflowData,
@@ -57,24 +55,7 @@ export function BuyersGuideScreen() {
   return (
     <>
       <div className="mx-auto flex w-full max-w-[8.5in] flex-col">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border border-black/10 bg-white/90 px-4 py-3 shadow-[0_14px_40px_rgba(0,0,0,0.08)]">
-          <Link
-            href={getWorkflowReturnPath()}
-            className="inline-flex min-h-10 items-center justify-center border border-[var(--foreground)] bg-white px-4 text-sm font-bold text-[var(--foreground)]"
-          >
-            Back to Workflow
-          </Link>
-          <span className="text-sm font-bold text-[var(--foreground)]">
-            Last 8: {getLast8(workflow.vin) || "-"}
-          </span>
-          <button
-            type="button"
-            onClick={openPrintSurface}
-            className="inline-flex min-h-10 items-center justify-center border border-[var(--foreground)] bg-[var(--foreground)] px-4 text-sm font-bold text-white"
-          >
-            Print Form
-          </button>
-        </div>
+        <DocToolbar vin={workflow.vin} mileage={workflow.mileage} saved={false} onSave={() => { }} onPrint={openPrintSurface} />
 
         <div ref={containerRef}>
           <div

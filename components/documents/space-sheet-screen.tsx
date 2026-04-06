@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
+import { DocToolbar } from "@/components/documents/doc-toolbar";
 import { SpaceSheet } from "@/components/documents/space-sheet-sheet";
 import {
   loadWorkflow,
@@ -22,6 +22,7 @@ const INPUT_FIELDS = [
   { name: "homeState", label: "State", type: "text" },
   { name: "homeZip", label: "Zip", type: "text" },
   { name: "customerSource", label: "How did you hear about us?", type: "text" },
+  { name: "vehicleOfInterest", label: "Vehicle of Interest", type: "text" },
 ] as const;
 
 const PRIORITY_FIELDS = [
@@ -39,10 +40,11 @@ export function SpaceSheetScreen() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [pageScale, setPageScale] = useState(1);
   const [saved, setSaved] = useState(false);
-  const [customerOpen, setCustomerOpen] = useState(true);
-  const [tradeOpen, setTradeOpen] = useState(true);
-  const [priorityOpen, setPriorityOpen] = useState(true);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [customerOpen, setCustomerOpen] = useState(false);
+  const [coBuyerOpen, setCoBuyerOpen] = useState(false);
+  const [tradeOpen, setTradeOpen] = useState(false);
+  const [priorityOpen, setPriorityOpen] = useState(false);
 
   useLayoutEffect(() => {
     const el = containerRef.current;
@@ -78,37 +80,13 @@ export function SpaceSheetScreen() {
   }
 
   function handlePrint() {
-    window.open("/print/pain-points?autoprint=1&vinchecked=1", "_blank");
+    window.open("/print/spaced?autoprint=1", "_blank");
   }
 
   return (
     <>
       <div className="mx-auto flex w-full max-w-[8.5in] flex-col rounded-lg bg-[#1c1c1e] p-3 shadow-[0_0_40px_rgba(190,23,23,0.15),0_24px_60px_rgba(0,0,0,0.3)] sm:p-4">
-        {/* Toolbar */}
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border border-white/10 bg-[#2a2a2e] px-4 py-3 shadow-[0_14px_40px_rgba(0,0,0,0.2)]">
-          <Link
-            href="/dashboard"
-            className="inline-flex min-h-10 items-center justify-center border border-white/20 bg-white/10 px-4 text-sm font-bold text-white transition hover:bg-white/20"
-          >
-            Back to Dashboard
-          </Link>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={handleSave}
-              className="inline-flex min-h-10 items-center justify-center border border-white/20 bg-white/10 px-4 text-sm font-bold text-white transition hover:bg-white/20"
-            >
-              {saved ? "✓ Saved" : "Save"}
-            </button>
-            <button
-              type="button"
-              onClick={handlePrint}
-              className="inline-flex min-h-10 items-center justify-center border border-white/20 bg-[var(--accent)] px-4 text-sm font-bold text-white transition hover:bg-[var(--accent-strong)]"
-            >
-              Print Form
-            </button>
-          </div>
-        </div>
+        <DocToolbar vin={workflow.vin} mileage={workflow.mileage} saved={saved} onSave={handleSave} onPrint={handlePrint} />
 
         {/* Customer Info Accordion */}
         <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
@@ -118,23 +96,57 @@ export function SpaceSheetScreen() {
             className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center px-5 py-4 text-left"
           >
             <span className="text-lg font-bold text-white">Customer Info</span>
-            <span
-              className="text-xl leading-none text-white/70 transition-transform"
-              style={{ transform: customerOpen ? "rotate(180deg)" : undefined }}
-            >
-              ▼
-            </span>
+            <span className="text-xl leading-none text-white/70 transition-transform" style={{ transform: customerOpen ? "rotate(180deg)" : undefined }}>▼</span>
           </button>
           {customerOpen && (
-            <div className="bg-[#2a2a2e] px-5 pb-5 pt-4">
-              <p className="text-sm text-white/50">
-                Fill this out first — data carries over to New/Used workflows.
-              </p>
+            <div className="border-t border-white/10 bg-[#2a2a2e] px-5 pb-6 pt-5">
+              <p className="mb-4 text-sm text-white/50">Fill this out first — data carries over to New/Used workflows.</p>
+
+              {/* Customer Name */}
+              <label className="grid gap-2">
+                <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Customer Name</span>
+                <input
+                  type="text"
+                  value={String(workflow.customerName ?? "")}
+                  onChange={(e) => updateField("customerName", e.currentTarget.value)}
+                  className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+                />
+              </label>
+
+              {/* Co-Buyer nested accordion */}
+              <div className="mt-3 overflow-hidden border border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setCoBuyerOpen((o) => !o)}
+                  className="flex w-full items-center justify-between bg-white/5 px-4 py-3 text-left transition hover:bg-white/10"
+                >
+                  <span className="text-sm font-bold uppercase tracking-[0.14em] text-white/60">Co-Buyer</span>
+                  <span className="text-sm leading-none text-white/40 transition-transform" style={{ transform: coBuyerOpen ? "rotate(180deg)" : undefined }}>▼</span>
+                </button>
+                {coBuyerOpen && (
+                  <div className="border-t border-white/10 bg-[#232326] px-4 pb-4 pt-3">
+                    <p className="mb-3 text-sm italic leading-relaxed text-white/40">
+                      &ldquo;I know we may not buy today, and that&rsquo;s totally fine &mdash; but if we were to purchase today, whose name would the title be in?&rdquo;
+                    </p>
+                    <label className="grid gap-2">
+                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Co-Customer Name</span>
+                      <input
+                        type="text"
+                        value={String(workflow.coCustomerName ?? "")}
+                        onChange={(e) => updateField("coCustomerName", e.currentTarget.value)}
+                        className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+                      />
+                    </label>
+                  </div>
+                )}
+              </div>
+
+              {/* Remaining fields */}
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                {INPUT_FIELDS.map((field) => (
+                {INPUT_FIELDS.filter((f) => f.name !== "customerName").map((field) => (
                   <label
                     key={field.name}
-                    className={`grid gap-2 ${field.name === "customerSource" || field.name === "homeAddress" ? "sm:col-span-2" : ""}`}
+                    className={`grid gap-2 ${field.name === "customerSource" || field.name === "homeAddress" || field.name === "vehicleOfInterest" ? "sm:col-span-2" : ""}`}
                   >
                     <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">
                       {field.label}
@@ -160,16 +172,10 @@ export function SpaceSheetScreen() {
             className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center px-5 py-4 text-left"
           >
             <span className="text-lg font-bold text-white">Trade &amp; Budget</span>
-            <span
-              className="text-xl leading-none text-white/70 transition-transform"
-              style={{ transform: tradeOpen ? "rotate(180deg)" : undefined }}
-            >
-              ▼
-            </span>
+            <span className="text-xl leading-none text-white/70 transition-transform" style={{ transform: tradeOpen ? "rotate(180deg)" : undefined }}>▼</span>
           </button>
           {tradeOpen && (
-            <div className="bg-[#2a2a2e] px-5 pb-5 pt-4">
-              {/* Trade-In toggle */}
+            <div className="border-t border-white/10 bg-[#2a2a2e] px-5 pb-6 pt-5">
               <div>
                 <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Trade-In?</span>
                 <div className="mt-2 flex gap-2 sm:max-w-xs">
@@ -191,8 +197,6 @@ export function SpaceSheetScreen() {
                   </button>
                 </div>
               </div>
-
-              {/* Balance / Payment / Budget — clean 3-col row */}
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
                 <label className="grid gap-2">
                   <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Approx. Balance</span>
@@ -211,25 +215,20 @@ export function SpaceSheetScreen() {
           )}
         </div>
 
-        {/* Priority Items Accordion */}
+        {/* S.P.A.C.E.D. Accordion */}
         <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button
             type="button"
             onClick={() => setPriorityOpen((o) => !o)}
             className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center px-5 py-4 text-left"
           >
-            <span className="text-lg font-bold text-white">What 3 Are Most Important &amp; Why?</span>
-            <span
-              className="text-xl leading-none text-white/70 transition-transform"
-              style={{ transform: priorityOpen ? "rotate(180deg)" : undefined }}
-            >
-              ▼
-            </span>
+            <span className="text-lg font-bold text-white">S.P.A.C.E.D.</span>
+            <span className="text-xl leading-none text-white/70 transition-transform" style={{ transform: priorityOpen ? "rotate(180deg)" : undefined }}>▼</span>
           </button>
           {priorityOpen && (
-            <div className="bg-[#2a2a2e] px-5 pb-5 pt-4">
-              <p className="text-sm text-white/50">These print on the SPACED sheet.</p>
-              <div className="mt-4 grid gap-4">
+            <div className="border-t border-white/10 bg-[#2a2a2e] px-5 pb-6 pt-5">
+              <p className="mb-4 text-sm text-white/50">What 3 are most important &amp; why?</p>
+              <div className="grid gap-4">
                 {PRIORITY_FIELDS.map((field) => (
                   <label key={field.name} className="grid gap-2">
                     <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/80">{field.label}</span>

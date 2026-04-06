@@ -3,6 +3,7 @@
 import { SignaturePad } from "@/components/ui/signature-pad";
 import type { ConsultantInfo } from "@/lib/dealer-consultant";
 import {
+  getFullStockNumber,
   loadSignatures,
   saveSignatures,
   type SignatureStore,
@@ -72,7 +73,7 @@ export function VinVerificationSheet({ workflow, consultant }: Props) {
 
       <p className={css.paragraph}>
         The vehicle referenced below bearing Stock #{" "}
-        <span className={css.inlineField}>{workflow.stockNumber}</span> has been
+        <span className={css.inlineField}>{getFullStockNumber(workflow)}</span> has been
         delivered to{" "}
         <span className={css.inlineFieldWide}>{workflow.customerName}</span> on the{" "}
         <span className={css.inlineFieldShort} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{dd.day}</span> day of{" "}

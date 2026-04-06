@@ -83,22 +83,22 @@ export function PayoffFormSheet({ workflow }: Props) {
         amounts.
       </p>
 
-      {/* Vehicle Info */}
+      {/* Vehicle Info (Trade-In) */}
       <div className={css.vehicleRow}>
         <div className={css.vehicleCell}>
-          <div className={css.vehicleLine}>{workflow.vehicleYear}</div>
+          <div className={css.vehicleLine}>{workflow.tradeYear}</div>
           <span className={css.vehicleLabel}>Year</span>
         </div>
         <div className={css.vehicleCell}>
-          <div className={css.vehicleLine}>{workflow.vehicleMake}</div>
+          <div className={css.vehicleLine}>{workflow.tradeMake}</div>
           <span className={css.vehicleLabel}>Make</span>
         </div>
         <div className={css.vehicleCell}>
-          <div className={css.vehicleLine}>{workflow.vehicleModel}</div>
+          <div className={css.vehicleLine}>{workflow.tradeModel}</div>
           <span className={css.vehicleLabel}>Model</span>
         </div>
         <div className={css.vehicleCell}>
-          <div className={css.vehicleLine}>{workflow.vin}</div>
+          <div className={css.vehicleLine}>{workflow.tradeVin}</div>
           <span className={css.vehicleLabel}>VIN</span>
         </div>
       </div>
@@ -147,46 +147,46 @@ export function PayoffFormSheet({ workflow }: Props) {
 
       <div className={css.fieldRow}>
         <span className={css.fieldLabel}>Lienholder Name:</span>
-        <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+        <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{workflow.lienholderName}</span>
         <span className={css.fieldLabel}>Ph:</span>
-        <span className={css.fieldLine} style={{ maxWidth: "180px" }} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+        <span className={css.fieldLine} style={{ maxWidth: "180px" }} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{workflow.lienholderPhone}</span>
       </div>
 
       <div className={css.fieldRow}>
         <span className={css.fieldLabel}>Physical Address:</span>
-        <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+        <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{workflow.lienholderAddress}</span>
       </div>
 
       <div className={css.twoCol}>
         <div className={css.fieldRow}>
-          <span className={css.fieldLabel}>15 Day Payoff $</span>
-          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+          <span className={css.fieldLabel}>10 Day Payoff $</span>
+          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{workflow.payoff15Day}</span>
         </div>
         <div className={css.fieldRow}>
           <span className={css.fieldLabel}>Good until Date:</span>
-          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{formatDate(workflow.goodUntilDate)}</span>
         </div>
       </div>
 
       <div className={css.twoCol}>
         <div className={css.fieldRow}>
           <span className={css.fieldLabel}>Payoff as of Today&rsquo;s $</span>
-          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{workflow.payoffToday}</span>
         </div>
         <div className={css.fieldRow}>
           <span className={css.fieldLabel}>Account Number:</span>
-          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{workflow.accountNumber}</span>
         </div>
       </div>
 
       <div className={css.twoCol}>
         <div className={css.fieldRow}>
           <span className={css.fieldLabel}>per Diem</span>
-          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{workflow.perDiem}</span>
         </div>
         <div className={css.fieldRow}>
           <span className={css.fieldLabel}>Social Security Number:</span>
-          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{workflow.socialSecurityNumber}</span>
         </div>
       </div>
 
@@ -195,17 +195,17 @@ export function PayoffFormSheet({ workflow }: Props) {
       <div className={css.twoCol}>
         <div className={css.fieldRow}>
           <span className={css.fieldLabel}>Representative Name:</span>
-          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter} />
+          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{workflow.representativeName}</span>
         </div>
         <div className={css.fieldRow}>
           <span className={css.fieldLabel}>Date:</span>
-          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{workflow.payoffVerified ? formatDate(workflow.dealDate) : ""}</span>
+          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{workflow.repDate || (workflow.payoffVerified ? formatDate(workflow.dealDate) : "")}</span>
         </div>
       </div>
 
       <div className={css.fieldRow}>
         <span className={css.fieldLabel}>Verified By:</span>
-        <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{workflow.payoffVerified ? workflow.salespersonName : ""}</span>
+        <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{workflow.verifiedBy || (workflow.payoffVerified ? workflow.salespersonName : "")}</span>
       </div>
 
       <div className={css.spacerMd} />

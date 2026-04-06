@@ -7,6 +7,7 @@ export type DealerInfo = {
   city: string;
   state: string;
   zip: string;
+  fniEmail: string;
 };
 
 export type ConsultantInfo = {
@@ -29,7 +30,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export function createDefaultDealer(): DealerInfo {
-  return { dealershipName: "", street: "", city: "", state: "", zip: "" };
+  return { dealershipName: "", street: "", city: "", state: "", zip: "", fniEmail: "" };
 }
 
 export function createDefaultConsultant(): ConsultantInfo {
@@ -44,6 +45,7 @@ function normalizeDealer(value: unknown): DealerInfo {
     city: safeTrim(value.city),
     state: safeTrim(value.state),
     zip: safeTrim(value.zip),
+    fniEmail: safeTrim(value.fniEmail),
   };
 }
 

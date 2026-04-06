@@ -4,48 +4,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
 import {
-  loadConsultant,
-  loadDealer,
-  type ConsultantInfo,
-  type DealerInfo,
-} from "@/lib/dealer-consultant";
+  DocumentDrawer,
+  DocumentDrawerTrigger,
+} from "@/components/workflow/document-drawer";
 import {
-  CHECKLIST_ITEMS,
   clearWorkflowSession,
-  DOCUMENT_LIBRARY,
+  getFullStockNumber,
   getLast8,
   loadWorkflow,
-  normalizeVin,
   saveWorkflow,
   subscribeToWorkflowSessionClear,
   type WorkflowData
 } from "@/lib/walker-workflow";
-
-const CUSTOMER_FIELDS = [
-  { name: "customerName", label: "Customer Name", type: "text", wide: false },
-  { name: "coCustomerName", label: "Co-Customer Name", type: "text", wide: false },
-  { name: "dealDate", label: "Date", type: "date", wide: false },
-  { name: "email", label: "Email", type: "email", wide: false },
-  { name: "cellPhone", label: "Cell Phone", type: "tel", wide: false },
-] as const;
-
-const DEAL_FIELDS = [
-  { name: "dealNumber", label: "Deal #", type: "text", wide: false },
-  { name: "stockNumber", label: "Stock #", type: "text", wide: false },
-  { name: "customerSource", label: "Customer Source", type: "text", wide: false },
-  { name: "fniEmail", label: "F&I Manager Email", type: "email", wide: false },
-  { name: "vehicleYear", label: "Year", type: "text", wide: false },
-  { name: "vehicleMake", label: "Make", type: "text", wide: false },
-  { name: "vehicleModel", label: "Model", type: "text", wide: false },
-  { name: "mileage", label: "Mileage", type: "text", wide: false },
-  { name: "vin", label: "VIN", type: "text", wide: true },
-] as const;
-
-const US_STATES = [
-  "", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY", "DC",
-];
 
 type StatusTone = "" | "success" | "warn";
 const WORKFLOW_VIEW_STATE_KEY = "walker.workflow.view.v1";
@@ -114,22 +85,38 @@ export function getWorkflowReturnPath(): string {
   }
 }
 
+function OverviewRow({ label, value, href, onNavigate }: { label: string; value: string; href?: string; onNavigate?: () => void }) {
+  const display = value || "-";
+  return (
+    <div className="flex items-baseline gap-2">
+      <span className="shrink-0 text-[11px] font-bold uppercase tracking-[0.1em] text-white/40">{label}</span>
+      {href ? (
+        <Link
+          href={href}
+          onClick={onNavigate}
+          className="truncate text-sm font-semibold text-white underline decoration-white/20 underline-offset-2 transition hover:text-[var(--accent)] hover:decoration-[var(--accent)]"
+        >
+          {display} <span className="text-[10px] text-white/30">&#x270E;</span>
+        </Link>
+      ) : (
+        <span className="truncate text-sm font-semibold text-white">{display}</span>
+      )}
+    </div>
+  );
+}
+
 export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new" } = {}) {
   const isNewDeal = dealType === "new";
-  const printAllPath = isNewDeal ? "/print/all-new" : "/print/all";
   const workflowPath = isNewDeal ? "/workflow/new" : "/workflow";
-  const { confirmVinAction, dialog } = useVinConfirmation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [data, setData] = useState<WorkflowData>(() => loadWorkflow());
-  const [dealer] = useState<DealerInfo>(() => loadDealer());
-  const [consultant] = useState<ConsultantInfo>(() => loadConsultant());
-  const [mailingSameAsPhysical, setMailingSameAsPhysical] = useState(true);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const savedSections = loadWorkflowViewState()?.openSections ?? {};
     return {
       dealer: false,
       consultant: false,
       deal: false,
-      documents: false,
+      overview: true,
       ...savedSections,
     };
   });
@@ -138,25 +125,6 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
   useEffect(() => {
     saveWorkflow(data);
   }, [data]);
-
-  useEffect(() => {
-    // Initialise mailing toggle based on saved data
-    if (data.mailingAddress && data.mailingAddress !== data.homeAddress) {
-      setMailingSameAsPhysical(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (mailingSameAsPhysical) {
-      patchWorkflow({
-        mailingAddress: data.homeAddress,
-        mailingCity: data.homeCity,
-        mailingState: data.homeState,
-        mailingZip: data.homeZip,
-      });
-    }
-  }, [mailingSameAsPhysical, data.homeAddress, data.homeCity, data.homeState, data.homeZip]);
 
   useEffect(() => {
     return subscribeToWorkflowSessionClear(() => {
@@ -234,66 +202,6 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
     });
   }
 
-  function patchWorkflow(patch: Partial<WorkflowData>) {
-    setData((current) => {
-      const next = { ...current, ...patch };
-      next.address = next.homeAddress;
-      return next;
-    });
-  }
-
-  function updateField(name: keyof WorkflowData, value: string | boolean) {
-    if (name === "vin") {
-      patchWorkflow({ vin: normalizeVin(String(value)) });
-      return;
-    }
-
-    if (name === "deliveryEnabled") {
-      patchWorkflow({ deliveryEnabled: Boolean(value) });
-      return;
-    }
-
-    if (name === "hasCoOwner") {
-      patchWorkflow({ hasCoOwner: Boolean(value) });
-      return;
-    }
-
-    if (name === "payoffVerified") {
-      const isVerified = Boolean(value);
-      if (!isVerified) {
-        patchWorkflow({ payoffVerified: false });
-        return;
-      }
-
-      patchWorkflow({
-        payoffVerified: true,
-        salespersonName: consultant.name || data.salespersonName,
-        salespersonNumber:
-          consultant.salespersonNumber || data.salespersonNumber,
-      });
-      return;
-    }
-
-    patchWorkflow({ [name]: String(value) } as Partial<WorkflowData>);
-  }
-
-  function updateChecklist(
-    key: keyof WorkflowData["deliveryChecklist"],
-    checked: boolean,
-  ) {
-    setData((current) => ({
-      ...current,
-      deliveryChecklist: {
-        ...current.deliveryChecklist,
-        [key]: checked,
-      },
-    }));
-  }
-
-  function toggleSection(key: string) {
-    setOpenSections((current) => ({ ...current, [key]: !current[key] }));
-  }
-
   function saveNow() {
     const saved = saveWorkflow(data);
     setData(saved);
@@ -307,120 +215,11 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
     clearWorkflowSession();
     clearWorkflowViewState();
     setData(loadWorkflow());
-    setOpenSections({ dealer: false, consultant: false, deal: false, documents: false });
+    setOpenSections({ dealer: false, consultant: false, deal: false, overview: true });
     setStatusMessage(
       "Session cleared. Ready for a new deal.",
       "success",
     );
-  }
-
-  function validateForOutput() {
-    if (!data.customerName) {
-      setStatusMessage("Enter the customer name first.", "warn");
-      return false;
-    }
-
-    if (!data.vin || data.vin.length !== 17) {
-      setStatusMessage("Enter the full 17-character VIN first.", "warn");
-      return false;
-    }
-
-    saveWorkflow(data);
-    return true;
-  }
-
-  async function openPrintFlow() {
-    if (!data.deliveryEnabled) {
-      setStatusMessage(
-        "Enable the Delivery Checklist first.",
-        "warn",
-      );
-      return;
-    }
-
-    if (!validateForOutput()) {
-      return;
-    }
-
-    if (!(await confirmVinAction(data.vin, "printing"))) {
-      return;
-    }
-
-    persistWorkflowViewState();
-    window.open("/print/delivery-checklist?autoprint=1&vinchecked=1", "_blank");
-    setStatusMessage(
-      "Print window opened.",
-      "success",
-    );
-  }
-
-  async function savePdf() {
-    if (!data.deliveryEnabled) {
-      setStatusMessage(
-        "Enable the Delivery Checklist first.",
-        "warn",
-      );
-      return;
-    }
-
-    if (!validateForOutput()) {
-      return;
-    }
-
-    if (!(await confirmVinAction(data.vin, "saving to PDF"))) {
-      return;
-    }
-
-    persistWorkflowViewState();
-    window.open("/print/delivery-checklist?autoprint=1&vinchecked=1&mode=save", "_blank");
-    setStatusMessage(
-      "PDF downloading…",
-      "success",
-    );
-  }
-
-  async function printAll() {
-    if (!validateForOutput()) {
-      return;
-    }
-
-    if (!(await confirmVinAction(data.vin, "printing all forms"))) {
-      return;
-    }
-
-    persistWorkflowViewState();
-    window.open(`${printAllPath}?autoprint=1&vinchecked=1`, "_blank");
-    setStatusMessage(
-      "Print All window opened.",
-      "success",
-    );
-  }
-
-  async function saveAllPdf() {
-    if (!validateForOutput()) {
-      return;
-    }
-
-    if (!(await confirmVinAction(data.vin, "saving all forms to PDF"))) {
-      return;
-    }
-
-    persistWorkflowViewState();
-    window.open(`${printAllPath}?autoprint=1&vinchecked=1&mode=save`, "_blank");
-    setStatusMessage(
-      "PDF downloading…",
-      "success",
-    );
-  }
-
-  function printBlank() {
-    window.open(`${printAllPath}?autoprint=1&vinchecked=1&blank=1`, "_blank");
-    setStatusMessage("Blank forms print window opened.", "success");
-  }
-
-  function saveBlankPdf() {
-    window.open(`${printAllPath}?autoprint=1&vinchecked=1&blank=1&mode=save`, "_blank");
-    setStatusMessage("Blank PDF downloading…", "success");
   }
 
   return (
@@ -436,12 +235,9 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                 width={320}
                 height={116}
                 priority
-                className="mx-auto h-auto w-full max-w-[240px]"
+                className="mx-auto h-auto w-full max-w-[280px]"
               />
-              <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-white drop-shadow-sm print:text-[var(--accent)] print:drop-shadow-none">
-                Walker Docs
-              </p>
-              <h2 className="mt-2 text-3xl font-extrabold leading-tight tracking-[0.01em] text-white drop-shadow-sm sm:text-4xl print:text-[var(--foreground)] print:drop-shadow-none">
+              <h2 className="mt-3 text-3xl font-extrabold leading-tight tracking-[0.01em] text-white drop-shadow-sm sm:text-4xl print:text-[var(--foreground)] print:drop-shadow-none">
                 {isNewDeal ? "New Vehicle Workflow" : "Used Vehicle Workflow"}
               </h2>
               <p className="mt-2 text-sm font-bold text-white/90 print:text-[var(--foreground)]">
@@ -465,245 +261,37 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
           </div>
         </section>
 
-        {/* ── Current Deal (primary section) ── */}
+        {/* ── Deal Overview (read-only) ── */}
         <section className="overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_18px_44px_rgba(0,0,0,0.25)]">
           <button
             type="button"
-            onClick={() => toggleSection("deal")}
-            className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center p-5 text-left sm:p-6 print:bg-none"
+            onClick={() => setOpenSections(prev => ({ ...prev, overview: !prev.overview }))}
+            className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center p-5 text-left sm:p-6"
           >
             <div>
-              <h3 className="text-2xl font-bold text-white">
-                Current Deal
-              </h3>
-              <p className="mt-1 text-sm text-white/70">
-                {data.customerName || "No customer yet"}
+              <h3 className="text-2xl font-bold text-white">Deal Overview</h3>
+              <p className="mt-1 text-lg font-semibold text-white/90 underline decoration-[var(--accent)] decoration-2 underline-offset-4">
+                {data.customerName || "No customer yet"} {data.coCustomerName ? `& ${data.coCustomerName}` : ""}
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              <span className={`text-xl text-white/70 transition-transform ${openSections.deal ? "rotate-180" : ""}`}>▾</span>
-            </div>
+            <span className="ml-3 shrink-0 text-2xl text-white/70" aria-hidden="true">{openSections.overview ? "▲" : "▼"}</span>
           </button>
-          {openSections.deal && (
-            <div className="border-t border-white/10 bg-[#2a2a2e] px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
-
-              <div className="mt-5 grid gap-4 md:grid-cols-2">
-                {CUSTOMER_FIELDS.map((field) => (
-                  <label
-                    key={field.name}
-                    className={`grid gap-2 ${field.wide ? "md:col-span-2" : ""}`}
-                  >
-                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">
-                      {field.label}
-                    </span>
-                    <input
-                      type={field.type}
-                      value={String(data[field.name])}
-                      onChange={(event) =>
-                        updateField(field.name, event.currentTarget.value)
-                      }
-                      className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
-                    />
-                  </label>
-                ))}
+          {openSections.overview && (
+            <div className="border-t border-white/10 bg-[#2a2a2e] px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:gap-x-6 sm:gap-y-3">
+                <OverviewRow label="Vehicle" value={[data.vehicleYear, data.vehicleMake, data.vehicleModel].filter(Boolean).join(" ")} href="/documents/vin-verification" onNavigate={persistWorkflowViewState} />
+                {data.tradeIn === "yes" ? <OverviewRow label="Trade-In" value={[data.tradeYear, data.tradeMake, data.tradeModel].filter(Boolean).join(" ")} href="/documents/payoff-form" onNavigate={persistWorkflowViewState} /> : null}
+                <OverviewRow label="VIN (Last 8)" value={getLast8(data.vin)} href="/documents/vin-verification" onNavigate={persistWorkflowViewState} />
+                <OverviewRow label="Stock #" value={getFullStockNumber(data)} href="/documents/vin-verification" onNavigate={persistWorkflowViewState} />
+                <OverviewRow label="Deal #" value={data.dealNumber} href="/documents/delivery-checklist" onNavigate={persistWorkflowViewState} />
+                <OverviewRow label="Vehicle Miles" value={data.mileage} href="/documents/vin-verification" onNavigate={persistWorkflowViewState} />
+                {data.lienholderName ? <OverviewRow label="Lienholder" value={data.lienholderName} href="/documents/payoff-form" onNavigate={persistWorkflowViewState} /> : null}
+                <OverviewRow label="Payoff Verified" value={data.payoffVerified ? "Yes" : "No"} href="/documents/payoff-form" onNavigate={persistWorkflowViewState} />
+                <OverviewRow label="Deal is Ready" value={data.deliveryEnabled ? "Yes" : "No"} href="/documents/delivery-checklist" onNavigate={persistWorkflowViewState} />
+                <OverviewRow label="Plate" value={data.specialtyPlate === "yes" ? "Specialty — Transfer $3" : data.specialtyPlate === "no" ? "Standard — New Plate" : "Not checked"} />
               </div>
 
-              {/* Home Address */}
-              <div className="mt-4 grid gap-4">
-                <label className="grid gap-2">
-                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Street Address</span>
-                  <input type="text" value={data.homeAddress} onChange={(e) => updateField("homeAddress", e.currentTarget.value)} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
-                </label>
-                <div className="grid gap-4 md:grid-cols-3">
-                  <label className="grid gap-2">
-                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">City</span>
-                    <input type="text" value={data.homeCity} onChange={(e) => updateField("homeCity", e.currentTarget.value)} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
-                  </label>
-                  <label className="grid gap-2">
-                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">State</span>
-                    <select value={data.homeState} onChange={(e) => updateField("homeState", e.currentTarget.value)} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]">
-                      {US_STATES.map((s) => <option key={s} value={s}>{s || "Select"}</option>)}
-                    </select>
-                  </label>
-                  <label className="grid gap-2">
-                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Zip</span>
-                    <input type="text" value={data.homeZip} onChange={(e) => updateField("homeZip", e.currentTarget.value)} maxLength={10} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
-                  </label>
-                </div>
-              </div>
-
-              {/* Deal & Vehicle Fields */}
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
-                {DEAL_FIELDS.map((field) => (
-                  <label
-                    key={field.name}
-                    className={`grid gap-2 ${field.wide ? "md:col-span-2" : ""}`}
-                  >
-                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">
-                      {field.label}
-                    </span>
-                    <input
-                      type={field.type}
-                      value={String(data[field.name])}
-                      onChange={(event) =>
-                        updateField(field.name, event.currentTarget.value)
-                      }
-                      maxLength={field.name === "vin" ? 17 : undefined}
-                      spellCheck={field.name === "vin" ? false : undefined}
-                      autoCapitalize={field.name === "vin" ? "characters" : undefined}
-                      className={`min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]${field.name === "vin" ? " uppercase" : ""}`}
-                    />
-                  </label>
-                ))}
-              </div>
-
-              {/* Mailing Address */}
-              <div className="mt-5 border-t border-white/10 pt-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Mailing Address</span>
-                  <button
-                    type="button"
-                    onClick={() => setMailingSameAsPhysical(!mailingSameAsPhysical)}
-                    className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors ${mailingSameAsPhysical ? "bg-white/20" : "bg-[var(--accent)]"}`}
-                  >
-                    <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${mailingSameAsPhysical ? "translate-x-0.5" : "translate-x-[22px]"}`} />
-                  </button>
-                </div>
-                <p className="mt-1 text-xs text-white/40">
-                  {mailingSameAsPhysical ? "Same as physical address" : "Enter a separate mailing address"}
-                </p>
-                <div className={`mt-3 grid gap-4 transition-opacity ${mailingSameAsPhysical ? "pointer-events-none opacity-40" : "opacity-100"}`}>
-                  <label className="grid gap-2">
-                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Street Address</span>
-                    <input type="text" value={mailingSameAsPhysical ? data.homeAddress : data.mailingAddress} onChange={(e) => updateField("mailingAddress", e.currentTarget.value)} disabled={mailingSameAsPhysical} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[#1c1c1e] disabled:text-white/40" />
-                  </label>
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <label className="grid gap-2">
-                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">City</span>
-                      <input type="text" value={mailingSameAsPhysical ? data.homeCity : data.mailingCity} onChange={(e) => updateField("mailingCity", e.currentTarget.value)} disabled={mailingSameAsPhysical} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[#1c1c1e] disabled:text-white/40" />
-                    </label>
-                    <label className="grid gap-2">
-                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">State</span>
-                      <select value={mailingSameAsPhysical ? data.homeState : data.mailingState} onChange={(e) => updateField("mailingState", e.currentTarget.value)} disabled={mailingSameAsPhysical} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[#1c1c1e] disabled:text-white/40">
-                        {US_STATES.map((s) => <option key={s} value={s}>{s || "Select"}</option>)}
-                      </select>
-                    </label>
-                    <label className="grid gap-2">
-                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Zip</span>
-                      <input type="text" value={mailingSameAsPhysical ? data.homeZip : data.mailingZip} onChange={(e) => updateField("mailingZip", e.currentTarget.value)} disabled={mailingSameAsPhysical} maxLength={10} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] disabled:bg-[#1c1c1e] disabled:text-white/40" />
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-3 border-t border-white/10 pt-4 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => updateField("deliveryEnabled", !data.deliveryEnabled)}
-                  className={`flex min-h-12 items-center gap-3 border px-4 text-sm font-bold transition ${data.deliveryEnabled ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]" : "border-white/10 bg-white/10 text-white/60 hover:border-[var(--accent)] hover:text-white"}`}
-                >
-                  <span className={`flex h-5 w-5 items-center justify-center border text-xs ${data.deliveryEnabled ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/20 bg-white/10"}`}>
-                    {data.deliveryEnabled ? "✓" : ""}
-                  </span>
-                  Prepare Delivery Checklist for F&amp;I
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateField("hasCoOwner", !data.hasCoOwner)}
-                  className={`flex min-h-12 items-center gap-3 border px-4 text-sm font-bold transition ${data.hasCoOwner ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]" : "border-white/10 bg-white/10 text-white/60 hover:border-[var(--accent)] hover:text-white"}`}
-                >
-                  <span className={`flex h-5 w-5 items-center justify-center border text-xs ${data.hasCoOwner ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/20 bg-white/10"}`}>
-                    {data.hasCoOwner ? "✓" : ""}
-                  </span>
-                  Co-owner on this deal
-                </button>
-              </div>
-
-              {data.deliveryEnabled ? (
-                <section className="mt-5 border border-white/10 bg-[#1c1c1e] p-4">
-                  <h4 className="text-lg font-bold text-white">
-                    Delivery Checklist Items
-                  </h4>
-                  <p className="mt-2 text-sm leading-6 text-white/40">
-                    Check items for this deal. These carry over to the printed
-                    checklist.
-                  </p>
-                  <div className="mt-4 grid gap-3 md:grid-cols-2">
-                    {CHECKLIST_ITEMS.map((item) => (
-                      <div
-                        key={item.key}
-                        className="inline-flex items-center gap-3"
-                      >
-                        <label className="inline-flex items-center gap-3 text-sm font-semibold text-white">
-                          <input
-                            type="checkbox"
-                            checked={data.deliveryChecklist[item.key]}
-                            onChange={(event) =>
-                              updateChecklist(item.key, event.currentTarget.checked)
-                            }
-                            className="h-5 w-5 accent-[var(--accent)]"
-                          />
-                          {item.label}
-                        </label>
-                        {item.key === "miles" && (
-                          <input
-                            type="text"
-                            inputMode="numeric"
-                            placeholder="Enter mileage"
-                            value={data.mileage}
-                            onChange={(event) =>
-                              updateField("mileage", event.currentTarget.value)
-                            }
-                            className="ml-1 h-8 w-32 border border-white/10 bg-white px-2 text-sm text-[var(--foreground)]"
-                          />
-                        )}
-                        {item.key === "etchNumbers" && (
-                          <input
-                            type="text"
-                            placeholder="Enter etch #"
-                            value={data.etchNumbers}
-                            onChange={(event) =>
-                              updateField("etchNumbers", event.currentTarget.value)
-                            }
-                            className="ml-1 h-8 w-32 border border-white/10 bg-white px-2 text-sm text-[var(--foreground)]"
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap items-center gap-6">
-                    <div className="inline-flex items-center gap-3">
-                      <span className="text-sm font-semibold text-white">
-                        Tax %
-                      </span>
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder="e.g. 6.25"
-                        value={data.taxPercent}
-                        onChange={(event) =>
-                          updateField("taxPercent", event.currentTarget.value)
-                        }
-                        className="h-8 w-28 border border-white/10 bg-white px-2 text-sm text-[var(--foreground)]"
-                      />
-                    </div>
-                    <label className="inline-flex items-center gap-3 text-sm font-semibold text-white">
-                      <input
-                        type="checkbox"
-                        checked={data.payoffVerified}
-                        onChange={(event) =>
-                          updateField("payoffVerified", event.currentTarget.checked)
-                        }
-                        className="h-5 w-5 accent-[var(--accent)]"
-                      />
-                      Payoff Verified
-                    </label>
-                  </div>
-                </section>
-              ) : null}
-
-              <div className="mt-6 flex flex-wrap gap-3">
+              <div className="mt-6 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
                   onClick={saveNow}
@@ -718,115 +306,64 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                 >
                   New Deal
                 </button>
+                {status && (
+                  <span className={`text-sm font-bold ${tone === "success" ? "text-[var(--success)]" : tone === "warn" ? "text-[var(--warn)]" : "text-white/50"}`}>
+                    {tone === "warn" ? "⚠ " : tone === "success" ? "✓ " : ""}{status}
+                  </span>
+                )}
               </div>
-
               <p className="mt-4 text-sm leading-6 text-white/40">
-                Deal data is stored in the current browser session only.
+                Enter deal data on individual document screens. This overview refreshes automatically.
               </p>
-            </div>
-          )}
-        </section>
 
-        {/* ── Status Message (always visible) ── */}
-        {status && (
-          <div
-            className={`flex items-center gap-3 border px-5 py-3 text-sm font-bold ${tone === "success"
-              ? "border-[var(--success)] bg-[var(--success)]/10 text-[var(--success)]"
-              : tone === "warn"
-                ? "border-[var(--warn)] bg-[var(--warn)]/10 text-[var(--warn)]"
-                : "border-[var(--border)] bg-[var(--panel)] text-[var(--muted)]"
-              }`}
-          >
-            <span className="text-lg">{tone === "warn" ? "⚠" : tone === "success" ? "✓" : "ℹ"}</span>
-            {status}
-          </div>
-        )}
-
-        {/* ── Available Documents ── */}
-        <section className="overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_18px_44px_rgba(0,0,0,0.25)]">
-          <button
-            type="button"
-            onClick={() => toggleSection("documents")}
-            className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center p-5 text-left sm:p-6 print:bg-none"
-          >
-            <div>
-              <h3 className="text-2xl font-bold text-white">
-                Available Documents
-              </h3>
-              <p className="mt-1 text-sm text-white/70">
-                {isNewDeal ? "New vehicle documents" : "Used vehicle documents"}
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className={`text-xl text-white/70 transition-transform ${openSections.documents ? "rotate-180" : ""}`}>▾</span>
-            </div>
-          </button>
-          {openSections.documents && (
-            <div className="border-t border-white/10 bg-[#2a2a2e] px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={printAll}
-                  className="inline-flex min-h-12 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-5 text-sm font-bold uppercase tracking-[0.08em] text-white"
-                >
-                  Print All
-                </button>
-                <button
-                  type="button"
-                  onClick={saveAllPdf}
-                  className="inline-flex min-h-12 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-5 text-sm font-bold uppercase tracking-[0.08em] text-white"
-                >
-                  Save All to PDF
-                </button>
-                <button
-                  type="button"
-                  onClick={printBlank}
-                  className="inline-flex min-h-12 items-center justify-center border border-white/20 bg-white/10 px-5 text-sm font-bold uppercase tracking-[0.08em] text-white"
-                >
-                  Print Blank
-                </button>
-                <button
-                  type="button"
-                  onClick={saveBlankPdf}
-                  className="inline-flex min-h-12 items-center justify-center border border-white/20 bg-white/10 px-5 text-sm font-bold uppercase tracking-[0.08em] text-white"
-                >
-                  Save Blank to PDF
-                </button>
-              </div>
-              <div className="mt-4 grid gap-3">
-                {DOCUMENT_LIBRARY.filter((doc) => doc.slug !== "pain-points" && (!isNewDeal || doc.slug !== "buyers-guide")).map((doc) => (
-                  <div
-                    key={doc.slug}
-                    className="flex flex-wrap items-center justify-between gap-3 border border-white/10 bg-[#1c1c1e] px-4 py-3"
+              {/* ── Specialty Plate Check ── */}
+              <div className="mt-5 border-t border-white/10 pt-5">
+                <p className="text-sm font-bold uppercase tracking-[0.1em] text-white/60">Does the customer have a specialty plate?</p>
+                <p className="mt-1 text-xs leading-5 text-white/40">
+                  Louisiana: Only specialty plates (Saints, LSU, Disabled Veteran, Handicap, etc.) can transfer between vehicles for $3. Standard plates are canceled — a new plate is issued ($40–$112).
+                </p>
+                <div className="mt-3 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => { setData(prev => { const next = { ...prev, specialtyPlate: prev.specialtyPlate === "yes" ? "" as const : "yes" as const }; saveWorkflow(next); return next; }); }}
+                    className={`inline-flex min-h-10 items-center justify-center border px-5 text-sm font-bold uppercase tracking-[0.08em] transition ${data.specialtyPlate === "yes" ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/20 bg-white/10 text-white"}`}
                   >
-                    <div>
-                      <p className="text-sm font-bold text-white">
-                        {doc.title}
-                      </p>
-                      <p className="text-sm text-white/40">{doc.description}</p>
-                    </div>
-                    {doc.ready ? (
-                      <Link
-                        href={doc.href}
-                        onClick={persistWorkflowViewState}
-                        className="inline-flex min-h-10 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-4 text-xs font-bold uppercase tracking-[0.08em] text-white"
-                      >
-                        Open
-                      </Link>
-                    ) : (
-                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/40">
-                        Queued
-                      </span>
-                    )}
+                    Yes — Specialty
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setData(prev => { const next = { ...prev, specialtyPlate: prev.specialtyPlate === "no" ? "" as const : "no" as const }; saveWorkflow(next); return next; }); }}
+                    className={`inline-flex min-h-10 items-center justify-center border px-5 text-sm font-bold uppercase tracking-[0.08em] transition ${data.specialtyPlate === "no" ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/20 bg-white/10 text-white"}`}
+                  >
+                    No — Standard
+                  </button>
+                </div>
+                {data.specialtyPlate === "yes" && (
+                  <div className="mt-3 border-l-4 border-[var(--success)] bg-[var(--success)]/10 px-4 py-3">
+                    <p className="text-sm font-bold text-[var(--success)]">Plate Transfer — $3 fee</p>
+                    <p className="mt-1 text-xs leading-5 text-white/70">Customer has a transferable specialty plate — confirm transfer to save on fees. Flag deal as &quot;plate transfer&quot; when structuring numbers.</p>
                   </div>
-                ))}
+                )}
+                {data.specialtyPlate === "no" && (
+                  <div className="mt-3 border-l-4 border-[var(--warn)] bg-[var(--warn)]/10 px-4 py-3">
+                    <p className="text-sm font-bold text-[var(--warn)]">New Plate Required — $40–$112</p>
+                    <p className="mt-1 text-xs leading-5 text-white/70">Standard plate will be canceled. Include new plate fee in deal structuring before presenting final numbers.</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
         </section>
+
+        {/* ── Available Documents removed — use Document Drawer instead ── */}
       </div>
 
-      {dialog}
+      <DocumentDrawerTrigger onClick={() => setDrawerOpen(true)} />
+      <DocumentDrawer
+        dealType={dealType}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
     </>
   );
 }

@@ -21,8 +21,8 @@ import {
 } from "@/lib/walker-workflow";
 
 export function BuyersGuidePrintScreen() {
-  const searchParams = useSearchParams();
   const { confirmVinAction, dialog } = useVinConfirmation();
+  const searchParams = useSearchParams();
   const [workflow, setWorkflow] = useState<WorkflowData>(() => loadWorkflow());
   const [dealer] = useState<DealerInfo>(() => loadDealer());
   const [consultant] = useState<ConsultantInfo>(() => loadConsultant());
@@ -35,8 +35,8 @@ export function BuyersGuidePrintScreen() {
   useEffect(() => {
     if (printedRef.current || searchParams.get("autoprint") !== "1") return;
     printedRef.current = true;
+    const vinChecked = searchParams.get("vinchecked") === "1";
     const timeout = window.setTimeout(async () => {
-      const vinChecked = searchParams.get("vinchecked") === "1";
       const proceed = vinChecked ? true : await confirmVinAction(workflow.vin, "printing");
       if (!proceed) return;
       const front = document.querySelector('[data-print-sheet="buyers-guide"]');
@@ -45,7 +45,7 @@ export function BuyersGuidePrintScreen() {
       if (back instanceof HTMLElement) await printElementExact(back);
     }, 260);
     return () => window.clearTimeout(timeout);
-  }, [confirmVinAction, searchParams, workflow]);
+  }, [searchParams, workflow, confirmVinAction]);
 
   async function handlePrint() {
     if (!(await confirmVinAction(workflow.vin, "printing"))) return;

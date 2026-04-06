@@ -59,30 +59,20 @@ export const ACCOUNTING_RIGHT_FIELDS = [
 
 export const DOCUMENT_LIBRARY = [
   {
-    slug: "delivery-checklist",
-    title: "Delivery Checklist",
-    description:
-      "Customer info, checklist items, and accounting fields.",
-    href: "/documents/delivery-checklist",
-    printHref: "/print/delivery-checklist",
-    stage: "Deal Form",
-    ready: true,
-  },
-  {
-    slug: "pain-points",
+    slug: "spaced",
     title: "SPACED Sheet",
     description:
       "Standalone sales tool — priority selling points and customer concerns.",
-    href: "/documents/pain-points",
-    printHref: "/print/pain-points",
+    href: "/documents/spaced",
+    printHref: "/print/spaced",
     stage: "Deal Form",
     ready: true,
   },
   {
     slug: "payoff-form",
-    title: "Payoff Form",
+    title: "Trade Info",
     description:
-      "Trade-in lienholder, payoff details, and signatures.",
+      "Trade-in vehicle details, lienholder, payoff, and signatures.",
     href: "/documents/payoff-form",
     printHref: "/print/payoff-form",
     stage: "Deal Form",
@@ -99,6 +89,16 @@ export const DOCUMENT_LIBRARY = [
     ready: true,
   },
   {
+    slug: "vin-verification",
+    title: "VIN Verification",
+    description:
+      "VIN confirmation and salesperson signature.",
+    href: "/documents/vin-verification",
+    printHref: "/print/vin-verification",
+    stage: "Deal Form",
+    ready: true,
+  },
+  {
     slug: "buyers-guide",
     title: "Buyers Guide",
     description:
@@ -109,12 +109,12 @@ export const DOCUMENT_LIBRARY = [
     ready: true,
   },
   {
-    slug: "vin-verification",
-    title: "VIN Verification",
+    slug: "delivery-checklist",
+    title: "Review Delivery Checklist",
     description:
-      "VIN confirmation and salesperson signature.",
-    href: "/documents/vin-verification",
-    printHref: "/print/vin-verification",
+      "Customer info, checklist items, and accounting fields.",
+    href: "/documents/delivery-checklist",
+    printHref: "/print/delivery-checklist",
     stage: "Deal Form",
     ready: true,
   },
@@ -149,6 +149,7 @@ export type WorkflowData = {
   homeCity: string;
   homeState: string;
   homeZip: string;
+  mailingDifferent: boolean;
   mailingAddress: string;
   mailingCity: string;
   mailingState: string;
@@ -158,6 +159,7 @@ export type WorkflowData = {
   salespersonNumber: string;
   dealNumber: string;
   stockNumber: string;
+  stockNumberLetter: string;
   customerSource: string;
   fniEmail: string;
   vehicleYear: string;
@@ -174,6 +176,18 @@ export type WorkflowData = {
   tradeIn: "" | "yes" | "no";
   approxBalance: string;
   currentPayment: string;
+  lienholderName: string;
+  lienholderPhone: string;
+  lienholderAddress: string;
+  payoff15Day: string;
+  goodUntilDate: string;
+  payoffToday: string;
+  accountNumber: string;
+  perDiem: string;
+  socialSecurityNumber: string;
+  representativeName: string;
+  repDate: string;
+  verifiedBy: string;
   newBudget: string;
   prioritySafety: string;
   priorityPerformance: string;
@@ -182,6 +196,14 @@ export type WorkflowData = {
   priorityEconomy: string;
   priorityDependability: string;
   priorityOther: string;
+  vehicleOfInterest: string;
+  tradeYear: string;
+  tradeMake: string;
+  tradeModel: string;
+  tradeVin: string;
+  tradeColor: string;
+  tradeMileage: string;
+  specialtyPlate: "" | "yes" | "no";
 };
 
 export type DeliveryChecklistNotes = Partial<
@@ -254,6 +276,12 @@ export function getYearMakeModel(
     .join(" ");
 }
 
+export function getFullStockNumber(
+  data: Pick<WorkflowData, "stockNumber" | "stockNumberLetter">,
+) {
+  return `${safeTrim(data.stockNumber)}${safeTrim(data.stockNumberLetter)}`;
+}
+
 export function getDefaultDate() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -281,6 +309,7 @@ export function createDefaultWorkflowData(): WorkflowData {
     homeCity: "",
     homeState: "",
     homeZip: "",
+    mailingDifferent: false,
     mailingAddress: "",
     mailingCity: "",
     mailingState: "",
@@ -290,6 +319,7 @@ export function createDefaultWorkflowData(): WorkflowData {
     salespersonNumber: "",
     dealNumber: "",
     stockNumber: "",
+    stockNumberLetter: "",
     customerSource: "",
     fniEmail: "",
     vehicleYear: "",
@@ -306,6 +336,18 @@ export function createDefaultWorkflowData(): WorkflowData {
     tradeIn: "",
     approxBalance: "",
     currentPayment: "",
+    lienholderName: "",
+    lienholderPhone: "",
+    lienholderAddress: "",
+    payoff15Day: "",
+    goodUntilDate: "",
+    payoffToday: "",
+    accountNumber: "",
+    perDiem: "",
+    socialSecurityNumber: "",
+    representativeName: "",
+    repDate: "",
+    verifiedBy: "",
     newBudget: "",
     prioritySafety: "",
     priorityPerformance: "",
@@ -314,6 +356,14 @@ export function createDefaultWorkflowData(): WorkflowData {
     priorityEconomy: "",
     priorityDependability: "",
     priorityOther: "",
+    vehicleOfInterest: "",
+    tradeYear: "",
+    tradeMake: "",
+    tradeModel: "",
+    tradeVin: "",
+    tradeColor: "",
+    tradeMileage: "",
+    specialtyPlate: "",
   };
 }
 
@@ -348,6 +398,7 @@ export function normalizeWorkflowData(value: unknown): WorkflowData {
     homeCity: safeTrim(value.homeCity),
     homeState: safeTrim(value.homeState),
     homeZip: safeTrim(value.homeZip),
+    mailingDifferent: Boolean(value.mailingDifferent),
     mailingAddress: safeTrim(value.mailingAddress),
     mailingCity: safeTrim(value.mailingCity),
     mailingState: safeTrim(value.mailingState),
@@ -357,6 +408,7 @@ export function normalizeWorkflowData(value: unknown): WorkflowData {
     salespersonNumber: safeTrim(value.salespersonNumber),
     dealNumber: safeTrim(value.dealNumber),
     stockNumber: safeTrim(value.stockNumber),
+    stockNumberLetter: safeTrim(value.stockNumberLetter),
     customerSource: safeTrim(value.customerSource),
     fniEmail: safeTrim(value.fniEmail),
     vehicleYear: safeTrim(value.vehicleYear),
@@ -376,6 +428,18 @@ export function normalizeWorkflowData(value: unknown): WorkflowData {
     tradeIn: safeTrim(value.tradeIn) === "yes" ? "yes" : safeTrim(value.tradeIn) === "no" ? "no" : "",
     approxBalance: safeTrim(value.approxBalance),
     currentPayment: safeTrim(value.currentPayment),
+    lienholderName: safeTrim(value.lienholderName),
+    lienholderPhone: safeTrim(value.lienholderPhone),
+    lienholderAddress: safeTrim(value.lienholderAddress),
+    payoff15Day: safeTrim(value.payoff15Day),
+    goodUntilDate: safeTrim(value.goodUntilDate),
+    payoffToday: safeTrim(value.payoffToday),
+    accountNumber: safeTrim(value.accountNumber),
+    perDiem: safeTrim(value.perDiem),
+    socialSecurityNumber: safeTrim(value.socialSecurityNumber),
+    representativeName: safeTrim(value.representativeName),
+    repDate: safeTrim(value.repDate),
+    verifiedBy: safeTrim(value.verifiedBy),
     newBudget: safeTrim(value.newBudget),
     prioritySafety: safeTrim(value.prioritySafety),
     priorityPerformance: safeTrim(value.priorityPerformance),
@@ -384,6 +448,14 @@ export function normalizeWorkflowData(value: unknown): WorkflowData {
     priorityEconomy: safeTrim(value.priorityEconomy),
     priorityDependability: safeTrim(value.priorityDependability),
     priorityOther: safeTrim(value.priorityOther),
+    vehicleOfInterest: safeTrim(value.vehicleOfInterest),
+    tradeYear: safeTrim(value.tradeYear),
+    tradeMake: safeTrim(value.tradeMake),
+    tradeModel: safeTrim(value.tradeModel),
+    tradeVin: safeTrim(value.tradeVin),
+    tradeColor: safeTrim(value.tradeColor),
+    tradeMileage: safeTrim(value.tradeMileage),
+    specialtyPlate: safeTrim(value.specialtyPlate) === "yes" ? "yes" : safeTrim(value.specialtyPlate) === "no" ? "no" : "",
   };
 }
 
@@ -521,7 +593,7 @@ export function createEmailDraft(data: WorkflowData, salespersonName?: string): 
     `VIN: ${normalizeVin(data.vin) || "-"}`,
     `Last 8: ${getLast8(data.vin) || "-"}`,
     `Deal #: ${safeTrim(data.dealNumber) || "-"}`,
-    `Stock #: ${safeTrim(data.stockNumber) || "-"}`,
+    `Stock #: ${getFullStockNumber(data) || "-"}`,
     `Salesperson: ${salespersonName || safeTrim(data.salespersonName) || "-"}`,
     `Email: ${safeTrim(data.email) || "-"}`,
     "",
