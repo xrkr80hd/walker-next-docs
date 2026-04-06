@@ -307,7 +307,7 @@ export function DeliveryChecklistSheet({
             </div>
             <div className={`${styles.fieldRow} ${styles.fieldRowCompact}`}>
               <div className={styles.fieldLabel}>PHONE NUMBER:</div>
-              <div className={styles.fieldLine}>{workflow.cellPhone}</div>
+              <div className={styles.fieldLine}>{workflow.lienholderPhone}</div>
             </div>
           </div>
           <div>

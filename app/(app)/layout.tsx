@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { DisclosureGate } from "@/components/auth/disclosure-gate";
 import { SupabaseSessionGate } from "@/components/auth/supabase-session-gate";
+import { NotificationPrompt } from "@/components/ui/notification-prompt";
 import {
   DocumentDrawer,
   DocumentDrawerTrigger,
@@ -127,6 +128,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         )}
       </DisclosureGate>
       {settingsOpen && <SettingsDrawer onClose={() => setSettingsOpen(false)} />}
+      <NotificationPrompt />
     </SupabaseSessionGate>
   );
 }

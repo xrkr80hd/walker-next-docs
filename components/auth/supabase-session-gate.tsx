@@ -50,7 +50,8 @@ export function SupabaseSessionGate({
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "reset">("login");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (authDisabled || !isSupabaseConfigured()) {
@@ -114,6 +115,29 @@ export function SupabaseSessionGate({
 
     if (!trimmedEmail) {
       setError("Enter your email address.");
+      return;
+    }
+
+    if (mode === "reset") {
+      setSending(true);
+      setStatus("");
+      setError("");
+      try {
+        const supabase = getSupabaseBrowserClient();
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
+          redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+        });
+        if (resetError) {
+          setError(resetError.message);
+        } else {
+          setStatus("If that email is registered, you'll receive a password reset link shortly. Check your inbox.");
+          setMode("login");
+        }
+      } catch (resetErr) {
+        setError(resetErr instanceof Error ? resetErr.message : "Could not send reset email.");
+      } finally {
+        setSending(false);
+      }
       return;
     }
 
@@ -238,7 +262,7 @@ export function SupabaseSessionGate({
             <Image src="/walker-red-graphic-v2.png" alt="Walker Automotive" width={320} height={116} priority className="mx-auto h-auto w-full max-w-[200px]" />
             <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-white drop-shadow-sm">Walker Docs</p>
             <h2 className="mt-1 text-2xl font-extrabold text-white drop-shadow-sm sm:text-3xl">
-              {mode === "signup" ? "Create Account" : "Sign In"}
+              {mode === "signup" ? "Create Account" : mode === "reset" ? "Reset Password" : "Sign In"}
             </h2>
           </div>
 
@@ -257,17 +281,34 @@ export function SupabaseSessionGate({
                 />
               </label>
 
-              <label className="grid gap-2">
-                <span className="text-xs font-bold uppercase tracking-[0.18em] text-white/60">Password</span>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder="••••••••"
-                  className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
-                  autoComplete="current-password"
-                />
-              </label>
+              {mode !== "reset" && (
+                <div className="grid gap-2">
+                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-white/60">Password</span>
+                  <div className="flex">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      placeholder="••••••••"
+                      className="min-h-12 flex-1 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+                      autoComplete="current-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((s) => !s)}
+                      className="min-h-12 border border-l-0 border-white/10 bg-white/90 px-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground)]/60 transition hover:text-[var(--foreground)]"
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {mode === "reset" && (
+                <p className="text-xs leading-relaxed text-white/50">
+                  Enter the email address associated with your account and we&apos;ll send you a link to reset your password.
+                </p>
+              )}
 
               <button
                 type="submit"
@@ -278,24 +319,49 @@ export function SupabaseSessionGate({
                   ? "Please wait…"
                   : mode === "signup"
                     ? "Create Account"
-                    : "Sign In"}
+                    : mode === "reset"
+                      ? "Send Reset Link"
+                      : "Sign In"}
               </button>
             </form>
 
-            <div className="mt-4 text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setMode(mode === "login" ? "signup" : "login");
-                  setError("");
-                  setStatus("");
-                }}
-                className="text-sm font-bold text-[var(--accent)] underline underline-offset-2"
-              >
-                {mode === "login"
-                  ? "Have an invite? Create your account"
-                  : "Already have an account? Sign in"}
-              </button>
+            <div className="mt-4 flex flex-col items-center gap-2">
+              {mode === "login" && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => { setMode("reset"); setError(""); setStatus(""); }}
+                    className="text-sm font-bold text-white/50 underline underline-offset-2 transition hover:text-white/70"
+                  >
+                    Forgot your password?
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setMode("signup"); setError(""); setStatus(""); }}
+                    className="text-sm font-bold text-[var(--accent)] underline underline-offset-2"
+                  >
+                    Have an invite? Create your account
+                  </button>
+                </>
+              )}
+              {mode === "signup" && (
+                <button
+                  type="button"
+                  onClick={() => { setMode("login"); setError(""); setStatus(""); }}
+                  className="text-sm font-bold text-[var(--accent)] underline underline-offset-2"
+                >
+                  Already have an account? Sign in
+                </button>
+              )}
+              {mode === "reset" && (
+                <button
+                  type="button"
+                  onClick={() => { setMode("login"); setError(""); setStatus(""); }}
+                  className="text-sm font-bold text-[var(--accent)] underline underline-offset-2"
+                >
+                  Back to sign in
+                </button>
+              )}
             </div>
 
             {status ? (
