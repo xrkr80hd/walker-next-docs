@@ -136,10 +136,10 @@ const SECTIONS = [
         <div>
           <p className="mb-1 font-bold uppercase tracking-wider text-white/50">LAST</p>
           <ul className="list-disc pl-5 text-white/60">
-            <li><span className="font-bold text-white">L</span>isten</li>
-            <li><span className="font-bold text-white">A</span>cknowledge</li>
-            <li><span className="font-bold text-white">S</span>olve</li>
-            <li><span className="font-bold text-white">T</span>ransition</li>
+            <li><span className="font-bold text-white">L</span>ook</li>
+            <li><span className="font-bold text-white">A</span>ct</li>
+            <li><span className="font-bold text-white">S</span>ound</li>
+            <li><span className="font-bold text-white">T</span>hink</li>
           </ul>
         </div>
         <div>
