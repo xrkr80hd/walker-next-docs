@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { DeliveryChecklistSheet } from "@/components/documents/delivery-checklist-sheet";
 import { loadConsultant, type ConsultantInfo } from "@/lib/dealer-consultant";
@@ -22,6 +22,19 @@ export function DeliveryChecklistPrintScreen() {
     loadDeliveryChecklistNotes(),
   );
   const printedRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [pageScale, setPageScale] = useState(1);
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const w = entry.contentRect.width;
+      setPageScale(w >= 816 ? 1 : w / 816);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     return subscribeToWorkflowSessionClear(() => {
@@ -67,7 +80,11 @@ export function DeliveryChecklistPrintScreen() {
           </button>
         </div>
 
-        <DeliveryChecklistSheet workflow={workflow} consultant={consultant} notes={notes} />
+        <div ref={containerRef}>
+          <div style={pageScale < 1 ? { zoom: pageScale } : undefined} className="print:[zoom:1]">
+            <DeliveryChecklistSheet workflow={workflow} consultant={consultant} notes={notes} />
+          </div>
+        </div>
       </div>
 
     </>

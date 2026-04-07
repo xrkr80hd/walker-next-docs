@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { PayoffFormSheet } from "@/components/documents/payoff-form-sheet";
 import {
@@ -15,6 +15,19 @@ export function PayoffFormPrintScreen() {
   const searchParams = useSearchParams();
   const [workflow, setWorkflow] = useState<WorkflowData>(() => loadWorkflow());
   const printedRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [pageScale, setPageScale] = useState(1);
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const w = entry.contentRect.width;
+      setPageScale(w >= 816 ? 1 : w / 816);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     return subscribeToWorkflowSessionClear(() => setWorkflow(loadWorkflow()));
@@ -44,7 +57,11 @@ export function PayoffFormPrintScreen() {
             Print Form
           </button>
         </div>
-        <PayoffFormSheet workflow={workflow} />
+        <div ref={containerRef}>
+          <div style={pageScale < 1 ? { zoom: pageScale } : undefined} className="print:[zoom:1]">
+            <PayoffFormSheet workflow={workflow} />
+          </div>
+        </div>
       </div>
     </>
   );

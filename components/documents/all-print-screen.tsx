@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { AddressInformationSheet } from "@/components/documents/address-information-sheet";
 import { BuyersGuideReverseSheet } from "@/components/documents/buyers-guide-reverse-sheet";
@@ -37,6 +37,19 @@ export function AllPrintScreen() {
     loadDeliveryChecklistNotes(),
   );
   const printedRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [pageScale, setPageScale] = useState(1);
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const w = entry.contentRect.width;
+      setPageScale(w >= 816 ? 1 : w / 816);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     return subscribeToWorkflowSessionClear(() => {
@@ -77,28 +90,32 @@ export function AllPrintScreen() {
           </button>
         </div>
 
-        <DeliveryChecklistSheet
-          workflow={workflow}
-          consultant={consultant}
-          notes={notes}
-          onNoteChange={() => { }}
-        />
-        <div className="mt-6" />
-        <SpaceSheet workflow={workflow} />
-        <div className="mt-6" />
-        <PayoffFormSheet workflow={workflow} />
-        <div className="mt-6" />
-        <AddressInformationSheet workflow={workflow} />
-        <div className="mt-6" />
-        <BuyersGuideSheet workflow={workflow} />
-        <div className="mt-6" />
-        <BuyersGuideReverseSheet
-          workflow={workflow}
-          dealer={dealer}
-          consultant={consultant}
-        />
-        <div className="mt-6" />
-        <VinVerificationSheet workflow={workflow} consultant={consultant} />
+        <div ref={containerRef}>
+          <div style={pageScale < 1 ? { zoom: pageScale } : undefined} className="print:[zoom:1]">
+            <DeliveryChecklistSheet
+              workflow={workflow}
+              consultant={consultant}
+              notes={notes}
+              onNoteChange={() => { }}
+            />
+            <div className="mt-6" />
+            <SpaceSheet workflow={workflow} />
+            <div className="mt-6" />
+            <PayoffFormSheet workflow={workflow} />
+            <div className="mt-6" />
+            <AddressInformationSheet workflow={workflow} />
+            <div className="mt-6" />
+            <BuyersGuideSheet workflow={workflow} />
+            <div className="mt-6" />
+            <BuyersGuideReverseSheet
+              workflow={workflow}
+              dealer={dealer}
+              consultant={consultant}
+            />
+            <div className="mt-6" />
+            <VinVerificationSheet workflow={workflow} consultant={consultant} />
+          </div>
+        </div>
       </div>
     </>
   );
