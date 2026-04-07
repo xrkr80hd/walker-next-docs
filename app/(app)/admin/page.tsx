@@ -265,7 +265,7 @@ export default function AdminPage() {
                         </div>
                         <div className="flex items-center gap-3">
                           <span
-                            className={`rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${u.role === "admin"
+                            className={`rounded border px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${u.role === "admin"
                               ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]"
                               : "border-[var(--border)] bg-[var(--panel-strong)] text-[var(--muted)]"
                               }`}
@@ -334,14 +334,14 @@ export default function AdminPage() {
                         </div>
                         <div className="flex items-center gap-3">
                           <span
-                            className={`rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${inv.accepted_at
+                            className={`rounded border px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${inv.accepted_at
                               ? "border-[var(--success)] bg-green-50 text-[var(--success)]"
                               : "border-[var(--warn)] bg-amber-50 text-[var(--warn)]"
                               }`}
                           >
                             {inv.accepted_at ? "Accepted" : "Pending"}
                           </span>
-                          <span className="rounded-full border border-[var(--border)] bg-[var(--panel-strong)] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
+                          <span className="rounded border border-[var(--border)] bg-[var(--panel-strong)] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
                             {inv.role}
                           </span>
                           <button
