@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { DocToolbar } from "@/components/documents/doc-toolbar";
 import { PayoffFormSheet } from "@/components/documents/payoff-form-sheet";
+import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
 import {
   loadWorkflow,
   saveWorkflow,
@@ -37,6 +38,7 @@ const TRADE_FIELDS = [
 ] as const;
 
 export function PayoffFormScreen() {
+  const { confirmVinAction, dialog } = useVinConfirmation();
   const [workflow, setWorkflow] = useState<WorkflowData>(() => loadWorkflow());
   const containerRef = useRef<HTMLDivElement>(null);
   const [pageScale, setPageScale] = useState(1);
@@ -81,8 +83,9 @@ export function PayoffFormScreen() {
     setTimeout(() => setSaved(false), 2000);
   }
 
-  function handlePrint() {
-    window.open("/print/payoff-form?autoprint=1", "_blank");
+  async function handlePrint() {
+    if (!(await confirmVinAction(workflow.vin, "printing"))) return;
+    window.open("/print/payoff-form?autoprint=1&vinchecked=1", "_blank");
   }
 
   return (
@@ -179,11 +182,11 @@ export function PayoffFormScreen() {
                     <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">{field.label}</span>
                     {field.name === "socialSecurityNumber" ? (
                       <div className="flex">
-                        <input type={showSsn ? "text" : "password"} maxLength={9} inputMode="numeric" value={String(workflow[field.name] ?? "")} onChange={(e) => updateField(field.name, e.currentTarget.value)} className="min-h-12 flex-1 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
+                        <input type={showSsn ? "text" : "password"} maxLength={9} inputMode="numeric" autoComplete="off" value={String(workflow[field.name] ?? "")} onChange={(e) => updateField(field.name, e.currentTarget.value)} className="min-h-12 flex-1 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
                         <button type="button" onClick={() => setShowSsn((s) => !s)} className="min-h-12 border border-l-0 border-white/10 bg-white/5 px-3 text-xs font-bold uppercase tracking-wider text-white/60 transition hover:text-white">{showSsn ? "Hide" : "Show"}</button>
                       </div>
                     ) : (
-                      <input type={field.type} value={String(workflow[field.name] ?? "")} onChange={(e) => updateField(field.name, e.currentTarget.value)} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
+                      <input type={field.type} autoComplete="off" value={String(workflow[field.name] ?? "")} onChange={(e) => updateField(field.name, e.currentTarget.value)} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
                     )}
                   </label>
                 ))}
@@ -256,6 +259,7 @@ export function PayoffFormScreen() {
           )}
         </div>
       </div>
+      {dialog}
     </>
   );
 }

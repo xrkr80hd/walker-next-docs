@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { DeliveryChecklistSheet } from "@/components/documents/delivery-checklist-sheet";
 import { DocToolbar } from "@/components/documents/doc-toolbar";
+import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
 import { loadConsultant, type ConsultantInfo } from "@/lib/dealer-consultant";
 import {
   CHECKLIST_ITEMS,
@@ -23,6 +24,7 @@ import {
 const PAGE_W = 816;
 
 export function DeliveryChecklistScreen() {
+  const { confirmVinAction, dialog } = useVinConfirmation();
   const [workflow, setWorkflow] = useState<WorkflowData>(() => loadWorkflow());
   const [consultant] = useState<ConsultantInfo>(() => loadConsultant());
   const [notes, setNotes] = useState<DeliveryChecklistNotes>(() =>
@@ -86,8 +88,9 @@ export function DeliveryChecklistScreen() {
     setTimeout(() => setSaved(false), 2000);
   }
 
-  function handlePrint() {
-    window.open("/print/delivery-checklist?autoprint=1", "_blank");
+  async function handlePrint() {
+    if (!(await confirmVinAction(workflow.vin, "printing"))) return;
+    window.open("/print/delivery-checklist?autoprint=1&vinchecked=1", "_blank");
     setStatus("Print window opened.");
     setTone("success");
   }
@@ -343,6 +346,7 @@ export function DeliveryChecklistScreen() {
           )}
         </div>
       </div>
+      {dialog}
     </>
   );
 }

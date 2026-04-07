@@ -5,6 +5,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DocToolbar } from "@/components/documents/doc-toolbar";
 import { VinVerificationSheet } from "@/components/documents/vin-verification-sheet";
 import { SignaturePad } from "@/components/ui/signature-pad";
+import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
 import { loadConsultant, type ConsultantInfo } from "@/lib/dealer-consultant";
 import {
   loadSignatures,
@@ -33,6 +34,7 @@ function loadVinSigs(): Record<SigKey, string> {
 }
 
 export function VinVerificationScreen() {
+  const { confirmVinAction, dialog } = useVinConfirmation();
   const [workflow, setWorkflow] = useState<WorkflowData>(() => loadWorkflow());
   const [consultant] = useState<ConsultantInfo>(() => loadConsultant());
   const [signatures, setSignatures] = useState<Record<SigKey, string>>(() => loadVinSigs());
@@ -84,8 +86,9 @@ export function VinVerificationScreen() {
     setTimeout(() => setSaved(false), 2000);
   }
 
-  function handlePrint() {
-    window.open("/print/vin-verification?autoprint=1", "_blank");
+  async function handlePrint() {
+    if (!(await confirmVinAction(workflow.vin, "printing"))) return;
+    window.open("/print/vin-verification?autoprint=1&vinchecked=1", "_blank");
   }
 
   return (
@@ -228,6 +231,7 @@ export function VinVerificationScreen() {
           onCancel={() => setActiveSig(null)}
         />
       )}
+      {dialog}
     </>
   );
 }

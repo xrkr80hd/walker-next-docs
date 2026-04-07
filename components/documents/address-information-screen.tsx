@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { AddressInformationSheet } from "@/components/documents/address-information-sheet";
 import { DocToolbar } from "@/components/documents/doc-toolbar";
+import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
 import {
   loadWorkflow,
   saveWorkflow,
@@ -30,6 +31,7 @@ const MAILING_FIELDS = [
 ] as const;
 
 export function AddressInformationScreen() {
+  const { confirmVinAction, dialog } = useVinConfirmation();
   const [workflow, setWorkflow] = useState<WorkflowData>(() => loadWorkflow());
   const containerRef = useRef<HTMLDivElement>(null);
   const [pageScale, setPageScale] = useState(1);
@@ -71,8 +73,9 @@ export function AddressInformationScreen() {
     setTimeout(() => setSaved(false), 2000);
   }
 
-  function handlePrint() {
-    window.open("/print/address-information?autoprint=1", "_blank");
+  async function handlePrint() {
+    if (!(await confirmVinAction(workflow.vin, "printing"))) return;
+    window.open("/print/address-information?autoprint=1&vinchecked=1", "_blank");
   }
 
   return (
@@ -213,6 +216,7 @@ export function AddressInformationScreen() {
           )}
         </div>
       </div>
+      {dialog}
     </>
   );
 }

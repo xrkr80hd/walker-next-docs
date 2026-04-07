@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { DocToolbar } from "@/components/documents/doc-toolbar";
 import { SpaceSheet } from "@/components/documents/space-sheet-sheet";
+import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
 import {
   loadWorkflow,
   saveWorkflow,
@@ -36,6 +37,7 @@ const PRIORITY_FIELDS = [
 ] as const;
 
 export function SpaceSheetScreen() {
+  const { confirmVinAction, dialog } = useVinConfirmation();
   const [workflow, setWorkflow] = useState<WorkflowData>(() => loadWorkflow());
   const containerRef = useRef<HTMLDivElement>(null);
   const [pageScale, setPageScale] = useState(1);
@@ -79,8 +81,9 @@ export function SpaceSheetScreen() {
     setTimeout(() => setSaved(false), 2000);
   }
 
-  function handlePrint() {
-    window.open("/print/spaced?autoprint=1", "_blank");
+  async function handlePrint() {
+    if (!(await confirmVinAction(workflow.vin, "printing"))) return;
+    window.open("/print/spaced?autoprint=1&vinchecked=1", "_blank");
   }
 
   return (
@@ -276,6 +279,7 @@ export function SpaceSheetScreen() {
           )}
         </div>
       </div>
+      {dialog}
     </>
   );
 }
