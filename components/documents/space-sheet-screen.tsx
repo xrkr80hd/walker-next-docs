@@ -89,7 +89,7 @@ export function SpaceSheetScreen() {
         <DocToolbar vin={workflow.vin} mileage={workflow.mileage} saved={saved} onSave={handleSave} onPrint={handlePrint} />
 
         {/* Customer Info Accordion */}
-        <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button
             type="button"
             onClick={() => setCustomerOpen((o) => !o)}
@@ -165,7 +165,7 @@ export function SpaceSheetScreen() {
         </div>
 
         {/* Trade & Budget Accordion */}
-        <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button
             type="button"
             onClick={() => setTradeOpen((o) => !o)}
@@ -216,7 +216,7 @@ export function SpaceSheetScreen() {
         </div>
 
         {/* S.P.A.C.E.D. Accordion */}
-        <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button
             type="button"
             onClick={() => setPriorityOpen((o) => !o)}
@@ -247,7 +247,7 @@ export function SpaceSheetScreen() {
         </div>
 
         {/* Print Preview Accordion */}
-        <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button
             type="button"
             onClick={() => setPreviewOpen((o) => !o)}

@@ -91,7 +91,7 @@ export function PayoffFormScreen() {
         <DocToolbar vin={workflow.vin} mileage={workflow.mileage} saved={saved} onSave={handleSave} onPrint={handlePrint} />
 
         {/* Trade-In Accordion */}
-        <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button type="button" onClick={() => setTradeOpen((o) => !o)} className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center px-5 py-4 text-left">
             <span className="text-lg font-bold text-white">Trade-In</span>
             <span className="text-xl leading-none text-white/70 transition-transform" style={{ transform: tradeOpen ? "rotate(180deg)" : undefined }}>▼</span>
@@ -125,7 +125,7 @@ export function PayoffFormScreen() {
         </div>
 
         {/* Trade-In Vehicle Details Accordion */}
-        <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button type="button" onClick={() => setDetailsOpen((o) => !o)} className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center px-5 py-4 text-left">
             <span className="text-lg font-bold text-white">Trade-In Vehicle Details</span>
             <span className="text-xl leading-none text-white/70 transition-transform" style={{ transform: detailsOpen ? "rotate(180deg)" : undefined }}>▼</span>
@@ -166,7 +166,7 @@ export function PayoffFormScreen() {
         </div>
 
         {/* Who Do You Make Payments To? Accordion */}
-        <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button type="button" onClick={() => setLienholderOpen((o) => !o)} className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center px-5 py-4 text-left">
             <span className="text-lg font-bold text-white">Who Do You Make Payments To?</span>
             <span className="text-xl leading-none text-white/70 transition-transform" style={{ transform: lienholderOpen ? "rotate(180deg)" : undefined }}>▼</span>
@@ -204,7 +204,7 @@ export function PayoffFormScreen() {
         </div>
 
         {/* Representative Information Accordion */}
-        <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button type="button" onClick={() => setRepOpen((o) => !o)} className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center px-5 py-4 text-left">
             <span className="text-lg font-bold text-white">Representative Information</span>
             <span className="text-xl leading-none text-white/70 transition-transform" style={{ transform: repOpen ? "rotate(180deg)" : undefined }}>▼</span>
@@ -226,7 +226,7 @@ export function PayoffFormScreen() {
         </div>
 
         {/* Print Preview Accordion */}
-        <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button
             type="button"
             onClick={() => setPreviewOpen((o) => !o)}

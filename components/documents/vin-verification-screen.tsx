@@ -94,7 +94,7 @@ export function VinVerificationScreen() {
         <DocToolbar vin={workflow.vin} mileage={workflow.mileage} saved={saved} onSave={handleSave} onPrint={handlePrint} />
 
         {/* Vehicle Being Sold Accordion */}
-        <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button type="button" onClick={() => setVehicleOpen((o) => !o)} className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center px-5 py-4 text-left">
             <span className="text-lg font-bold text-white">Vehicle Being Sold</span>
             <span className="text-xl leading-none text-white/70 transition-transform" style={{ transform: vehicleOpen ? "rotate(180deg)" : undefined }}>▼</span>
@@ -147,7 +147,7 @@ export function VinVerificationScreen() {
         </div>
 
         {/* Signatures Accordion */}
-        <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button type="button" onClick={() => setSigOpen((o) => !o)} className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center px-5 py-4 text-left">
             <span className="text-lg font-bold text-white">Signatures</span>
             <span className="text-xl leading-none text-white/70 transition-transform" style={{ transform: sigOpen ? "rotate(180deg)" : undefined }}>▼</span>
@@ -186,7 +186,7 @@ export function VinVerificationScreen() {
         </div>
 
         {/* Print Preview Accordion */}
-        <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button
             type="button"
             onClick={() => setPreviewOpen((o) => !o)}

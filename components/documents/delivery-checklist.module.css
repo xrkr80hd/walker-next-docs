@@ -180,6 +180,10 @@
   border-bottom: 1.8px solid var(--ink);
 }
 
+.spacerSm {
+  height: 4px;
+}
+
 .spacerMd {
   height: 8px;
 }

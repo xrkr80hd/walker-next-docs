@@ -195,7 +195,7 @@ export function DeliveryChecklistScreen() {
         </div>
 
         {/* Checklist Items Accordion */}
-        <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button
             type="button"
             onClick={() => setChecklistOpen((o) => !o)}
@@ -308,7 +308,7 @@ export function DeliveryChecklistScreen() {
         </div>
 
         {/* Print Preview Accordion */}
-        <div className="mb-3 overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
           <button
             type="button"
             onClick={() => setPreviewOpen((o) => !o)}

@@ -179,6 +179,12 @@ export function DeliveryChecklistSheet({
                 )}
               </div>
             ))}
+            <div className={styles.lineItem}>
+              <div className={styles.fillLine}>
+                {workflow.specialtyPlate === "yes" ? "Specialty" : workflow.specialtyPlate === "no" ? "Standard" : ""}
+              </div>
+              <span>Plate</span>
+            </div>
           </div>
 
           <div className={styles.entryList}>
@@ -213,9 +219,9 @@ export function DeliveryChecklistSheet({
           </div>
         </div>
 
-        <div className={styles.spacerLg} />
+        <div className={styles.spacerSm} />
         <h2 className={styles.sectionHeading}>Trade Information</h2>
-        <div className={styles.spacerMd} />
+        <div className={styles.spacerSm} />
 
         <div className={styles.grid2}>
           <div className={styles.stackedLines}>
@@ -272,7 +278,7 @@ export function DeliveryChecklistSheet({
           </div>
         </div>
 
-        <div className={styles.spacerMd} />
+        <div className={styles.spacerSm} />
 
         <div className={`${styles.grid2} ${styles.grid2Contact}`}>
           <div>
@@ -354,9 +360,9 @@ export function DeliveryChecklistSheet({
           </div>
         </div>
 
-        <div className={styles.spacerLg} />
+        <div className={styles.spacerSm} />
         <h2 className={styles.sectionHeading}>For Account Use Only:</h2>
-        <div className={styles.spacerMd} />
+        <div className={styles.spacerSm} />
 
         <div className={`${styles.fieldRow} ${styles.fieldRowCompact} ${styles.officeDate}`}>
           <div className={`${styles.fieldLabel} ${styles.fieldLabelRegular}`}>
@@ -371,7 +377,7 @@ export function DeliveryChecklistSheet({
           />
         </div>
 
-        <div className={styles.spacerMd} />
+        <div className={styles.spacerSm} />
 
         <div className={styles.grid2}>
           <div className={styles.lineList}>
