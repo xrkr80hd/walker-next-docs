@@ -35,13 +35,16 @@ export function SettingsDrawer({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
     const supabase = getSupabaseBrowserClient();
-    supabase.auth.getSession().then(({ data }) => {
-      const token = data.session?.access_token;
-      if (!token) return;
-      fetch("/api/me", { headers: { authorization: `Bearer ${token}` } })
-        .then((r) => r.json())
-        .then((me) => { if (me.role === "admin") setIsAdmin(true); })
-        .catch(() => { });
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return;
+      supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .single()
+        .then(({ data: profile }) => {
+          if (profile?.role === "admin") setIsAdmin(true);
+        });
     });
   }, []);
 
