@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
+
+import Link from "next/link";
 
 import {
   createDefaultConsultant,
@@ -14,23 +16,14 @@ import {
 } from "@/lib/dealer-consultant";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase-browser";
 
-type TeamUser = { id: string; email: string; role: string; display_name: string | null };
-type TeamInvite = { id: string; email: string; role: string; created_at: string; expires_at: string; accepted_at: string | null };
-
 export function SettingsDrawer({ onClose }: { onClose: () => void }) {
   const [dealer, setDealer] = useState<DealerInfo>(() => loadDealer());
   const [consultant, setConsultant] = useState<ConsultantInfo>(() => loadConsultant());
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({ dealer: false, consultant: false, fni: false, team: false });
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({ dealer: false, consultant: false, fni: false });
   const [status, setStatus] = useState("");
 
   // Admin state
   const [isAdmin, setIsAdmin] = useState(false);
-  const [teamUsers, setTeamUsers] = useState<TeamUser[]>([]);
-  const [teamInvites, setTeamInvites] = useState<TeamInvite[]>([]);
-  const [teamLoading, setTeamLoading] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"user" | "admin">("user");
-  const [inviteSending, setInviteSending] = useState(false);
 
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
@@ -47,71 +40,6 @@ export function SettingsDrawer({ onClose }: { onClose: () => void }) {
         });
     });
   }, []);
-
-  async function getToken() {
-    const supabase = getSupabaseBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token ?? "";
-  }
-
-  async function loadTeamData() {
-    setTeamLoading(true);
-    try {
-      const token = await getToken();
-      const headers = { authorization: `Bearer ${token}`, "content-type": "application/json" };
-      const [usersRes, invitesRes] = await Promise.all([
-        fetch("/api/admin/users", { headers }).then((r) => r.json()),
-        fetch("/api/admin/invites", { headers }).then((r) => r.json()),
-      ]);
-      setTeamUsers(usersRes.users ?? []);
-      setTeamInvites(invitesRes.invites ?? []);
-    } catch {
-      setStatus("Failed to load team data.");
-    } finally {
-      setTeamLoading(false);
-    }
-  }
-
-  async function handleInvite(e: FormEvent) {
-    e.preventDefault();
-    const email = inviteEmail.trim().toLowerCase();
-    if (!email) return;
-    setInviteSending(true);
-    setStatus("");
-    try {
-      const token = await getToken();
-      const res = await fetch("/api/admin/invites", {
-        method: "POST",
-        headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
-        body: JSON.stringify({ email, role: inviteRole }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setStatus(data.error ?? "Invite failed."); return; }
-      setStatus(`Invite sent to ${email}`);
-      setInviteEmail("");
-      setInviteRole("user");
-      loadTeamData();
-    } catch {
-      setStatus("Failed to send invite.");
-    } finally {
-      setInviteSending(false);
-    }
-  }
-
-  async function handleRemoveUser(id: string, email: string) {
-    if (!confirm(`Remove ${email}? This deletes their account.`)) return;
-    try {
-      const token = await getToken();
-      await fetch(`/api/admin/users/${id}`, {
-        method: "DELETE",
-        headers: { authorization: `Bearer ${token}` },
-      });
-      setStatus(`${email} removed.`);
-      loadTeamData();
-    } catch {
-      setStatus("Failed to remove user.");
-    }
-  }
 
   function toggleSection(key: string) {
     setOpenSections((current) => ({ ...current, [key]: !current[key] }));
@@ -323,115 +251,13 @@ export function SettingsDrawer({ onClose }: { onClose: () => void }) {
           {/* ── Team Management (Admin Only) ── */}
           {isAdmin && (
             <section>
-              <button
-                type="button"
-                onClick={() => { toggleSection("team"); if (!openSections.team) loadTeamData(); }}
-                className="flex w-full items-center justify-between pb-3 text-left"
+              <Link
+                href="/admin"
+                onClick={onClose}
+                className="flex w-full items-center justify-center gap-2 border border-[var(--accent)] bg-[var(--accent)] px-4 py-3 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:opacity-90"
               >
-                <div>
-                  <h3 className="text-lg font-bold text-[var(--foreground)]">Team Management</h3>
-                  <p className="text-sm text-[var(--muted)]">Invite &amp; manage team members</p>
-                </div>
-                <span className={`text-lg text-[var(--muted)] transition-transform ${openSections.team ? "rotate-180" : ""}`}>▾</span>
-              </button>
-              {openSections.team && (
-                <div className="border-t border-[var(--border)] pt-4">
-                  {/* Invite Form */}
-                  <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent)]">Send Invite</p>
-                  <form onSubmit={handleInvite} className="grid gap-3">
-                    <label className="grid gap-2">
-                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Email</span>
-                      <input
-                        type="email"
-                        required
-                        placeholder="name@walkerautomotive.com"
-                        value={inviteEmail}
-                        onChange={(e) => setInviteEmail(e.currentTarget.value)}
-                        className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
-                      />
-                    </label>
-                    <label className="grid gap-2">
-                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Role</span>
-                      <select
-                        value={inviteRole}
-                        onChange={(e) => setInviteRole(e.currentTarget.value as "user" | "admin")}
-                        className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
-                      >
-                        <option value="user">Salesperson</option>
-                        <option value="admin">Admin</option>
-                      </select>
-                    </label>
-                    <button
-                      type="submit"
-                      disabled={inviteSending}
-                      className="inline-flex min-h-10 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-4 text-xs font-bold uppercase tracking-[0.08em] text-white disabled:opacity-40"
-                    >
-                      {inviteSending ? "Sending…" : "Send Invite"}
-                    </button>
-                  </form>
-
-                  {teamLoading ? (
-                    <p className="mt-5 text-sm text-[var(--muted)]">Loading team…</p>
-                  ) : (
-                    <>
-                      {/* Team Members */}
-                      {teamUsers.length > 0 && (
-                        <div className="mt-6">
-                          <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent)]">
-                            Team Members ({teamUsers.length})
-                          </p>
-                          <div className="divide-y divide-[var(--border)] border border-[var(--border)]">
-                            {teamUsers.map((u) => (
-                              <div key={u.id} className="flex items-center justify-between gap-2 px-4 py-3">
-                                <div className="min-w-0">
-                                  <p className="truncate text-sm font-bold text-[var(--foreground)]">{u.display_name || u.email}</p>
-                                  <p className="truncate text-xs text-[var(--muted)]">{u.email}</p>
-                                </div>
-                                <div className="flex shrink-0 items-center gap-2">
-                                  <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${u.role === "admin" ? "border-[var(--accent)] text-[var(--accent)]" : "border-[var(--border)] text-[var(--muted)]"}`}>
-                                    {u.role === "admin" ? "Admin" : "Sales"}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveUser(u.id, u.email)}
-                                    className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)] transition hover:text-[var(--accent)]"
-                                  >
-                                    Remove
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Pending Invites */}
-                      {teamInvites.filter((i) => !i.accepted_at).length > 0 && (
-                        <div className="mt-5">
-                          <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent)]">
-                            Pending Invites ({teamInvites.filter((i) => !i.accepted_at).length})
-                          </p>
-                          <div className="divide-y divide-[var(--border)] border border-[var(--border)]">
-                            {teamInvites.filter((i) => !i.accepted_at).map((inv) => (
-                              <div key={inv.id} className="flex items-center justify-between gap-2 px-4 py-3">
-                                <div className="min-w-0">
-                                  <p className="truncate text-sm font-bold text-[var(--foreground)]">{inv.email}</p>
-                                  <p className="text-xs text-[var(--muted)]">
-                                    Expires {new Date(inv.expires_at).toLocaleDateString()}
-                                  </p>
-                                </div>
-                                <span className="shrink-0 rounded-full border border-amber-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600">
-                                  Pending
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
+                Go To Team Management
+              </Link>
             </section>
           )}
         </div>

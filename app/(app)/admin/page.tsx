@@ -122,6 +122,18 @@ export default function AdminPage() {
     }
   }
 
+  async function handleRevokeInvite(id: string, email: string) {
+    if (!confirm(`Revoke invite for ${email}?`)) return;
+
+    setError("");
+    try {
+      await apiFetch(`/api/admin/invites/${id}`, { method: "DELETE" });
+      loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to revoke invite.");
+    }
+  }
+
   return (
     <div className="grid gap-6">
       {/* ── Hero ── */}
@@ -332,6 +344,13 @@ export default function AdminPage() {
                           <span className="rounded-full border border-[var(--border)] bg-[var(--panel-strong)] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
                             {inv.role}
                           </span>
+                          <button
+                            type="button"
+                            onClick={() => handleRevokeInvite(inv.id, inv.email)}
+                            className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--muted)] transition hover:text-[var(--accent)]"
+                          >
+                            {inv.accepted_at ? "Delete" : "Revoke"}
+                          </button>
                         </div>
                       </div>
                     ))}
