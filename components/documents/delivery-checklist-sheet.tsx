@@ -192,18 +192,27 @@ export function DeliveryChecklistSheet({
               <div key={field.id} className={styles.entryItem}>
                 <span className={styles.entryLabel}>{field.label}</span>
                 {field.id === "taxWatch" ? (
-                  <div className={styles.taxWatchRow}>
-                    <EditableLine
-                      ariaLabel={field.label}
-                      className={styles.entryLine}
-                      fieldKey={field.id}
-                      notes={notes}
-                      onNoteChange={onNoteChange}
-                    />
-                    <span className={styles.taxPercentLabel}>Tax %:</span>
-                    <span className={styles.taxPercentValue}>
+                  <>
+                    <div className={styles.taxBox}>
                       {workflow.taxPercent}
-                    </span>
+                    </div>
+                    <span className={styles.entryLabel}>%</span>
+                  </>
+                ) : field.id === "signedBuyerAgreement" ? (
+                  <div className={styles.entryLine}>
+                    {workflow.signedBuyerAgreement ? "✓" : ""}
+                  </div>
+                ) : field.id === "factoryInvFederalBuyerGuide" ? (
+                  <div className={styles.entryLine}>
+                    {workflow.factoryInvBuyerGuide ? "✓" : ""}
+                  </div>
+                ) : field.id === "firstServiceVisit" ? (
+                  <div className={styles.entryLine}>
+                    {formatDate(workflow.firstServiceVisitDate)}
+                  </div>
+                ) : field.id === "deliveryChecklistNew" ? (
+                  <div className={styles.entryLine}>
+                    {workflow.dealType === "new" ? "New" : workflow.dealType === "used" ? "Used" : ""}
                   </div>
                 ) : (
                   <EditableLine
@@ -226,13 +235,13 @@ export function DeliveryChecklistSheet({
         <div className={styles.grid2}>
           <div className={styles.stackedLines}>
             <div className={`${styles.fieldRow} ${styles.fieldRowCompact}`}>
-              <div className={`${styles.fieldLine} ${styles.fieldLineSm}`}>
+              <div className={`${styles.fieldLine} ${styles.fieldLineMd}`}>
                 {[workflow.tradeYear, workflow.tradeMake, workflow.tradeModel].filter(Boolean).join(" ")}
               </div>
               <div>Year, Make, Model</div>
             </div>
             <div className={`${styles.fieldRow} ${styles.fieldRowCompact}`}>
-              <div className={`${styles.fieldLine} ${styles.fieldLineSm}`}>
+              <div className={`${styles.fieldLine} ${styles.fieldLineMd}`}>
                 {normalizeVin(workflow.tradeVin)}
               </div>
               <div>VIN/Serial Number</div>
@@ -284,23 +293,11 @@ export function DeliveryChecklistSheet({
           <div>
             <div className={`${styles.fieldRow} ${styles.fieldRowCompact}`}>
               <div className={styles.fieldLabel}>LIENHOLDER:</div>
-              <EditableLine
-                ariaLabel="Lienholder"
-                className={styles.fieldLine}
-                fieldKey="lienholder"
-                notes={notes}
-                onNoteChange={onNoteChange}
-              />
+              <div className={styles.fieldLine}>{workflow.lienholderName}</div>
             </div>
             <div className={`${styles.fieldRow} ${styles.fieldRowCompact}`}>
               <div className={styles.fieldLabel}>PHYSICAL ADDRESS:</div>
-              <EditableLine
-                ariaLabel="Physical address line 1"
-                className={styles.fieldLine}
-                fieldKey="physicalAddressLine1"
-                notes={notes}
-                onNoteChange={onNoteChange}
-              />
+              <div className={styles.fieldLine}>{workflow.lienholderAddress}</div>
             </div>
             <div className={`${styles.fieldRow} ${styles.fieldRowCompact}`}>
               <EditableLine
@@ -319,43 +316,19 @@ export function DeliveryChecklistSheet({
           <div>
             <div className={`${styles.fieldRow} ${styles.fieldRowCompact}`}>
               <div className={styles.fieldLabel}>ACCOUNT NUMBER:</div>
-              <EditableLine
-                ariaLabel="Account number"
-                className={styles.fieldLine}
-                fieldKey="accountNumber"
-                notes={notes}
-                onNoteChange={onNoteChange}
-              />
+              <div className={styles.fieldLine}>{workflow.accountNumber}</div>
             </div>
             <div className={`${styles.fieldRow} ${styles.fieldRowCompact}`}>
               <div className={styles.fieldLabel}>PAYOFF AMOUNT:</div>
-              <EditableLine
-                ariaLabel="Payoff amount"
-                className={styles.fieldLine}
-                fieldKey="payoffAmount"
-                notes={notes}
-                onNoteChange={onNoteChange}
-              />
+              <div className={styles.fieldLine}>{workflow.payoff15Day}</div>
             </div>
             <div className={`${styles.fieldRow} ${styles.fieldRowCompact}`}>
               <div className={styles.fieldLabel}>GOOD UNTIL:</div>
-              <EditableLine
-                ariaLabel="Good until"
-                className={styles.fieldLine}
-                fieldKey="goodUntil"
-                notes={notes}
-                onNoteChange={onNoteChange}
-              />
+              <div className={styles.fieldLine}>{formatDate(workflow.goodUntilDate)}</div>
             </div>
             <div className={`${styles.fieldRow} ${styles.fieldRowCompact}`}>
               <div className={styles.fieldLabel}>SPOKE TO:</div>
-              <EditableLine
-                ariaLabel="Spoke to"
-                className={styles.fieldLine}
-                fieldKey="spokeTo"
-                notes={notes}
-                onNoteChange={onNoteChange}
-              />
+              <div className={styles.fieldLine}>{workflow.representativeName}</div>
             </div>
           </div>
         </div>

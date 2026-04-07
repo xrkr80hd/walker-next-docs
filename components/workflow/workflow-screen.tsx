@@ -126,6 +126,14 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
     saveWorkflow(data);
   }, [data]);
 
+  // Persist dealType so other screens (delivery checklist) can read it
+  useEffect(() => {
+    setData((prev) => {
+      if (prev.dealType === dealType) return prev;
+      return { ...prev, dealType };
+    });
+  }, [dealType]);
+
   useEffect(() => {
     return subscribeToWorkflowSessionClear(() => {
       setData(loadWorkflow());
@@ -263,10 +271,12 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
 
         {/* ── Deal Overview (read-only) ── */}
         <section className="overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_18px_44px_rgba(0,0,0,0.25)]">
-          <button
-            type="button"
+          <div
+            role="button"
+            tabIndex={0}
             onClick={() => setOpenSections(prev => ({ ...prev, overview: !prev.overview }))}
-            className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center p-5 text-left sm:p-6"
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenSections(prev => ({ ...prev, overview: !prev.overview })); } }}
+            className="flex w-full cursor-pointer items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center p-5 text-left sm:p-6"
           >
             <div>
               <h3 className="text-2xl font-bold text-white">Deal Overview</h3>
@@ -274,8 +284,21 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                 {data.customerName || "No customer yet"} {data.coCustomerName ? `& ${data.coCustomerName}` : ""}
               </p>
             </div>
+            {/* Deal # — editable, centered on accordion header */}
+            <div className="flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/50">Deal #</span>
+              <input
+                type="text"
+                value={data.dealNumber}
+                onChange={(e) => setData(prev => ({ ...prev, dealNumber: e.target.value }))}
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+                className="w-28 border-b-2 border-white/40 bg-transparent text-center text-3xl font-extrabold text-white outline-none placeholder:text-white/25 focus:border-white/70"
+                placeholder="—"
+              />
+            </div>
             <span className="ml-3 shrink-0 text-2xl text-white/70" aria-hidden="true">{openSections.overview ? "▲" : "▼"}</span>
-          </button>
+          </div>
           {openSections.overview && (
             <div className="border-t border-white/10 bg-[#2a2a2e] px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4">
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:gap-x-6 sm:gap-y-3">

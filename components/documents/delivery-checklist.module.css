@@ -75,6 +75,10 @@
   flex: 0 0 1.15in;
 }
 
+.fieldLineMd {
+  flex: 0 0 1.8in;
+}
+
 .fieldLineLg {
   flex: 0 0 2.6in;
 }
@@ -270,6 +274,20 @@
   text-overflow: ellipsis;
 }
 
+.taxBox {
+  width: 0.65in;
+  border-bottom: 1.2px solid var(--ink);
+  height: 1.2em;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 2px 1px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .stackedLines {
   display: grid;
   gap: 5px;
@@ -309,24 +327,4 @@
     break-inside: avoid;
     page-break-inside: avoid;
   }
-}
-
-.taxWatchRow {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-}
-
-.taxPercentLabel {
-  font-size: 8px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.taxPercentValue {
-  font-size: 9px;
-  min-width: 32px;
-  border-bottom: 1px solid #000;
-  text-align: center;
 }

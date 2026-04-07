@@ -258,46 +258,86 @@ export function DeliveryChecklistScreen() {
 
               <hr className="my-6 border-white/10" />
 
-              {/* Co-Owner + Payoff Verified toggles */}
+              {/* Document completion toggles */}
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={() => {
                     setWorkflow((current) => {
-                      const next = { ...current, hasCoOwner: !current.hasCoOwner };
+                      const next = { ...current, signedBuyerAgreement: !current.signedBuyerAgreement };
                       saveWorkflow(next);
                       return next;
                     });
                   }}
-                  className={`flex min-h-12 items-center gap-2 border px-4 text-sm font-bold transition ${workflow.hasCoOwner ? "border-[var(--accent)] bg-[var(--accent)]/20 text-[var(--accent)]" : "border-white/20 bg-white/5 text-white/60 hover:border-[var(--accent)]"}`}
+                  className={`flex min-h-12 items-center gap-3 border px-4 text-sm font-bold transition ${workflow.signedBuyerAgreement ? "border-[var(--accent)] bg-[var(--accent)]/20 text-[var(--accent)]" : "border-white/20 bg-white/5 text-white/60 hover:border-[var(--accent)]"}`}
                 >
-                  <span className={`flex h-5 w-5 items-center justify-center border text-xs ${workflow.hasCoOwner ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/30 bg-transparent"}`}>{workflow.hasCoOwner ? "✓" : ""}</span>
-                  Co-Owner
+                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center border text-xs ${workflow.signedBuyerAgreement ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/30 bg-transparent"}`}>{workflow.signedBuyerAgreement ? "✓" : ""}</span>
+                  Signed Buyer's Agreement
                 </button>
                 <button
                   type="button"
                   onClick={() => {
                     setWorkflow((current) => {
-                      const next = { ...current, payoffVerified: !current.payoffVerified };
+                      const next = { ...current, factoryInvBuyerGuide: !current.factoryInvBuyerGuide };
                       saveWorkflow(next);
                       return next;
                     });
                   }}
-                  className={`flex min-h-12 items-center gap-3 border px-4 text-sm font-bold transition ${workflow.payoffVerified
-                    ? "border-[var(--accent)] bg-[var(--accent)]/20 text-[var(--accent)]"
-                    : "border-white/20 bg-white/5 text-white/60 hover:border-[var(--accent)]"
-                    }`}
+                  className={`flex min-h-12 items-center gap-3 border px-4 text-sm font-bold transition ${workflow.factoryInvBuyerGuide ? "border-[var(--accent)] bg-[var(--accent)]/20 text-[var(--accent)]" : "border-white/20 bg-white/5 text-white/60 hover:border-[var(--accent)]"}`}
                 >
-                  <span
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center border text-xs ${workflow.payoffVerified
-                      ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-                      : "border-white/30 bg-transparent"
-                      }`}
-                  >
-                    {workflow.payoffVerified ? "✓" : ""}
-                  </span>
-                  Payoff Verified
+                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center border text-xs ${workflow.factoryInvBuyerGuide ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/30 bg-transparent"}`}>{workflow.factoryInvBuyerGuide ? "✓" : ""}</span>
+                  Factory Inv./Fed. Buyer's Guide
                 </button>
+              </div>
+
+              {/* First Service Visit + New/Used */}
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <label className="grid gap-2">
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">First Service Visit</span>
+                  <input
+                    type="date"
+                    value={workflow.firstServiceVisitDate}
+                    onChange={(e) => {
+                      setWorkflow((cur) => {
+                        const next = { ...cur, firstServiceVisitDate: e.target.value };
+                        saveWorkflow(next);
+                        return next;
+                      });
+                    }}
+                    className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+                  />
+                </label>
+                <div className="grid gap-2">
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Vehicle Type</span>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWorkflow((cur) => {
+                          const next = { ...cur, dealType: "new" as const };
+                          saveWorkflow(next);
+                          return next;
+                        });
+                      }}
+                      className={`flex min-h-12 flex-1 items-center justify-center border px-4 text-sm font-bold transition ${workflow.dealType === "new" ? "border-[var(--accent)] bg-[var(--accent)]/20 text-[var(--accent)]" : "border-white/20 bg-white/5 text-white/60 hover:border-[var(--accent)]"}`}
+                    >
+                      New
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWorkflow((cur) => {
+                          const next = { ...cur, dealType: "used" as const };
+                          saveWorkflow(next);
+                          return next;
+                        });
+                      }}
+                      className={`flex min-h-12 flex-1 items-center justify-center border px-4 text-sm font-bold transition ${workflow.dealType === "used" ? "border-[var(--accent)] bg-[var(--accent)]/20 text-[var(--accent)]" : "border-white/20 bg-white/5 text-white/60 hover:border-[var(--accent)]"}`}
+                    >
+                      Used
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <hr className="my-6 border-white/10" />

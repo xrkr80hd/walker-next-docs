@@ -182,25 +182,16 @@ export function PayoffFormScreen() {
                     <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">{field.label}</span>
                     {field.name === "socialSecurityNumber" ? (
                       <div className="flex">
-                        <input type={showSsn ? "text" : "password"} maxLength={9} inputMode="numeric" autoComplete="off" value={String(workflow[field.name] ?? "")} onChange={(e) => updateField(field.name, e.currentTarget.value)} className="min-h-12 flex-1 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
+                        <input type={showSsn ? "text" : "password"} name="payoff-ssn" maxLength={9} inputMode="numeric" autoComplete="new-password" value={String(workflow[field.name] ?? "")} onChange={(e) => updateField(field.name, e.currentTarget.value)} className="min-h-12 flex-1 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
                         <button type="button" onClick={() => setShowSsn((s) => !s)} className="min-h-12 border border-l-0 border-white/10 bg-white/5 px-3 text-xs font-bold uppercase tracking-wider text-white/60 transition hover:text-white">{showSsn ? "Hide" : "Show"}</button>
                       </div>
                     ) : (
-                      <input type={field.type} autoComplete="off" value={String(workflow[field.name] ?? "")} onChange={(e) => updateField(field.name, e.currentTarget.value)} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
+                      <input type={field.type} name={`payoff-${field.name}`} autoComplete="off" value={String(workflow[field.name] ?? "")} onChange={(e) => updateField(field.name, e.currentTarget.value)} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
                     )}
                   </label>
                 ))}
               </div>
 
-              <div className="mt-6">
-                <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Payoff Verified?</span>
-                <div className="mt-2">
-                  <button type="button" onClick={() => { setWorkflow((current) => { const next = { ...current, payoffVerified: !current.payoffVerified }; saveWorkflow(next); return next; }); }} className={`flex min-h-12 items-center gap-2 border px-4 text-sm font-bold transition ${workflow.payoffVerified ? "border-[var(--accent)] bg-[var(--accent)]/20 text-[var(--accent)]" : "border-white/20 bg-white/5 text-white/60 hover:border-[var(--accent)]"}`}>
-                    <span className={`flex h-5 w-5 items-center justify-center border text-xs ${workflow.payoffVerified ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/30 bg-transparent"}`}>{workflow.payoffVerified ? "✓" : ""}</span>
-                    Verified
-                  </button>
-                </div>
-              </div>
               <button type="button" onClick={() => setLienholderOpen(false)} className="mt-4 flex w-full items-center justify-center py-1 text-white/40 transition hover:text-white/70"><span className="text-lg">▲</span></button>
             </div>
           )}
@@ -222,6 +213,15 @@ export function PayoffFormScreen() {
                     <input type={field.type} value={String(workflow[field.name] ?? "")} onChange={(e) => updateField(field.name, e.currentTarget.value)} className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]" />
                   </label>
                 ))}
+              </div>
+              <div className="mt-6">
+                <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Payoff Verified?</span>
+                <div className="mt-2">
+                  <button type="button" onClick={() => { setWorkflow((current) => { const next = { ...current, payoffVerified: !current.payoffVerified }; saveWorkflow(next); return next; }); }} className={`flex min-h-12 items-center gap-2 border px-4 text-sm font-bold transition ${workflow.payoffVerified ? "border-[var(--accent)] bg-[var(--accent)]/20 text-[var(--accent)]" : "border-white/20 bg-white/5 text-white/60 hover:border-[var(--accent)]"}`}>
+                    <span className={`flex h-5 w-5 items-center justify-center border text-xs ${workflow.payoffVerified ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/30 bg-transparent"}`}>{workflow.payoffVerified ? "✓" : ""}</span>
+                    Verified
+                  </button>
+                </div>
               </div>
               <button type="button" onClick={() => setRepOpen(false)} className="mt-4 flex w-full items-center justify-center py-1 text-white/40 transition hover:text-white/70"><span className="text-lg">▲</span></button>
             </div>

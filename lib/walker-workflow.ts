@@ -13,8 +13,8 @@ export const CHECKLIST_ITEMS = [
   { key: "vinIncentiveLookup", label: "VIN Incentive Lookup" },
   { key: "inServiceDate", label: "In Service Date" },
   { key: "miles", label: "Miles" },
-  { key: "etchNumbers", label: "Etch #'s" },
   { key: "carfaxUsed", label: "Carfax (used)" },
+  { key: "etchNumbers", label: "Etch #'s" },
 ] as const;
 
 export const DELIVERY_CHECKLIST_ENTRY_FIELDS = [
@@ -204,6 +204,10 @@ export type WorkflowData = {
   tradeColor: string;
   tradeMileage: string;
   specialtyPlate: "" | "yes" | "no";
+  dealType: "" | "new" | "used";
+  signedBuyerAgreement: boolean;
+  factoryInvBuyerGuide: boolean;
+  firstServiceVisitDate: string;
 };
 
 export type DeliveryChecklistNotes = Partial<
@@ -364,6 +368,10 @@ export function createDefaultWorkflowData(): WorkflowData {
     tradeColor: "",
     tradeMileage: "",
     specialtyPlate: "",
+    dealType: "",
+    signedBuyerAgreement: false,
+    factoryInvBuyerGuide: false,
+    firstServiceVisitDate: "",
   };
 }
 
@@ -456,6 +464,12 @@ export function normalizeWorkflowData(value: unknown): WorkflowData {
     tradeColor: safeTrim(value.tradeColor),
     tradeMileage: safeTrim(value.tradeMileage),
     specialtyPlate: safeTrim(value.specialtyPlate) === "yes" ? "yes" : safeTrim(value.specialtyPlate) === "no" ? "no" : "",
+    dealType: safeTrim(value.dealType) === "new" ? "new" : safeTrim(value.dealType) === "used" ? "used" : "",
+    signedBuyerAgreement:
+      typeof value.signedBuyerAgreement === "boolean" ? value.signedBuyerAgreement : false,
+    factoryInvBuyerGuide:
+      typeof value.factoryInvBuyerGuide === "boolean" ? value.factoryInvBuyerGuide : false,
+    firstServiceVisitDate: safeTrim(value.firstServiceVisitDate),
   };
 }
 

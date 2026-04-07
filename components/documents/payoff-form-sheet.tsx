@@ -199,7 +199,7 @@ export function PayoffFormSheet({ workflow }: Props) {
         </div>
         <div className={css.fieldRow}>
           <span className={css.fieldLabel}>Date:</span>
-          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{workflow.repDate || (workflow.payoffVerified ? formatDate(workflow.dealDate) : "")}</span>
+          <span className={css.fieldLine} contentEditable suppressContentEditableWarning onKeyDown={blockEnter}>{formatDate(workflow.repDate) || (workflow.payoffVerified ? formatDate(workflow.dealDate) : "")}</span>
         </div>
       </div>
 
