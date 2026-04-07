@@ -41,7 +41,7 @@ export function SettingsDrawer({ onClose }: { onClose: () => void }) {
       fetch("/api/me", { headers: { authorization: `Bearer ${token}` } })
         .then((r) => r.json())
         .then((me) => { if (me.role === "admin") setIsAdmin(true); })
-        .catch(() => {});
+        .catch(() => { });
     });
   }, []);
 

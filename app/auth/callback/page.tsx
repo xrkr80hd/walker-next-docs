@@ -1,11 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase-browser";
+import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="mx-auto flex min-h-screen w-full max-w-xl items-center px-4 py-10 sm:px-6">
+        <div className="w-full overflow-hidden border border-black/10 shadow-[0_24px_60px_rgba(35,23,12,0.12)]">
+          <div className="bg-[var(--accent)] bg-[url('/bg-hero-16x9.jpg')] bg-cover bg-center px-5 py-8 text-center sm:px-6">
+            <p className="text-xs font-bold uppercase tracking-[0.24em] text-white drop-shadow-sm">Walker Docs</p>
+            <h2 className="mt-1 text-2xl font-extrabold text-white drop-shadow-sm sm:text-3xl">Processing…</h2>
+          </div>
+        </div>
+      </div>
+    }>
+      <AuthCallbackInner />
+    </Suspense>
+  );
+}
+
+function AuthCallbackInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState("Processing…");
