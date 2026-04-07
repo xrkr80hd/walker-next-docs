@@ -53,7 +53,7 @@ export function VinVerificationScreen() {
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [previewOpen]);
 
   useEffect(() => {
     return subscribeToWorkflowSessionClear(() => {
@@ -201,15 +201,11 @@ export function VinVerificationScreen() {
             </span>
           </button>
           {previewOpen && (
-            <div className="bg-[#2a2a2e] px-5 pb-5 pt-4" ref={containerRef}>
+            <div className="bg-[#2a2a2e] pb-5 pt-4" ref={containerRef}>
               <div
                 style={
                   pageScale < 1
-                    ? {
-                      transform: `scale(${pageScale})`,
-                      transformOrigin: "top left",
-                      height: `${1056 * pageScale}px`,
-                    }
+                    ? { zoom: pageScale }
                     : undefined
                 }
               >

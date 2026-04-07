@@ -79,11 +79,7 @@ export function BuyersGuideReverseScreen() {
           <div
             style={
               pageScale < 1
-                ? {
-                  transform: `scale(${pageScale})`,
-                  transformOrigin: "top left",
-                  height: `${1056 * pageScale}px`,
-                }
+                ? { zoom: pageScale }
                 : undefined
             }
           >

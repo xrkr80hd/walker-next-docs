@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { DeliveryChecklistSheet } from "@/components/documents/delivery-checklist-sheet";
 import { loadConsultant, type ConsultantInfo } from "@/lib/dealer-consultant";
-import { printCurrentWindowAndClear, printElementExact } from "@/lib/exact-print";
 import {
   loadDeliveryChecklistNotes,
   loadWorkflow,
@@ -31,44 +30,26 @@ export function DeliveryChecklistPrintScreen() {
     });
   }, []);
 
-  const isSaveMode = searchParams.get("mode") === "save";
-
   useEffect(() => {
     if (printedRef.current || searchParams.get("autoprint") !== "1") {
       return;
     }
 
     printedRef.current = true;
-    const timeout = window.setTimeout(async () => {
-      if (isSaveMode) {
-        printCurrentWindowAndClear();
-        return;
-      }
-
-      const target = document.querySelector('[data-print-sheet="delivery-checklist"]');
-      if (target instanceof HTMLElement) {
-        await printElementExact(target);
-      }
+    const timeout = window.setTimeout(() => {
+      window.print();
     }, 260);
 
     return () => window.clearTimeout(timeout);
-  }, [searchParams, workflow, isSaveMode]);
+  }, [searchParams]);
 
-  async function handleAction() {
-    if (isSaveMode) {
-      printCurrentWindowAndClear();
-      return;
-    }
-
-    const target = document.querySelector('[data-print-sheet="delivery-checklist"]');
-    if (target instanceof HTMLElement) {
-      await printElementExact(target);
-    }
+  function handleAction() {
+    window.print();
   }
 
   return (
     <>
-      <div className="mx-auto flex min-h-screen w-full max-w-[8.5in] flex-col px-4 py-4 sm:px-0">
+      <div className="mx-auto flex min-h-screen w-full max-w-[8.5in] flex-col px-4 py-4 print:min-h-0 print:px-0 print:py-0 sm:px-0">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border border-black/10 bg-white/90 px-4 py-3 shadow-[0_14px_40px_rgba(0,0,0,0.08)] print:hidden">
           <Link
             href="/documents/delivery-checklist"

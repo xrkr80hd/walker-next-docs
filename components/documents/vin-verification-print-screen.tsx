@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { VinVerificationSheet } from "@/components/documents/vin-verification-sheet";
 import { loadConsultant, type ConsultantInfo } from "@/lib/dealer-consultant";
-import { printElementExact } from "@/lib/exact-print";
 import {
   loadWorkflow,
   subscribeToWorkflowSessionClear,
@@ -26,21 +25,19 @@ export function VinVerificationPrintScreen() {
   useEffect(() => {
     if (printedRef.current || searchParams.get("autoprint") !== "1") return;
     printedRef.current = true;
-    const timeout = window.setTimeout(async () => {
-      const target = document.querySelector('[data-print-sheet="vin-verification"]');
-      if (target instanceof HTMLElement) await printElementExact(target);
+    const timeout = window.setTimeout(() => {
+      window.print();
     }, 260);
     return () => window.clearTimeout(timeout);
-  }, [searchParams, workflow]);
+  }, [searchParams]);
 
-  async function handlePrint() {
-    const target = document.querySelector('[data-print-sheet="vin-verification"]');
-    if (target instanceof HTMLElement) await printElementExact(target);
+  function handlePrint() {
+    window.print();
   }
 
   return (
     <>
-      <div className="mx-auto flex min-h-screen w-full max-w-[8.5in] flex-col px-4 py-4 sm:px-0">
+      <div className="mx-auto flex min-h-screen w-full max-w-[8.5in] flex-col px-4 py-4 print:min-h-0 print:px-0 print:py-0 sm:px-0">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border border-black/10 bg-white/90 px-4 py-3 shadow-[0_14px_40px_rgba(0,0,0,0.08)] print:hidden">
           <Link href="/documents/vin-verification" className="inline-flex min-h-10 items-center justify-center border border-[var(--foreground)] bg-white px-4 text-sm font-bold text-[var(--foreground)]">
             Back to Document
