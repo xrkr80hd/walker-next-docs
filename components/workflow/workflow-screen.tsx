@@ -494,7 +494,7 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                     onClick={finishDealNow}
                     className="inline-flex min-h-12 items-center justify-center border border-[var(--success)] bg-[var(--success)]/20 px-5 text-sm font-bold uppercase tracking-[0.08em] text-[var(--success)]"
                   >
-                    Deal Finished
+                    Finish Deal
                   </button>
                 )}
                 {status && (
