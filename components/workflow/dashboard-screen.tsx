@@ -34,10 +34,22 @@ export function DashboardScreen() {
 
             <nav className="mx-auto mt-8 flex w-[200px] flex-col gap-3">
               <Link
+                href="/deals"
+                className="inline-flex min-h-12 w-full items-center justify-center border border-white bg-white text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent)] transition hover:bg-white/90"
+              >
+                Deals
+              </Link>
+              <Link
                 href="/documents/spaced"
                 className="inline-flex min-h-12 w-full items-center justify-center border border-white bg-white text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent)] transition hover:bg-white/90"
               >
                 SPACED
+              </Link>
+              <Link
+                href="/overview"
+                className="inline-flex min-h-12 w-full items-center justify-center border border-white bg-white text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent)] transition hover:bg-white/90"
+              >
+                Overview
               </Link>
               <Link
                 href="/workflow/new"

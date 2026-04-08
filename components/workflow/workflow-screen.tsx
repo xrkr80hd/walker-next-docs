@@ -2,17 +2,30 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   DocumentDrawer,
   DocumentDrawerTrigger,
 } from "@/components/workflow/document-drawer";
 import {
+  clearLocalDealId,
+  finishDeal,
+  getLocalDealId,
+  listMyDeals,
+  loadDealFromServer,
+  saveDealToServer,
+  setLocalDealId,
+  type DealSummary,
+} from "@/lib/deals";
+import { isSupabaseConfigured } from "@/lib/supabase-browser";
+import {
   clearWorkflowSession,
   getFullStockNumber,
   getLast8,
+  loadSignatures,
   loadWorkflow,
+  saveSignatures,
   saveWorkflow,
   subscribeToWorkflowSessionClear,
   type WorkflowData
@@ -74,14 +87,14 @@ function clearWorkflowViewState() {
 }
 
 export function getWorkflowReturnPath(): string {
-  if (typeof window === "undefined") return "/workflow";
+  if (typeof window === "undefined") return "/overview";
   try {
     const raw = window.sessionStorage.getItem(WORKFLOW_VIEW_STATE_KEY);
-    if (!raw) return "/workflow";
+    if (!raw) return "/overview";
     const parsed = JSON.parse(raw) as Partial<WorkflowViewState>;
-    return parsed.returnPath || "/workflow";
+    return parsed.returnPath || "/overview";
   } catch {
-    return "/workflow";
+    return "/overview";
   }
 }
 
@@ -122,9 +135,119 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
   });
   const [status, setStatus] = useState("");
   const [tone, setTone] = useState<StatusTone>("");
+  const [dealId, setDealId] = useState<string | null>(() => getLocalDealId());
+  const [openDeals, setOpenDeals] = useState<DealSummary[] | null>(null);
+  const [showDealPicker, setShowDealPicker] = useState(false);
+  const [serverSynced, setServerSynced] = useState(false);
+  const serverSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const initialLoadDone = useRef(false);
+
+  // ── sessionStorage auto-save (every keystroke, instant) ──
   useEffect(() => {
     saveWorkflow(data);
   }, [data]);
+
+  // ── Server auto-save (debounced 2s after last change) ──
+  const debouncedServerSave = useCallback(
+    (workflow: WorkflowData, currentDealId: string | null) => {
+      if (serverSaveTimer.current) clearTimeout(serverSaveTimer.current);
+      serverSaveTimer.current = setTimeout(async () => {
+        if (!isSupabaseConfigured()) return;
+        const sigs = loadSignatures();
+        const result = await saveDealToServer(workflow, sigs, currentDealId);
+        if (result === null) {
+          // Save failed — likely expired session
+          setStatus("Could not sync to server — please refresh or sign in again.");
+          setTone("warn");
+          return;
+        }
+        if (result.id) {
+          setDealId(result.id);
+          setServerSynced(true);
+          setTimeout(() => setServerSynced(false), 3000);
+        }
+      }, 2000);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!initialLoadDone.current) return; // don't save during initial load
+    debouncedServerSave(data, dealId);
+    return () => {
+      if (serverSaveTimer.current) clearTimeout(serverSaveTimer.current);
+    };
+  }, [data, dealId, debouncedServerSave]);
+
+  // ── Load open deals on mount ──
+  useEffect(() => {
+    let cancelled = false;
+    async function loadDeals() {
+      if (!isSupabaseConfigured()) {
+        initialLoadDone.current = true;
+        return;
+      }
+
+      // If we have a local deal ID, verify workflow is loaded — if not, fetch from server
+      const localId = getLocalDealId();
+      if (localId) {
+        const current = loadWorkflow();
+        const isEmpty = !current.customerName && !current.vin && !current.dealNumber;
+        if (isEmpty) {
+          // sessionStorage was cleared (refresh/tab close) but dealId survived — reload from server
+          const deal = await loadDealFromServer(localId);
+          if (!cancelled && deal) {
+            const workflow = deal.workflow_data as unknown as WorkflowData;
+            saveWorkflow(workflow);
+            if (deal.signatures && typeof deal.signatures === "object") {
+              saveSignatures(deal.signatures as Record<string, string>);
+            }
+            setData(workflow);
+            setDealId(deal.id);
+          } else if (!cancelled) {
+            // Server deal gone — clear stale ID
+            clearLocalDealId();
+            setDealId(null);
+          }
+        }
+        initialLoadDone.current = true;
+        return;
+      }
+
+      // Check server for open deals
+      const deals = await listMyDeals();
+      if (cancelled) return;
+
+      if (deals.length === 0) {
+        // No open deals — start fresh
+        initialLoadDone.current = true;
+        return;
+      }
+
+      if (deals.length === 1) {
+        // Exactly one open deal — auto-load it
+        const deal = deals[0];
+        const workflow = deal.workflow_data as unknown as WorkflowData;
+        saveWorkflow(workflow);
+        if (deal.signatures && typeof deal.signatures === "object") {
+          saveSignatures(deal.signatures as Record<string, string>);
+        }
+        setData(workflow);
+        setDealId(deal.id);
+        setLocalDealId(deal.id);
+        initialLoadDone.current = true;
+        return;
+      }
+
+      // Multiple open deals — show picker
+      setOpenDeals(deals);
+      setShowDealPicker(true);
+      initialLoadDone.current = true;
+    }
+
+    loadDeals();
+    return () => { cancelled = true; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Persist dealType so other screens (delivery checklist) can read it
   useEffect(() => {
@@ -136,6 +259,8 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
 
   useEffect(() => {
     return subscribeToWorkflowSessionClear(() => {
+      clearLocalDealId();
+      setDealId(null);
       setData(loadWorkflow());
       setStatus("Session cleared. Ready for a new deal.");
       setTone("success");
@@ -222,12 +347,46 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
   function clearSessionNow() {
     clearWorkflowSession();
     clearWorkflowViewState();
+    clearLocalDealId();
+    setDealId(null);
     setData(loadWorkflow());
     setOpenSections({ dealer: false, consultant: false, deal: false, overview: true });
     setStatusMessage(
       "Session cleared. Ready for a new deal.",
       "success",
     );
+  }
+
+  async function finishDealNow() {
+    if (!dealId) {
+      clearSessionNow();
+      return;
+    }
+    const ok = await finishDeal(dealId);
+    if (ok) {
+      clearWorkflowSession();
+      clearWorkflowViewState();
+      clearLocalDealId();
+      setDealId(null);
+      setData(loadWorkflow());
+      setOpenSections({ dealer: false, consultant: false, deal: false, overview: true });
+      setStatusMessage("Deal finished. It will be removed in ~8 hours.", "success");
+    } else {
+      setStatusMessage("Could not finish deal — try again.", "warn");
+    }
+  }
+
+  function pickDeal(deal: DealSummary) {
+    const workflow = deal.workflow_data as unknown as WorkflowData;
+    saveWorkflow(workflow);
+    if (deal.signatures && typeof deal.signatures === "object") {
+      saveSignatures(deal.signatures as Record<string, string>);
+    }
+    setData(workflow);
+    setDealId(deal.id);
+    setLocalDealId(deal.id);
+    setShowDealPicker(false);
+    setOpenDeals(null);
   }
 
   return (
@@ -329,10 +488,22 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
                 >
                   New Deal
                 </button>
+                {dealId && (
+                  <button
+                    type="button"
+                    onClick={finishDealNow}
+                    className="inline-flex min-h-12 items-center justify-center border border-[var(--success)] bg-[var(--success)]/20 px-5 text-sm font-bold uppercase tracking-[0.08em] text-[var(--success)]"
+                  >
+                    Deal Finished
+                  </button>
+                )}
                 {status && (
                   <span className={`text-sm font-bold ${tone === "success" ? "text-[var(--success)]" : tone === "warn" ? "text-[var(--warn)]" : "text-white/50"}`}>
                     {tone === "warn" ? "⚠ " : tone === "success" ? "✓ " : ""}{status}
                   </span>
+                )}
+                {serverSynced && !status && (
+                  <span className="text-sm font-bold text-white/40">☁ Synced</span>
                 )}
               </div>
               <p className="mt-4 text-sm leading-6 text-white/40">
@@ -387,6 +558,46 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
       />
+
+      {/* ── Deal Picker (multiple open deals) ── */}
+      {showDealPicker && openDeals && openDeals.length > 1 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-md border border-white/10 bg-[#1c1c1e] p-6 shadow-2xl">
+            <h3 className="text-lg font-bold text-white">Resume a Deal</h3>
+            <p className="mt-1 text-sm text-white/60">You have {openDeals.length} open deals. Pick one to resume, or start fresh.</p>
+            <div className="mt-4 grid gap-2">
+              {openDeals.map((deal) => {
+                const w = deal.workflow_data as unknown as WorkflowData;
+                const label = w.customerName || "Untitled Deal";
+                const last8 = w.vin ? getLast8(w.vin) : "";
+                const updated = new Date(deal.updated_at).toLocaleString();
+                return (
+                  <button
+                    key={deal.id}
+                    type="button"
+                    onClick={() => pickDeal(deal)}
+                    className="flex items-center justify-between border border-white/10 bg-white/5 p-3 text-left transition hover:bg-white/10"
+                  >
+                    <div>
+                      <span className="text-sm font-bold text-white">{label}</span>
+                      {last8 && <span className="ml-2 font-mono text-xs text-white/50">{last8}</span>}
+                      <p className="text-xs text-white/40">Updated {updated}</p>
+                    </div>
+                    <span className="text-white/30">&rarr;</span>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={() => { setShowDealPicker(false); setOpenDeals(null); }}
+              className="mt-4 w-full border border-white/20 bg-white/10 p-3 text-sm font-bold uppercase tracking-[0.08em] text-white"
+            >
+              Start Fresh Instead
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

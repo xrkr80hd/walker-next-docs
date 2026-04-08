@@ -158,10 +158,10 @@ export default function AdminPage() {
               Manage team access, send invites, and control user roles.
             </p>
             <Link
-              href="/workflow"
+              href="/overview"
               className="mx-auto mt-4 inline-flex items-center gap-2 border border-white/30 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white backdrop-blur-sm transition hover:border-white/60 hover:bg-white/20"
             >
-              Back to Workflow
+              Back to Overview
             </Link>
           </div>
         </div>
