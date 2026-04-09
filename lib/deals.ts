@@ -111,3 +111,50 @@ export async function finishDeal(dealId: string): Promise<boolean> {
 
   return res.ok;
 }
+
+export async function deleteDeal(dealId: string): Promise<boolean> {
+  const token = await getAuthToken();
+  if (!token) return false;
+
+  const res = await fetch(`/api/deals/${encodeURIComponent(dealId)}`, {
+    method: "DELETE",
+    headers: authHeaders(token),
+  });
+
+  if (res.ok) {
+    clearLocalDealId();
+  }
+
+  return res.ok;
+}
+
+export async function sendToFni(dealId: string): Promise<boolean> {
+  const token = await getAuthToken();
+  if (!token) return false;
+
+  const res = await fetch(`/api/deals/${encodeURIComponent(dealId)}/send-fni`, {
+    method: "POST",
+    headers: authHeaders(token),
+  });
+
+  return res.ok;
+}
+
+export type FnaQueueDeal = {
+  id: string;
+  workflow_data: Record<string, string>;
+  fni_sent_at: string;
+  updated_at: string;
+  user_id: string;
+};
+
+export async function listFnaQueue(): Promise<FnaQueueDeal[]> {
+  const token = await getAuthToken();
+  if (!token) return [];
+
+  const res = await fetch("/api/fna-queue", { headers: authHeaders(token) });
+  if (!res.ok) return [];
+
+  const json = await res.json();
+  return json.deals ?? [];
+}

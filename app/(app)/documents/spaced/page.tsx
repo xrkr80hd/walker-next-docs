@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 
 const SpaceSheetScreen = dynamic(
   () =>
@@ -10,4 +11,8 @@ const SpaceSheetScreen = dynamic(
   { ssr: false },
 );
 
-export default SpaceSheetScreen;
+export default function SpacedPage() {
+  const params = useSearchParams();
+  const bypass = params.get("bypass") === "1";
+  return <SpaceSheetScreen bypassMode={bypass} />;
+}

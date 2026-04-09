@@ -32,3 +32,30 @@ export async function GET(
 
   return Response.json({ deal });
 }
+
+/**
+ * DELETE /api/deals/[id] — permanently delete a deal (owner only)
+ */
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const token = getToken(request);
+  if (!token) return Response.json({ error: "Missing authorization." }, { status: 401 });
+
+  const supabase = getSupabaseServiceClient();
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return Response.json({ error: "Invalid session." }, { status: 401 });
+
+  const { id } = await params;
+
+  const { error } = await supabase
+    .from("deals")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) return Response.json({ error: "Could not delete deal." }, { status: 500 });
+
+  return Response.json({ deleted: true });
+}

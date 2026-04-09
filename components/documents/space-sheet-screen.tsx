@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { DocToolbar } from "@/components/documents/doc-toolbar";
@@ -36,14 +37,14 @@ const PRIORITY_FIELDS = [
   { name: "priorityOther", label: "Other" },
 ] as const;
 
-export function SpaceSheetScreen() {
+export function SpaceSheetScreen({ bypassMode = false }: { bypassMode?: boolean }) {
   const { confirmVinAction, dialog } = useVinConfirmation();
   const [workflow, setWorkflow] = useState<WorkflowData>(() => loadWorkflow());
   const containerRef = useRef<HTMLDivElement>(null);
   const [pageScale, setPageScale] = useState(1);
   const [saved, setSaved] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [customerOpen, setCustomerOpen] = useState(false);
+  const [customerOpen, setCustomerOpen] = useState(() => bypassMode);
   const [coBuyerOpen, setCoBuyerOpen] = useState(false);
   const [tradeOpen, setTradeOpen] = useState(false);
   const [priorityOpen, setPriorityOpen] = useState(false);
@@ -163,12 +164,33 @@ export function SpaceSheetScreen() {
                   </label>
                 ))}
               </div>
+
+              {/* Bypass: New / Used routing */}
+              {bypassMode && (
+                <div className="mt-6 border-t border-white/10 pt-5">
+                  <p className="mb-3 text-sm font-bold uppercase tracking-[0.14em] text-white/60">Continue to&hellip;</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Link
+                      href="/workflow/new"
+                      className="inline-flex min-h-12 items-center justify-center border border-white bg-white text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent)] transition hover:bg-white/90"
+                    >
+                      New Vehicle
+                    </Link>
+                    <Link
+                      href="/workflow"
+                      className="inline-flex min-h-12 items-center justify-center border border-white bg-white text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent)] transition hover:bg-white/90"
+                    >
+                      Used Vehicle
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
 
         {/* Trade & Budget Accordion */}
-        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className={`mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)] ${bypassMode ? "pointer-events-none opacity-40" : ""}`}>
           <button
             type="button"
             onClick={() => setTradeOpen((o) => !o)}
@@ -219,7 +241,7 @@ export function SpaceSheetScreen() {
         </div>
 
         {/* S.P.A.C.E.D. Accordion */}
-        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+        <div className={`mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)] ${bypassMode ? "pointer-events-none opacity-40" : ""}`}>
           <button
             type="button"
             onClick={() => setPriorityOpen((o) => !o)}
@@ -249,35 +271,37 @@ export function SpaceSheetScreen() {
           )}
         </div>
 
-        {/* Print Preview Accordion */}
-        <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
-          <button
-            type="button"
-            onClick={() => setPreviewOpen((o) => !o)}
-            className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center px-5 py-4 text-left"
-          >
-            <span className="text-lg font-bold text-white">Print Preview</span>
-            <span
-              className="text-xl leading-none text-white/70 transition-transform"
-              style={{ transform: previewOpen ? "rotate(180deg)" : undefined }}
+        {/* Print Preview Accordion — hidden in bypass mode */}
+        {!bypassMode && (
+          <div className="mb-3 border border-white/10 shadow-[0_0_30px_rgba(190,23,23,0.12),0_14px_40px_rgba(0,0,0,0.2)]">
+            <button
+              type="button"
+              onClick={() => setPreviewOpen((o) => !o)}
+              className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center px-5 py-4 text-left"
             >
-              ▼
-            </span>
-          </button>
-          {previewOpen && (
-            <div className="bg-[#2a2a2e] pb-5 pt-4" ref={containerRef}>
-              <div
-                style={
-                  pageScale < 1
-                    ? { zoom: pageScale }
-                    : undefined
-                }
+              <span className="text-lg font-bold text-white">Print Preview</span>
+              <span
+                className="text-xl leading-none text-white/70 transition-transform"
+                style={{ transform: previewOpen ? "rotate(180deg)" : undefined }}
               >
-                <SpaceSheet workflow={workflow} />
+                ▼
+              </span>
+            </button>
+            {previewOpen && (
+              <div className="bg-[#2a2a2e] pb-5 pt-4" ref={containerRef}>
+                <div
+                  style={
+                    pageScale < 1
+                      ? { zoom: pageScale }
+                      : undefined
+                  }
+                >
+                  <SpaceSheet workflow={workflow} />
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
       {dialog}
     </>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useState, type ReactNode } from "react";
+import { useState, useSyncExternalStore, type ReactNode } from "react";
 
 const DISCLOSURE_ACCEPTED_KEY = "walker.disclosure.accepted";
 const DISCLOSURE_TTL_MS = 72 * 60 * 60 * 1000; // 72 hours
@@ -29,7 +29,7 @@ function saveAcceptance() {
   }
 }
 
-const emptySubscribe = () => () => {};
+const emptySubscribe = () => () => { };
 
 export function DisclosureGate({ children }: { children: ReactNode }) {
   const initiallyAccepted = useSyncExternalStore(
@@ -129,6 +129,21 @@ export function DisclosureGate({ children }: { children: ReactNode }) {
             constitutes ongoing agreement to these terms. Walker Automotive
             reserves the right to update these terms at any time; material
             changes will require re-acknowledgment.
+          </p>
+
+          <p>
+            <strong className="text-[var(--foreground)]">
+              Trademarks &amp; Logo Usage.
+            </strong>{" "}
+            The Walker Automotive name and logo displayed within this
+            application are the property of Walker Automotive and its respective
+            owners. The developer of this application does not own, claim, or
+            assert any rights to the Walker Automotive logo or branding. This
+            application is strictly a prototype built for internal demonstration
+            and development purposes. By proceeding, you acknowledge that this
+            is not an official Walker Automotive product and that all
+            trademarked materials are used solely for contextual accuracy during
+            prototyping and testing.
           </p>
         </div>
 

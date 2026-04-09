@@ -17,6 +17,7 @@ import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase-b
 export default function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isFna, setIsFna] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -38,12 +39,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         .single()
         .then(({ data: profile }) => {
           if (profile?.role === "admin") setIsAdmin(true);
+          if (profile?.role === "fna" || profile?.role === "admin") setIsFna(true);
         });
     });
   }, []);
 
   const isDocumentRoute = pathname.startsWith("/documents");
   const isAdminRoute = pathname.startsWith("/admin");
+  const isFnaQueueRoute = pathname.startsWith("/fna-queue");
   const isDashboardRoute = pathname === "/dashboard";
   const isWorkflowRoute = pathname.startsWith("/workflow");
 
@@ -118,6 +121,17 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                             }`}
                         >
                           Admin
+                        </Link>
+                      )}
+                      {isFna && (
+                        <Link
+                          href="/fna-queue"
+                          className={`inline-flex min-h-11 items-center justify-center border px-4 text-sm font-bold uppercase tracking-[0.08em] ${isFnaQueueRoute
+                            ? "border-blue-500 bg-blue-500 text-white"
+                            : "border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+                            }`}
+                        >
+                          F&amp;A Queue
                         </Link>
                       )}
                     </nav>

@@ -6,6 +6,7 @@ import { DeliveryChecklistSheet } from "@/components/documents/delivery-checklis
 import { DocToolbar } from "@/components/documents/doc-toolbar";
 import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
 import { loadConsultant, type ConsultantInfo } from "@/lib/dealer-consultant";
+import { getLocalDealId, sendToFni } from "@/lib/deals";
 import {
   CHECKLIST_ITEMS,
   createEmailDraft,
@@ -37,6 +38,8 @@ export function DeliveryChecklistScreen() {
   const [pageScale, setPageScale] = useState(1);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(false);
+  const [fniSent, setFniSent] = useState(false);
+  const [fniSending, setFniSending] = useState(false);
 
   useLayoutEffect(() => {
     const el = sheetContainerRef.current;
@@ -93,6 +96,26 @@ export function DeliveryChecklistScreen() {
     window.open("/print/delivery-checklist?autoprint=1&vinchecked=1", "_blank");
     setStatus("Print window opened.");
     setTone("success");
+  }
+
+  async function handleSendToFni() {
+    const dealId = getLocalDealId();
+    if (!dealId) {
+      setStatus("Save the deal first — no deal ID found.");
+      setTone("warn");
+      return;
+    }
+    setFniSending(true);
+    const ok = await sendToFni(dealId);
+    setFniSending(false);
+    if (ok) {
+      setFniSent(true);
+      setStatus("Deal sent to F&A queue.");
+      setTone("success");
+    } else {
+      setStatus("Could not send to F&A. It may already be sent.");
+      setTone("warn");
+    }
   }
 
   function emailFni() {
@@ -342,8 +365,18 @@ export function DeliveryChecklistScreen() {
 
               <hr className="my-6 border-white/10" />
 
-              {/* Email F&I */}
-              {emailFniButton}
+              {/* Email F&I + Send to F&A */}
+              <div className="grid gap-2 sm:grid-cols-2">
+                {emailFniButton}
+                <button
+                  type="button"
+                  onClick={handleSendToFni}
+                  disabled={fniSent || fniSending}
+                  className={`flex min-h-12 w-full items-center justify-center gap-2 border px-4 text-sm font-bold transition ${fniSent ? "border-green-500 bg-green-500/20 text-green-400" : "border-white/20 bg-white/10 text-white hover:bg-white/20"} disabled:opacity-50`}
+                >
+                  {fniSending ? "Sending…" : fniSent ? "✓ Sent to F&A" : "Send to F&A"}
+                </button>
+              </div>
 
               <button type="button" onClick={() => setChecklistOpen(false)} className="mt-4 flex w-full items-center justify-center py-1 text-white/40 transition hover:text-white/70"><span className="text-lg">▲</span></button>
             </div>
