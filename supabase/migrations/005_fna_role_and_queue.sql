@@ -1,4 +1,4 @@
--- 005 — F&A Role, Deal Queue, Notifications
+-- 005 — F&I Role, Deal Queue, Notifications (originally used 'fna' — corrected in 006)
 
 alter table public.profiles drop constraint if exists profiles_role_check;
 alter table public.profiles add constraint profiles_role_check check (role in ('admin', 'user', 'fna'));

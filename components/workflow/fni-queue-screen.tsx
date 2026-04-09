@@ -2,18 +2,18 @@
 
 import { useEffect, useState } from "react";
 
-import { listFnaQueue, type FnaQueueDeal } from "@/lib/deals";
+import { listFniQueue, type FniQueueDeal } from "@/lib/deals";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase-browser";
 
-export function FnaQueueScreen() {
-  const [deals, setDeals] = useState<FnaQueueDeal[]>([]);
+export function FniQueueScreen() {
+  const [deals, setDeals] = useState<FniQueueDeal[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch initial queue
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const result = await listFnaQueue();
+      const result = await listFniQueue();
       if (!cancelled) {
         setDeals(result);
         setLoading(false);
@@ -28,18 +28,18 @@ export function FnaQueueScreen() {
     const supabase = getSupabaseBrowserClient();
 
     const channel = supabase
-      .channel("fna-notifications")
+      .channel("fni-notifications")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications", filter: "recipient_role=eq.fna" },
+        { event: "INSERT", schema: "public", table: "notifications", filter: "recipient_role=eq.fni" },
         (payload) => {
           // Refresh the queue
-          listFnaQueue().then((fresh) => setDeals(fresh));
+          listFniQueue().then((fresh) => setDeals(fresh));
 
           // Browser notification
           const msg = (payload.new as { message?: string })?.message ?? "New deal in queue";
           if (typeof Notification !== "undefined" && Notification.permission === "granted") {
-            new Notification("Sales Docs — F&A Queue", { body: msg, icon: "/android-chrome-192x192.png" });
+            new Notification("Sales Docs — F&I Queue", { body: msg, icon: "/android-chrome-192x192.png" });
           }
         },
       )
@@ -62,8 +62,8 @@ export function FnaQueueScreen() {
     <section className="overflow-hidden border border-white/10 bg-[#1c1c1e] shadow-[0_0_40px_rgba(190,23,23,0.15),0_24px_60px_rgba(0,0,0,0.3)]">
       {/* Header */}
       <div className="bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center px-5 py-5 sm:px-6">
-        <h2 className="text-2xl font-bold text-white">F&A Queue</h2>
-        <p className="mt-1 text-sm text-white/70">Deals ready for Finance &amp; Accounting — oldest first</p>
+        <h2 className="text-2xl font-bold text-white">F&I Queue</h2>
+        <p className="mt-1 text-sm text-white/70">Deals ready for Finance &amp; Insurance — oldest first</p>
       </div>
 
       {/* Body */}
@@ -74,7 +74,7 @@ export function FnaQueueScreen() {
           <div className="py-12 text-center">
             <p className="text-lg font-semibold text-white/60">Queue is empty</p>
             <p className="mt-2 text-sm text-white/40">
-              No deals have been sent to F&A yet.
+              No deals have been sent to F&I yet.
             </p>
           </div>
         ) : (

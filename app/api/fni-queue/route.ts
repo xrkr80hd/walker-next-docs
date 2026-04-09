@@ -1,8 +1,8 @@
 import { getSupabaseServiceClient } from "@/lib/supabase-server";
 
 /**
- * GET /api/fna-queue — list deals flagged for F&A, ordered FIFO by fni_sent_at
- * Accessible by users with 'fna' or 'admin' role only.
+ * GET /api/fni-queue — list deals flagged for F&I, ordered FIFO by fni_sent_at
+ * Accessible by users with 'fni' or 'admin' role only.
  */
 
 function getToken(request: Request): string {
@@ -17,14 +17,14 @@ export async function GET(request: Request) {
   const { data: { user }, error: userError } = await supabase.auth.getUser(token);
   if (userError || !user) return Response.json({ error: "Invalid session." }, { status: 401 });
 
-  // Check role — fna or admin only
+  // Check role — fni, sales_manager, or admin only
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  if (!profile || (profile.role !== "fna" && profile.role !== "admin")) {
+  if (!profile || (profile.role !== "fni" && profile.role !== "admin" && profile.role !== "sales_manager")) {
     return Response.json({ error: "Forbidden." }, { status: 403 });
   }
 

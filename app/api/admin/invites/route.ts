@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   }
 
   const email = body.email?.trim().toLowerCase();
-  const role = body.role === "admin" ? "admin" : body.role === "fna" ? "fna" : "user";
+  const role = body.role === "admin" ? "admin" : body.role === "fni" ? "fni" : body.role === "sales_manager" ? "sales_manager" : "user";
 
   if (!email) {
     return Response.json({ error: "Email is required." }, { status: 400 });

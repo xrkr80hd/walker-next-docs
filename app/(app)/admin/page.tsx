@@ -56,7 +56,7 @@ export default function AdminPage() {
 
   // Invite form
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"user" | "admin" | "fna">("user");
+  const [inviteRole, setInviteRole] = useState<"user" | "admin" | "fni" | "sales_manager">("user");
   const [inviteStatus, setInviteStatus] = useState("");
   const [inviteSending, setInviteSending] = useState(false);
 
@@ -213,13 +213,14 @@ export default function AdminPage() {
                 />
                 <select
                   value={inviteRole}
-                  onChange={(e) => setInviteRole(e.currentTarget.value as "user" | "admin" | "fna")}
+                  onChange={(e) => setInviteRole(e.currentTarget.value as "user" | "admin" | "fni" | "sales_manager")}
                   title="Invite role"
                   className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
                 >
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
-                  <option value="fna">F&amp;A</option>
+                  <option value="fni">F&amp;I</option>
+                  <option value="sales_manager">Sales Manager</option>
                 </select>
                 <button
                   type="submit"
@@ -284,14 +285,17 @@ export default function AdminPage() {
                             title={`Change role for ${u.display_name || u.email}`}
                             className={`border px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] outline-none transition focus:border-[var(--accent)] ${u.role === "admin"
                               ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]"
-                              : u.role === "fna"
+                              : u.role === "fni"
                                 ? "border-blue-500 bg-blue-500/10 text-blue-500"
-                                : "border-[var(--border)] bg-[var(--panel-strong)] text-[var(--muted)]"
+                                : u.role === "sales_manager"
+                                  ? "border-amber-500 bg-amber-500/10 text-amber-500"
+                                  : "border-[var(--border)] bg-[var(--panel-strong)] text-[var(--muted)]"
                               }`}
                           >
                             <option value="user">User</option>
                             <option value="admin">Admin</option>
-                            <option value="fna">F&amp;A</option>
+                            <option value="fni">F&amp;I</option>
+                            <option value="sales_manager">Sales Mgr</option>
                           </select>
                           <button
                             type="button"

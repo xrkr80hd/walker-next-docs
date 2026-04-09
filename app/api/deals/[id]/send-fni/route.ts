@@ -1,7 +1,7 @@
 import { getSupabaseServiceClient } from "@/lib/supabase-server";
 
 /**
- * POST /api/deals/[id]/send-fni — flag a deal for F&A review (owner only)
+ * POST /api/deals/[id]/send-fni — flag a deal for F&I review (owner only)
  * Sets fni_ready = true, stamps fni_sent_at, inserts a notification row.
  */
 
@@ -32,7 +32,7 @@ export async function POST(
 
   if (fetchErr || !deal) return Response.json({ error: "Deal not found." }, { status: 404 });
 
-  if (deal.fni_ready) return Response.json({ error: "Already sent to F&A." }, { status: 409 });
+  if (deal.fni_ready) return Response.json({ error: "Already sent to F&I." }, { status: 409 });
 
   const now = new Date().toISOString();
 
@@ -58,9 +58,9 @@ export async function POST(
     .single();
   const senderName = profile?.display_name || user.email?.split("@")[0] || "Salesperson";
 
-  // Insert notification for fna role
+  // Insert notification for fni role
   await supabase.from("notifications").insert({
-    recipient_role: "fna",
+    recipient_role: "fni",
     deal_id: id,
     message: `${customer} — ${vehicle} · Sent by ${senderName}`,
   });

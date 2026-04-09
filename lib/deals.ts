@@ -140,7 +140,7 @@ export async function sendToFni(dealId: string): Promise<boolean> {
   return res.ok;
 }
 
-export type FnaQueueDeal = {
+export type FniQueueDeal = {
   id: string;
   workflow_data: Record<string, string>;
   fni_sent_at: string;
@@ -148,11 +148,11 @@ export type FnaQueueDeal = {
   user_id: string;
 };
 
-export async function listFnaQueue(): Promise<FnaQueueDeal[]> {
+export async function listFniQueue(): Promise<FniQueueDeal[]> {
   const token = await getAuthToken();
   if (!token) return [];
 
-  const res = await fetch("/api/fna-queue", { headers: authHeaders(token) });
+  const res = await fetch("/api/fni-queue", { headers: authHeaders(token) });
   if (!res.ok) return [];
 
   const json = await res.json();

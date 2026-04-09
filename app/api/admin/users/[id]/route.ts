@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/require-admin";
 import { getSupabaseServiceClient } from "@/lib/supabase-server";
 
-const VALID_ROLES = ["admin", "user", "fna"] as const;
+const VALID_ROLES = ["admin", "user", "fni", "sales_manager"] as const;
 
 export async function PATCH(
   request: Request,

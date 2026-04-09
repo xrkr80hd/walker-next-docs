@@ -110,10 +110,10 @@ export function DeliveryChecklistScreen() {
     setFniSending(false);
     if (ok) {
       setFniSent(true);
-      setStatus("Deal sent to F&A queue.");
+      setStatus("Deal sent to F&I queue.");
       setTone("success");
     } else {
-      setStatus("Could not send to F&A. It may already be sent.");
+      setStatus("Could not send to F&I. It may already be sent.");
       setTone("warn");
     }
   }
@@ -365,7 +365,7 @@ export function DeliveryChecklistScreen() {
 
               <hr className="my-6 border-white/10" />
 
-              {/* Email F&I + Send to F&A */}
+              {/* Email F&I + Send to F&I */}
               <div className="grid gap-2 sm:grid-cols-2">
                 {emailFniButton}
                 <button
@@ -374,7 +374,7 @@ export function DeliveryChecklistScreen() {
                   disabled={fniSent || fniSending}
                   className={`flex min-h-12 w-full items-center justify-center gap-2 border px-4 text-sm font-bold transition ${fniSent ? "border-green-500 bg-green-500/20 text-green-400" : "border-white/20 bg-white/10 text-white hover:bg-white/20"} disabled:opacity-50`}
                 >
-                  {fniSending ? "Sending…" : fniSent ? "✓ Sent to F&A" : "Send to F&A"}
+                  {fniSending ? "Sending…" : fniSent ? "✓ Sent to F&I" : "Send to F&I"}
                 </button>
               </div>
 
