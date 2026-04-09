@@ -136,14 +136,17 @@ export default function AdminPage() {
 
   async function handleRoleChange(id: string, newRole: string) {
     setError("");
+    // Optimistic: update local state immediately so the page doesn't jump
+    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role: newRole } : u)));
     try {
       await apiFetch(`/api/admin/users/${id}`, {
         method: "PATCH",
         body: JSON.stringify({ role: newRole }),
       });
-      loadData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update role.");
+      // Revert on failure
+      loadData();
     }
   }
 
