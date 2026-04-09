@@ -30,9 +30,10 @@ export async function GET(request: Request) {
 
   const { data: deals, error } = await supabase
     .from("deals")
-    .select("id, workflow_data, fni_sent_at, updated_at, user_id")
+    .select("id, workflow_data, fni_sent_at, fni_claimed_at, fni_claimed_by, fni_finished_at, updated_at, user_id, claimer:profiles!fni_claimed_by(display_name)")
     .eq("fni_ready", true)
     .eq("status", "open")
+    .is("fni_finished_at", null)
     .order("fni_sent_at", { ascending: true });
 
   if (error) return Response.json({ error: error.message }, { status: 500 });

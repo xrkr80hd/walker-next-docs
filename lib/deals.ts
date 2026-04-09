@@ -144,8 +144,12 @@ export type FniQueueDeal = {
   id: string;
   workflow_data: Record<string, string>;
   fni_sent_at: string;
+  fni_claimed_at: string | null;
+  fni_claimed_by: string | null;
+  fni_finished_at: string | null;
   updated_at: string;
   user_id: string;
+  claimer: { display_name: string } | null;
 };
 
 export async function listFniQueue(): Promise<FniQueueDeal[]> {
@@ -157,4 +161,28 @@ export async function listFniQueue(): Promise<FniQueueDeal[]> {
 
   const json = await res.json();
   return json.deals ?? [];
+}
+
+export async function claimFniDeal(dealId: string): Promise<boolean> {
+  const token = await getAuthToken();
+  if (!token) return false;
+
+  const res = await fetch(`/api/deals/${encodeURIComponent(dealId)}/fni-claim`, {
+    method: "POST",
+    headers: authHeaders(token),
+  });
+
+  return res.ok;
+}
+
+export async function finishFniDeal(dealId: string): Promise<boolean> {
+  const token = await getAuthToken();
+  if (!token) return false;
+
+  const res = await fetch(`/api/deals/${encodeURIComponent(dealId)}/fni-finish`, {
+    method: "POST",
+    headers: authHeaders(token),
+  });
+
+  return res.ok;
 }
