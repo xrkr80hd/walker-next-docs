@@ -66,83 +66,82 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <SupabaseSessionGate surface="app" renderBar={!isDocumentRoute}>
       <DisclosureGate>
-        {isDocumentRoute ? (
-          <div className="min-h-screen overflow-x-auto px-0 pb-8 pt-4 sm:px-2 lg:px-4">
-            <DocumentDrawerTrigger onClick={() => setDrawerOpen(true)} />
-            <DocumentDrawer
-              dealType={drawerDealType}
-              open={drawerOpen}
-              onClose={() => setDrawerOpen(false)}
-            />
-            {children}
-          </div>
-        ) : (
-          <div className="min-h-screen">
-            <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-8 pt-4 sm:px-6 lg:px-8">
-              {!isDashboardRoute && !isWorkflowRoute && (
-                <header className="border border-white/10 bg-[#2a2a2e] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center shadow-[0_24px_60px_rgba(0,0,0,0.3)]">
-                  <div className="flex flex-col gap-4 px-5 py-4 sm:px-6">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.24em] text-white/50">
-                          Walker Automotive
-                        </p>
-                        <h1 className="text-2xl font-extrabold tracking-[0.01em] text-white">
-                          Walker Docs
-                        </h1>
-                      </div>
-                      <div className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
-                        Beta
-                      </div>
+        <div className="min-h-screen">
+          <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-8 pt-4 sm:px-6 lg:px-8">
+            {!isDashboardRoute && !isWorkflowRoute && (
+              <header className="border border-white/10 bg-[#2a2a2e] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center shadow-[0_24px_60px_rgba(0,0,0,0.3)]">
+                <div className="flex flex-col gap-4 px-5 py-4 sm:px-6">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.24em] text-white/50">
+                        Walker Automotive
+                      </p>
+                      <h1 className="text-2xl font-extrabold tracking-[0.01em] text-white">
+                        Walker Docs
+                      </h1>
                     </div>
+                    <div className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
+                      Beta
+                    </div>
+                  </div>
 
-                    <nav className="flex flex-wrap gap-2">
+                  <nav className="flex flex-wrap gap-2">
+                    <Link
+                      href="/dashboard"
+                      className={`inline-flex min-h-11 items-center justify-center border px-4 text-sm font-bold uppercase tracking-[0.08em] ${!isAdminRoute
+                        ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                        : "border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+                        }`}
+                    >
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/documents"
+                      className="inline-flex min-h-11 items-center justify-center border border-white/20 bg-white/10 px-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:bg-white/20"
+                    >
+                      Documents
+                    </Link>
+                    {isAdmin && (
                       <Link
-                        href="/dashboard"
-                        className={`inline-flex min-h-11 items-center justify-center border px-4 text-sm font-bold uppercase tracking-[0.08em] ${!isAdminRoute
+                        href="/admin"
+                        className={`inline-flex min-h-11 items-center justify-center border px-4 text-sm font-bold uppercase tracking-[0.08em] ${isAdminRoute
                           ? "border-[var(--accent)] bg-[var(--accent)] text-white"
                           : "border-white/20 bg-white/10 text-white transition hover:bg-white/20"
                           }`}
                       >
-                        Dashboard
+                        Admin
                       </Link>
+                    )}
+                    {isFni && (
                       <Link
-                        href="/documents"
-                        className="inline-flex min-h-11 items-center justify-center border border-white/20 bg-white/10 px-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:bg-white/20"
+                        href="/fni-queue"
+                        className={`inline-flex min-h-11 items-center justify-center border px-4 text-sm font-bold uppercase tracking-[0.08em] ${isFniQueueRoute
+                          ? "border-blue-500 bg-blue-500 text-white"
+                          : "border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+                          }`}
                       >
-                        Documents
+                        F&amp;I Queue
                       </Link>
-                      {isAdmin && (
-                        <Link
-                          href="/admin"
-                          className={`inline-flex min-h-11 items-center justify-center border px-4 text-sm font-bold uppercase tracking-[0.08em] ${isAdminRoute
-                            ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-                            : "border-white/20 bg-white/10 text-white transition hover:bg-white/20"
-                            }`}
-                        >
-                          Admin
-                        </Link>
-                      )}
-                      {isFni && (
-                        <Link
-                          href="/fni-queue"
-                          className={`inline-flex min-h-11 items-center justify-center border px-4 text-sm font-bold uppercase tracking-[0.08em] ${isFniQueueRoute
-                            ? "border-blue-500 bg-blue-500 text-white"
-                            : "border-white/20 bg-white/10 text-white transition hover:bg-white/20"
-                            }`}
-                        >
-                          F&amp;I Queue
-                        </Link>
-                      )}
-                    </nav>
-                  </div>
-                </header>
-              )}
+                    )}
+                  </nav>
+                </div>
+              </header>
+            )}
 
-              <main className="flex-1 py-6">{children}</main>
-            </div>
+            {isDocumentRoute && (
+              <>
+                <DocumentDrawerTrigger onClick={() => setDrawerOpen(true)} />
+                <DocumentDrawer
+                  dealType={drawerDealType}
+                  open={drawerOpen}
+                  onClose={() => setDrawerOpen(false)}
+                />
+              </>
+            )}
+
+            <main className="flex-1 py-6">{children}</main>
           </div>
-        )}
+        </div>
       </DisclosureGate>
       {settingsOpen && <SettingsDrawer onClose={() => setSettingsOpen(false)} />}
       <NotificationPrompt />

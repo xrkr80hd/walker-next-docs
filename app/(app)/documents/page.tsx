@@ -18,58 +18,71 @@ export default function DocumentsPage() {
         </p>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2">
+      <section className="grid gap-3">
         {DOCUMENT_LIBRARY.map((doc) => (
-          <article
+          <details
             key={doc.slug}
-            className="border border-black/10 bg-[var(--panel-strong)] p-5 shadow-[0_18px_44px_rgba(35,23,12,0.08)]"
+            className="group border border-black/10 bg-[var(--panel-strong)] shadow-[0_18px_44px_rgba(35,23,12,0.08)]"
           >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
-                  {doc.stage}
-                </p>
-                <h3 className="mt-1 text-xl font-bold text-[var(--foreground)]">
-                  {doc.title}
-                </h3>
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 [&::-webkit-details-marker]:hidden">
+              <div className="flex items-center gap-4">
+                <svg
+                  className="h-4 w-4 shrink-0 text-[var(--muted)] transition-transform group-open:rotate-90"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
+                    {doc.stage}
+                  </p>
+                  <h3 className="mt-0.5 text-lg font-bold text-[var(--foreground)]">
+                    {doc.title}
+                  </h3>
+                </div>
               </div>
               <span
-                className={`border px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] ${doc.ready
+                className={`shrink-0 border px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] ${doc.ready
                     ? "border-[var(--success)] text-[var(--success)]"
                     : "border-[var(--border)] text-[var(--muted)]"
                   }`}
               >
                 {doc.ready ? "Ready" : "Queued"}
               </span>
-            </div>
+            </summary>
 
-            <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-              {doc.description}
-            </p>
-
-            {doc.ready ? (
-              <div className="mt-5 flex flex-wrap gap-2">
-                <Link
-                  href={doc.href}
-                  className="inline-flex min-h-11 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-4 text-sm font-bold uppercase tracking-[0.08em] text-white"
-                >
-                  Open Document
-                </Link>
-                <Link
-                  href={doc.printHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center justify-center border border-[var(--foreground)] bg-white px-4 text-sm font-bold uppercase tracking-[0.08em] text-[var(--foreground)]"
-                >
-                  Print Form
-                </Link>
-              </div>
-            ) : (
-              <p className="mt-5 text-sm font-semibold text-[var(--muted)]">
-                Coming soon.
+            <div className="border-t border-black/10 px-5 pb-5 pt-4">
+              <p className="text-sm leading-6 text-[var(--muted)]">
+                {doc.description}
               </p>
-            )}
-          </article>
+
+              {doc.ready ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Link
+                    href={doc.href}
+                    className="inline-flex min-h-11 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-4 text-sm font-bold uppercase tracking-[0.08em] text-white"
+                  >
+                    Open Document
+                  </Link>
+                  <Link
+                    href={doc.printHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-11 items-center justify-center border border-[var(--foreground)] bg-white px-4 text-sm font-bold uppercase tracking-[0.08em] text-[var(--foreground)]"
+                  >
+                    Print Form
+                  </Link>
+                </div>
+              ) : (
+                <p className="mt-4 text-sm font-semibold text-[var(--muted)]">
+                  Coming soon.
+                </p>
+              )}
+            </div>
+          </details>
         ))}
       </section>
     </div>
