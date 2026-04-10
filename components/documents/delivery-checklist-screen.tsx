@@ -6,7 +6,7 @@ import { DeliveryChecklistSheet } from "@/components/documents/delivery-checklis
 import { DocToolbar } from "@/components/documents/doc-toolbar";
 import { useVinConfirmation } from "@/components/ui/use-vin-confirmation";
 import { loadConsultant, type ConsultantInfo } from "@/lib/dealer-consultant";
-import { getLocalDealId, sendToFni } from "@/lib/deals";
+import { getLocalDealId, sendToSm } from "@/lib/deals";
 import {
   CHECKLIST_ITEMS,
   createEmailDraft,
@@ -38,8 +38,8 @@ export function DeliveryChecklistScreen() {
   const [pageScale, setPageScale] = useState(1);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(false);
-  const [fniSent, setFniSent] = useState(false);
-  const [fniSending, setFniSending] = useState(false);
+  const [smSent, setSmSent] = useState(false);
+  const [smSending, setSmSending] = useState(false);
 
   useLayoutEffect(() => {
     const el = sheetContainerRef.current;
@@ -98,22 +98,22 @@ export function DeliveryChecklistScreen() {
     setTone("success");
   }
 
-  async function handleSendToFni() {
+  async function handleSendToSm() {
     const dealId = getLocalDealId();
     if (!dealId) {
       setStatus("Save the deal first — no deal ID found.");
       setTone("warn");
       return;
     }
-    setFniSending(true);
-    const ok = await sendToFni(dealId);
-    setFniSending(false);
+    setSmSending(true);
+    const ok = await sendToSm(dealId);
+    setSmSending(false);
     if (ok) {
-      setFniSent(true);
-      setStatus("Deal sent to F&I queue.");
+      setSmSent(true);
+      setStatus("Deal sent to Sales Manager queue.");
       setTone("success");
     } else {
-      setStatus("Could not send to F&I. It may already be sent.");
+      setStatus("Could not send to Sales Manager. It may already be sent.");
       setTone("warn");
     }
   }
@@ -170,22 +170,6 @@ export function DeliveryChecklistScreen() {
             />
           </label>
           <label className="grid gap-2">
-            <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Deal #</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={workflow.dealNumber}
-              onChange={(e) => {
-                setWorkflow((cur) => {
-                  const next = { ...cur, dealNumber: e.target.value };
-                  saveWorkflow(next);
-                  return next;
-                });
-              }}
-              className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
-            />
-          </label>
-          <label className="grid gap-2">
             <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Tax %</span>
             <input
               type="text"
@@ -215,7 +199,7 @@ export function DeliveryChecklistScreen() {
               className={`flex min-h-12 w-full items-center gap-3 border px-4 text-sm font-bold transition ${workflow.deliveryEnabled ? "border-[var(--accent)] bg-[var(--accent)]/20 text-[var(--accent)]" : "border-white/20 bg-white/5 text-white/60 hover:border-[var(--accent)]"}`}
             >
               <span className={`flex h-5 w-5 items-center justify-center border text-xs ${workflow.deliveryEnabled ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/30 bg-transparent"}`}>{workflow.deliveryEnabled ? "✓" : ""}</span>
-              Prepare for F&amp;I
+              Prepare for Sales Manager
             </button>
           </div>
         </div>
@@ -363,18 +347,66 @@ export function DeliveryChecklistScreen() {
                 </div>
               </div>
 
+              {/* ── Specialty Plate Check ── */}
+              <div className="mt-4 border-t border-white/10 pt-4">
+                <p className="text-sm font-bold uppercase tracking-[0.1em] text-white/60">Does the customer have a specialty plate?</p>
+                <p className="mt-1 text-xs leading-5 text-white/40">
+                  Louisiana: Only specialty plates (Saints, LSU, Disabled Veteran, Handicap, etc.) can transfer between vehicles for $3. Standard plates are canceled — a new plate is issued ($40–$112).
+                </p>
+                <div className="mt-3 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => { setWorkflow(prev => { const next = { ...prev, specialtyPlate: prev.specialtyPlate === "yes" ? "" as const : "yes" as const }; saveWorkflow(next); return next; }); }}
+                    className={`inline-flex min-h-10 items-center justify-center border px-5 text-sm font-bold uppercase tracking-[0.08em] transition ${workflow.specialtyPlate === "yes" ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/20 bg-white/10 text-white"}`}
+                  >
+                    Yes — Specialty
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setWorkflow(prev => { const next = { ...prev, specialtyPlate: prev.specialtyPlate === "no" ? "" as const : "no" as const }; saveWorkflow(next); return next; }); }}
+                    className={`inline-flex min-h-10 items-center justify-center border px-5 text-sm font-bold uppercase tracking-[0.08em] transition ${workflow.specialtyPlate === "no" ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/20 bg-white/10 text-white"}`}
+                  >
+                    No — Standard
+                  </button>
+                </div>
+                {workflow.specialtyPlate === "yes" && (
+                  <div className="mt-3 border-l-4 border-[var(--success)] bg-[var(--success)]/10 px-4 py-3">
+                    <p className="text-sm font-bold text-[var(--success)]">Plate Transfer — $3 fee</p>
+                    <p className="mt-1 text-xs leading-5 text-white/70">Customer has a transferable specialty plate — confirm transfer to save on fees. Flag deal as &quot;plate transfer&quot; when structuring numbers.</p>
+                  </div>
+                )}
+                {workflow.specialtyPlate === "no" && (
+                  <div className="mt-3 border-l-4 border-[var(--warn)] bg-[var(--warn)]/10 px-4 py-3">
+                    <p className="text-sm font-bold text-[var(--warn)]">New Plate Required — $40–$112</p>
+                    <p className="mt-1 text-xs leading-5 text-white/70">Standard plate will be canceled. Include new plate fee in deal structuring before presenting final numbers.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* ── Validation Hints ── */}
+              <div className="mt-4 grid gap-2">
+                <div className="border-l-4 border-amber-500 bg-amber-500/10 px-4 py-3">
+                  <p className="text-xs font-bold text-amber-400">License Check</p>
+                  <p className="mt-1 text-xs leading-5 text-white/60">Clear photo, not expired, not cropped — front + back. Name on deal MUST match license EXACTLY (Chris ≠ Christopher = DEAL KILLER).</p>
+                </div>
+                <div className="border-l-4 border-amber-500 bg-amber-500/10 px-4 py-3">
+                  <p className="text-xs font-bold text-amber-400">Insurance Check</p>
+                  <p className="mt-1 text-xs leading-5 text-white/60">Full coverage required. Correct vehicle listed. Deductibles ≤ $1,000. Must cover the new vehicle — not just the trade.</p>
+                </div>
+              </div>
+
               <hr className="my-6 border-white/10" />
 
-              {/* Email F&I + Send to F&I */}
+              {/* Email F&I + Send to Sales Manager */}
               <div className="grid gap-2 sm:grid-cols-2">
                 {emailFniButton}
                 <button
                   type="button"
-                  onClick={handleSendToFni}
-                  disabled={fniSent || fniSending}
-                  className={`flex min-h-12 w-full items-center justify-center gap-2 border px-4 text-sm font-bold transition ${fniSent ? "border-green-500 bg-green-500/20 text-green-400" : "border-white/20 bg-white/10 text-white hover:bg-white/20"} disabled:opacity-50`}
+                  onClick={handleSendToSm}
+                  disabled={smSent || smSending}
+                  className={`flex min-h-12 w-full items-center justify-center gap-2 border px-4 text-sm font-bold transition ${smSent ? "border-green-500 bg-green-500/20 text-green-400" : "border-white/20 bg-white/10 text-white hover:bg-white/20"} disabled:opacity-50`}
                 >
-                  {fniSending ? "Sending…" : fniSent ? "✓ Sent to F&I" : "Send to F&I"}
+                  {smSending ? "Sending…" : smSent ? "✓ Sent to Sales Manager" : "Send to Sales Manager"}
                 </button>
               </div>
 

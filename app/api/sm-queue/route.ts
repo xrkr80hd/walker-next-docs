@@ -1,8 +1,8 @@
 import { getSupabaseServiceClient } from "@/lib/supabase-server";
 
 /**
- * GET /api/fni-queue — list deals flagged for F&I, ordered FIFO by fni_sent_at
- * Accessible by users with 'fni' or 'admin' role only.
+ * GET /api/sm-queue — list deals flagged for Sales Manager review, FIFO by sm_sent_at.
+ * Accessible by sales_manager or admin role only.
  */
 
 function getToken(request: Request): string {
@@ -17,25 +17,23 @@ export async function GET(request: Request) {
   const { data: { user }, error: userError } = await supabase.auth.getUser(token);
   if (userError || !user) return Response.json({ error: "Invalid session." }, { status: 401 });
 
-  // Check role — fni, sales_manager, or admin only
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  if (!profile || (profile.role !== "fni" && profile.role !== "admin" && profile.role !== "sales_manager")) {
+  if (!profile || (profile.role !== "sales_manager" && profile.role !== "admin")) {
     return Response.json({ error: "Forbidden." }, { status: 403 });
   }
 
   const { data: deals, error } = await supabase
     .from("deals")
-    .select("id, workflow_data, deal_number, fni_sent_at, fni_claimed_at, fni_claimed_by, fni_finished_at, updated_at, user_id, claimer:profiles!fni_claimed_by(display_name)")
-    .eq("fni_ready", true)
+    .select("id, workflow_data, sm_sent_at, sm_claimed_at, sm_claimed_by, sm_finished_at, deal_number, updated_at, user_id, claimer:profiles!sm_claimed_by(display_name)")
+    .eq("sm_ready", true)
     .eq("status", "open")
-    .is("fni_finished_at", null)
-    .not("sm_finished_at", "is", null)
-    .order("fni_sent_at", { ascending: true });
+    .is("sm_finished_at", null)
+    .order("sm_sent_at", { ascending: true });
 
   if (error) return Response.json({ error: error.message }, { status: 500 });
 

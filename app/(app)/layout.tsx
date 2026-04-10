@@ -18,6 +18,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isFni, setIsFni] = useState(false);
+  const [isSm, setIsSm] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -40,6 +41,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         .then(({ data: profile }) => {
           if (profile?.role === "admin") setIsAdmin(true);
           if (profile?.role === "fni" || profile?.role === "admin" || profile?.role === "sales_manager") setIsFni(true);
+          if (profile?.role === "sales_manager" || profile?.role === "admin") setIsSm(true);
         });
     });
   }, []);
@@ -47,6 +49,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const isDocumentRoute = pathname.startsWith("/documents");
   const isAdminRoute = pathname.startsWith("/admin");
   const isFniQueueRoute = pathname.startsWith("/fni-queue");
+  const isSmQueueRoute = pathname.startsWith("/sm-queue");
   const isDashboardRoute = pathname === "/dashboard";
   const isWorkflowRoute = pathname.startsWith("/workflow");
 
@@ -110,6 +113,17 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                           }`}
                       >
                         Admin
+                      </Link>
+                    )}
+                    {isSm && (
+                      <Link
+                        href="/sm-queue"
+                        className={`inline-flex min-h-11 items-center justify-center border px-4 text-sm font-bold uppercase tracking-[0.08em] ${isSmQueueRoute
+                          ? "border-amber-500 bg-amber-500 text-white"
+                          : "border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+                          }`}
+                      >
+                        SM Queue
                       </Link>
                     )}
                     {isFni && (

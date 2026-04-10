@@ -2,12 +2,30 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { SettingsDrawer } from "@/components/workflow/settings-drawer";
+import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase-browser";
 
 export function DashboardScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [isSm, setIsSm] = useState(false);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    const supabase = getSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return;
+      supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .single()
+        .then(({ data: profile }) => {
+          if (profile?.role === "sales_manager" || profile?.role === "admin") setIsSm(true);
+        });
+    });
+  }, []);
 
   return (
     <>
@@ -52,17 +70,19 @@ export function DashboardScreen() {
                 Overview
               </Link>
               <Link
-                href="/workflow/new"
+                href="/cdjr-sales-cheat-sheet"
                 className="inline-flex min-h-12 w-full items-center justify-center border border-[var(--accent)] bg-white/10 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:bg-white/20"
               >
-                New Vehicle
+                Cheat Sheet
               </Link>
-              <Link
-                href="/workflow"
-                className="inline-flex min-h-12 w-full items-center justify-center border border-[var(--accent)] bg-white/10 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:bg-white/20"
-              >
-                Used Vehicle
-              </Link>
+              {isSm && (
+                <Link
+                  href="/sm-queue"
+                  className="inline-flex min-h-12 w-full items-center justify-center border border-amber-500 bg-amber-500/10 text-sm font-bold uppercase tracking-[0.08em] text-amber-400 transition hover:bg-amber-500/20"
+                >
+                  SM Queue
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={() => setSettingsOpen(true)}

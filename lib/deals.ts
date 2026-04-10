@@ -143,6 +143,7 @@ export async function sendToFni(dealId: string): Promise<boolean> {
 export type FniQueueDeal = {
   id: string;
   workflow_data: Record<string, string>;
+  deal_number: string | null;
   fni_sent_at: string;
   fni_claimed_at: string | null;
   fni_claimed_by: string | null;
@@ -180,6 +181,81 @@ export async function finishFniDeal(dealId: string): Promise<boolean> {
   if (!token) return false;
 
   const res = await fetch(`/api/deals/${encodeURIComponent(dealId)}/fni-finish`, {
+    method: "POST",
+    headers: authHeaders(token),
+  });
+
+  return res.ok;
+}
+
+// ── SM Queue helpers ──
+
+export type SmQueueDeal = {
+  id: string;
+  workflow_data: Record<string, string>;
+  sm_sent_at: string;
+  sm_claimed_at: string | null;
+  sm_claimed_by: string | null;
+  sm_finished_at: string | null;
+  deal_number: string | null;
+  updated_at: string;
+  user_id: string;
+  claimer: { display_name: string } | null;
+};
+
+export async function sendToSm(dealId: string): Promise<boolean> {
+  const token = await getAuthToken();
+  if (!token) return false;
+
+  const res = await fetch(`/api/deals/${encodeURIComponent(dealId)}/send-sm`, {
+    method: "POST",
+    headers: authHeaders(token),
+  });
+
+  return res.ok;
+}
+
+export async function listSmQueue(): Promise<SmQueueDeal[]> {
+  const token = await getAuthToken();
+  if (!token) return [];
+
+  const res = await fetch("/api/sm-queue", { headers: authHeaders(token) });
+  if (!res.ok) return [];
+
+  const json = await res.json();
+  return json.deals ?? [];
+}
+
+export async function claimSmDeal(dealId: string): Promise<boolean> {
+  const token = await getAuthToken();
+  if (!token) return false;
+
+  const res = await fetch(`/api/deals/${encodeURIComponent(dealId)}/sm-claim`, {
+    method: "POST",
+    headers: authHeaders(token),
+  });
+
+  return res.ok;
+}
+
+export async function setDealNumber(dealId: string, dealNumber: string): Promise<boolean> {
+  const token = await getAuthToken();
+  if (!token) return false;
+
+  const res = await fetch(`/api/deals/${encodeURIComponent(dealId)}/deal-number`, {
+    method: "PATCH",
+    headers: authHeaders(token),
+    body: JSON.stringify({ dealNumber }),
+  });
+
+  return res.ok;
+}
+
+export async function finishSmDeal(dealId: string): Promise<boolean> {
+  const token = await getAuthToken();
+  if (!token) return false;
+
+  const res = await fetch(`/api/deals/${encodeURIComponent(dealId)}/sm-finish`, {
     method: "POST",
     headers: authHeaders(token),
   });

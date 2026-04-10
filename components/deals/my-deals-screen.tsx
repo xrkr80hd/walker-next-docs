@@ -15,6 +15,8 @@ import {
   clearWorkflowSession,
   createDefaultWorkflowData,
   getLast8,
+  loadWorkflow,
+  normalizeVin,
   saveSignatures,
   saveWorkflow,
 } from "@/lib/walker-workflow";
@@ -25,7 +27,13 @@ export function MyDealsScreen() {
   const [loading, setLoading] = useState(true);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [newDealReady, setNewDealReady] = useState(false);
+  const [voiDone, setVoiDone] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [voiVin, setVoiVin] = useState("");
+  const [voiYear, setVoiYear] = useState("");
+  const [voiMake, setVoiMake] = useState("");
+  const [voiModel, setVoiModel] = useState("");
+  const [voiDealType, setVoiDealType] = useState<"" | "new" | "used">("");
 
   useEffect(() => {
     let cancelled = false;
@@ -97,9 +105,112 @@ export function MyDealsScreen() {
             >
               {creating ? "Creating…" : "Start a New Deal"}
             </button>
+          ) : !voiDone ? (
+            <div className="grid gap-4">
+              <p className="text-center text-sm font-bold text-white/60">Vehicle of Interest — enter once, flows everywhere</p>
+
+              <div className="border-l-4 border-amber-500 bg-amber-500/10 px-4 py-3">
+                <p className="text-xs leading-5 text-white/70">Walk to the vehicle — read VIN from the dash, NOT from the website. Year/make/model from the window sticker or lot tag.</p>
+              </div>
+
+              <label className="grid gap-2">
+                <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">VIN</span>
+                <input
+                  type="text"
+                  maxLength={17}
+                  value={voiVin}
+                  onChange={(e) => setVoiVin(normalizeVin(e.target.value))}
+                  placeholder="17-character VIN"
+                  className="min-h-12 border border-white/10 bg-white px-4 font-mono text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+                />
+              </label>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                <label className="grid gap-2">
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Year</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={voiYear}
+                    onChange={(e) => setVoiYear(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                    placeholder="e.g. 2025"
+                    className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+                  />
+                </label>
+                <label className="grid gap-2">
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Make</span>
+                  <input
+                    type="text"
+                    value={voiMake}
+                    onChange={(e) => setVoiMake(e.target.value)}
+                    placeholder="e.g. Jeep"
+                    className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+                  />
+                </label>
+                <label className="grid gap-2">
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Model</span>
+                  <input
+                    type="text"
+                    value={voiModel}
+                    onChange={(e) => setVoiModel(e.target.value)}
+                    placeholder="e.g. Wrangler"
+                    className="min-h-12 border border-white/10 bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+                  />
+                </label>
+              </div>
+
+              <div className="grid gap-2">
+                <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">New or Used?</span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setVoiDealType("new")}
+                    className={`flex min-h-12 flex-1 items-center justify-center border px-4 text-sm font-bold transition ${voiDealType === "new" ? "border-[var(--accent)] bg-[var(--accent)]/20 text-[var(--accent)]" : "border-white/20 bg-white/5 text-white/60 hover:border-[var(--accent)]"}`}
+                  >
+                    New
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setVoiDealType("used")}
+                    className={`flex min-h-12 flex-1 items-center justify-center border px-4 text-sm font-bold transition ${voiDealType === "used" ? "border-[var(--accent)] bg-[var(--accent)]/20 text-[var(--accent)]" : "border-white/20 bg-white/5 text-white/60 hover:border-[var(--accent)]"}`}
+                  >
+                    Used
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                disabled={!voiDealType}
+                onClick={() => {
+                  const wf = loadWorkflow();
+                  const updated = {
+                    ...wf,
+                    vin: voiVin,
+                    vehicleYear: voiYear,
+                    vehicleMake: voiMake,
+                    vehicleModel: voiModel,
+                    dealType: voiDealType,
+                  };
+                  saveWorkflow(updated);
+                  // Also persist to server
+                  const dealId = typeof window !== "undefined" ? window.sessionStorage.getItem("walker.deal.id.v1") : null;
+                  if (dealId) {
+                    saveDealToServer(updated, {}, dealId);
+                  }
+                  setVoiDone(true);
+                }}
+                className="inline-flex min-h-12 w-full items-center justify-center border border-white bg-white text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent)] transition hover:bg-white/90 disabled:opacity-40"
+              >
+                Continue
+              </button>
+            </div>
           ) : (
             <div className="grid gap-3">
-              <p className="text-center text-sm font-bold text-white/60">Deal created — how do you want to start?</p>
+              <p className="text-center text-sm font-bold text-white/60">
+                {voiYear} {voiMake} {voiModel} ({voiDealType === "new" ? "New" : "Used"}) — how do you want to start?
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 <Link
                   href="/documents/spaced"

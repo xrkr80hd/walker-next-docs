@@ -509,42 +509,6 @@ export function WorkflowScreen({ dealType = "used" }: { dealType?: "used" | "new
               <p className="mt-4 text-sm leading-6 text-white/40">
                 Enter deal data on individual document screens. This overview refreshes automatically.
               </p>
-
-              {/* ── Specialty Plate Check ── */}
-              <div className="mt-5 border-t border-white/10 pt-5">
-                <p className="text-sm font-bold uppercase tracking-[0.1em] text-white/60">Does the customer have a specialty plate?</p>
-                <p className="mt-1 text-xs leading-5 text-white/40">
-                  Louisiana: Only specialty plates (Saints, LSU, Disabled Veteran, Handicap, etc.) can transfer between vehicles for $3. Standard plates are canceled — a new plate is issued ($40–$112).
-                </p>
-                <div className="mt-3 flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => { setData(prev => { const next = { ...prev, specialtyPlate: prev.specialtyPlate === "yes" ? "" as const : "yes" as const }; saveWorkflow(next); return next; }); }}
-                    className={`inline-flex min-h-10 items-center justify-center border px-5 text-sm font-bold uppercase tracking-[0.08em] transition ${data.specialtyPlate === "yes" ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/20 bg-white/10 text-white"}`}
-                  >
-                    Yes — Specialty
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setData(prev => { const next = { ...prev, specialtyPlate: prev.specialtyPlate === "no" ? "" as const : "no" as const }; saveWorkflow(next); return next; }); }}
-                    className={`inline-flex min-h-10 items-center justify-center border px-5 text-sm font-bold uppercase tracking-[0.08em] transition ${data.specialtyPlate === "no" ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-white/20 bg-white/10 text-white"}`}
-                  >
-                    No — Standard
-                  </button>
-                </div>
-                {data.specialtyPlate === "yes" && (
-                  <div className="mt-3 border-l-4 border-[var(--success)] bg-[var(--success)]/10 px-4 py-3">
-                    <p className="text-sm font-bold text-[var(--success)]">Plate Transfer — $3 fee</p>
-                    <p className="mt-1 text-xs leading-5 text-white/70">Customer has a transferable specialty plate — confirm transfer to save on fees. Flag deal as &quot;plate transfer&quot; when structuring numbers.</p>
-                  </div>
-                )}
-                {data.specialtyPlate === "no" && (
-                  <div className="mt-3 border-l-4 border-[var(--warn)] bg-[var(--warn)]/10 px-4 py-3">
-                    <p className="text-sm font-bold text-[var(--warn)]">New Plate Required — $40–$112</p>
-                    <p className="mt-1 text-xs leading-5 text-white/70">Standard plate will be canceled. Include new plate fee in deal structuring before presenting final numbers.</p>
-                  </div>
-                )}
-              </div>
             </div>
           )}
         </section>
