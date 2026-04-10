@@ -152,34 +152,33 @@ export default function AdminPage() {
 
   return (
     <div className="grid gap-6">
-      {/* ── Hero ── */}
+      {/* ── Compact Hero ── */}
       <section className="overflow-hidden border border-black/10 bg-[var(--panel)] bg-[url('/bg-hero-16x9.jpg')] bg-cover bg-center shadow-[0_24px_60px_rgba(35,23,12,0.12)]">
-        <div className="grid gap-5 px-5 py-5 sm:px-6">
-          <div className="text-center">
+        <div className="flex items-center justify-between px-5 py-4 sm:px-6">
+          <div className="flex items-center gap-4">
             <Image
               src="/walker-red-graphic-v2.png"
               alt="Walker Automotive graphic"
-              width={320}
-              height={116}
+              width={160}
+              height={58}
               priority
-              className="mx-auto h-auto w-full max-w-[240px]"
+              className="h-auto w-[120px]"
             />
-            <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-white drop-shadow-sm">
-              Walker Docs
-            </p>
-            <h2 className="mt-2 text-3xl font-extrabold leading-tight tracking-[0.01em] text-white drop-shadow-sm sm:text-4xl">
-              Admin Console
-            </h2>
-            <p className="mx-auto mt-3 max-w-3xl text-base leading-7 text-white/70">
-              Manage team access, send invites, and control user roles.
-            </p>
-            <Link
-              href="/overview"
-              className="mx-auto mt-4 inline-flex items-center gap-2 border border-white/30 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white backdrop-blur-sm transition hover:border-white/60 hover:bg-white/20"
-            >
-              Back to Overview
-            </Link>
+            <div>
+              <h2 className="text-xl font-extrabold leading-tight text-white drop-shadow-sm sm:text-2xl">
+                Admin Console
+              </h2>
+              <p className="text-xs text-white/60">
+                Manage team access, invites &amp; roles
+              </p>
+            </div>
           </div>
+          <Link
+            href="/overview"
+            className="inline-flex items-center gap-2 border border-white/30 bg-white/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-white backdrop-blur-sm transition hover:border-white/60 hover:bg-white/20"
+          >
+            Back to Overview
+          </Link>
         </div>
       </section>
 
@@ -191,203 +190,176 @@ export default function AdminPage() {
       )}
 
       {loading ? (
-        <section className="border border-black/10 bg-[var(--panel)] p-6 shadow-[0_18px_44px_rgba(35,23,12,0.08)]">
+        <div className="border border-black/10 bg-white p-6">
           <p className="text-sm font-bold text-[var(--muted)]">Loading…</p>
-        </section>
+        </div>
       ) : (
-        <>
-          {/* ── Send Invite ── */}
-          <section className="overflow-hidden border border-black/10 shadow-[0_18px_44px_rgba(35,23,12,0.08)]">
-            <div className="bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center p-5 sm:p-6">
-              <h3 className="text-2xl font-bold text-white">Send Invite</h3>
-              <p className="mt-1 text-sm text-white/70">
-                Invite a team member by email
-              </p>
-            </div>
-            <div className="border-t border-[var(--border)] bg-white px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
-              <form onSubmit={handleInvite} className="grid gap-4 sm:grid-cols-[1fr_auto_auto]">
-                <input
-                  type="email"
-                  required
-                  placeholder="team@walkerautomotive.com"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.currentTarget.value)}
-                  className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
-                />
-                <select
-                  value={inviteRole}
-                  onChange={(e) => setInviteRole(e.currentTarget.value as "user" | "admin" | "fni" | "sales_manager")}
-                  title="Invite role"
-                  className="min-h-12 border border-[var(--border)] bg-white px-4 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
-                >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                  <option value="fni">F&amp;I</option>
-                  <option value="sales_manager">Sales Manager</option>
-                </select>
-                <button
-                  type="submit"
-                  disabled={inviteSending}
-                  className="min-h-12 border border-[var(--accent)] bg-[var(--accent)] px-6 text-sm font-bold uppercase tracking-[0.08em] text-white disabled:opacity-40"
-                >
-                  {inviteSending ? "Sending…" : "Invite"}
-                </button>
-              </form>
-              {inviteStatus && (
-                <p className="mt-3 text-sm font-bold text-[var(--success)]">
-                  {inviteStatus}
-                </p>
-              )}
-            </div>
-          </section>
+        /* ── Single unified panel ── */
+        <div className="overflow-hidden border border-black/10 bg-white shadow-[0_18px_44px_rgba(35,23,12,0.08)]">
 
-          {/* ── Users ── */}
-          <section className="overflow-hidden border border-black/10 shadow-[0_18px_44px_rgba(35,23,12,0.08)]">
+          {/* ── Send Invite (inline) ── */}
+          <div className="px-5 py-4 sm:px-6">
+            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
+              Send Invite
+            </h3>
+            <form onSubmit={handleInvite} className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+              <input
+                type="email"
+                required
+                placeholder="team@walkerautomotive.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.currentTarget.value)}
+                className="h-10 border border-[var(--border)] bg-white px-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+              />
+              <select
+                value={inviteRole}
+                onChange={(e) => setInviteRole(e.currentTarget.value as "user" | "admin" | "fni" | "sales_manager")}
+                title="Invite role"
+                className="h-10 border border-[var(--border)] bg-white px-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+                <option value="fni">F&amp;I</option>
+                <option value="sales_manager">Sales Manager</option>
+              </select>
+              <button
+                type="submit"
+                disabled={inviteSending}
+                className="h-10 border border-[var(--accent)] bg-[var(--accent)] px-5 text-[11px] font-bold uppercase tracking-[0.08em] text-white disabled:opacity-40"
+              >
+                {inviteSending ? "Sending…" : "Invite"}
+              </button>
+            </form>
+            {inviteStatus && (
+              <p className="mt-2 text-xs font-bold text-[var(--success)]">
+                {inviteStatus}
+              </p>
+            )}
+          </div>
+
+          {/* ── Divider ── */}
+          <div className="border-t border-[var(--border)]" />
+
+          {/* ── Team Members ── */}
+          <div className="px-5 sm:px-6">
             <button
               type="button"
               onClick={() => setShowUsers((v) => !v)}
-              className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center p-5 text-left sm:p-6"
+              className="flex w-full items-center justify-between py-3"
             >
-              <div>
-                <h3 className="text-2xl font-bold text-white">
-                  Team Members
-                </h3>
-                <p className="mt-1 text-sm text-white/70">
-                  {users.length} user{users.length !== 1 ? "s" : ""}
-                </p>
-              </div>
-              <span className={`text-xl text-white/70 transition-transform ${showUsers ? "rotate-180" : ""}`}>
+              <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
+                Team Members
+                <span className="ml-1.5 text-[var(--foreground)]">({users.length})</span>
+              </h3>
+              <span className={`text-sm text-[var(--muted)] transition-transform ${showUsers ? "rotate-180" : ""}`}>
                 ▾
               </span>
             </button>
             {showUsers && (
-              <div className="border-t border-[var(--border)] bg-white">
+              <div className="divide-y divide-[var(--border)] pb-1">
                 {users.length === 0 ? (
-                  <p className="px-5 py-4 text-sm text-[var(--muted)]">
-                    No users yet.
-                  </p>
+                  <p className="py-3 text-sm text-[var(--muted)]">No users yet.</p>
                 ) : (
-                  <div className="divide-y divide-[var(--border)]">
-                    {users.map((u) => (
-                      <div
-                        key={u.id}
-                        className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-6"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-bold text-[var(--foreground)]">
-                            {u.display_name || u.email}
-                          </p>
-                          <p className="truncate text-xs text-[var(--muted)]">
-                            {u.email}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <select
-                            value={u.role}
-                            onChange={(e) => handleRoleChange(u.id, e.currentTarget.value)}
-                            title={`Change role for ${u.display_name || u.email}`}
-                            className={`border px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] outline-none transition focus:border-[var(--accent)] ${u.role === "admin"
-                              ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]"
-                              : u.role === "fni"
-                                ? "border-blue-500 bg-blue-500/10 text-blue-500"
-                                : u.role === "sales_manager"
-                                  ? "border-amber-500 bg-amber-500/10 text-amber-500"
-                                  : "border-[var(--border)] bg-[var(--panel-strong)] text-[var(--muted)]"
-                              }`}
-                          >
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
-                            <option value="fni">F&amp;I</option>
-                            <option value="sales_manager">Sales Mgr</option>
-                          </select>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveUser(u.id, u.email)}
-                            className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--muted)] transition hover:text-[var(--accent)]"
-                          >
-                            Remove
-                          </button>
-                        </div>
+                  users.map((u) => (
+                    <div key={u.id} className="flex items-center gap-3 py-2.5">
+                      <div className="min-w-0 flex-1">
+                        <span className="text-sm font-bold text-[var(--foreground)]">
+                          {u.display_name || u.email.split("@")[0]}
+                        </span>
+                        <span className="mx-2 text-[var(--border)]">·</span>
+                        <span className="text-xs text-[var(--muted)]">{u.email}</span>
                       </div>
-                    ))}
-                  </div>
+                      <select
+                        value={u.role}
+                        onChange={(e) => handleRoleChange(u.id, e.currentTarget.value)}
+                        title={`Change role for ${u.display_name || u.email}`}
+                        className={`min-w-[120px] border px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] outline-none transition focus:border-[var(--accent)] ${u.role === "admin"
+                          ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]"
+                          : u.role === "fni"
+                            ? "border-blue-500 bg-blue-500/10 text-blue-500"
+                            : u.role === "sales_manager"
+                              ? "border-amber-500 bg-amber-500/10 text-amber-500"
+                              : "border-[var(--border)] bg-[var(--panel-strong)] text-[var(--muted)]"
+                          }`}
+                      >
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                        <option value="fni">F&amp;I</option>
+                        <option value="sales_manager">Sales Mgr</option>
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveUser(u.id, u.email)}
+                        className="shrink-0 border border-transparent px-2 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))
                 )}
               </div>
             )}
-          </section>
+          </div>
 
-          {/* ── Pending Invites ── */}
-          <section className="overflow-hidden border border-black/10 shadow-[0_18px_44px_rgba(35,23,12,0.08)]">
+          {/* ── Divider ── */}
+          <div className="border-t border-[var(--border)]" />
+
+          {/* ── Invites ── */}
+          <div className="px-5 sm:px-6">
             <button
               type="button"
               onClick={() => setShowInvites((v) => !v)}
-              className="flex w-full items-center justify-between bg-[var(--accent)] bg-[url('/bg-card-3x2.jpg')] bg-cover bg-center p-5 text-left sm:p-6"
+              className="flex w-full items-center justify-between py-3"
             >
-              <div>
-                <h3 className="text-2xl font-bold text-white">
-                  Invites
-                </h3>
-                <p className="mt-1 text-sm text-white/70">
-                  {invites.filter((i) => !i.accepted_at).length} pending
-                </p>
-              </div>
-              <span className={`text-xl text-white/70 transition-transform ${showInvites ? "rotate-180" : ""}`}>
+              <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
+                Invites
+                <span className="ml-1.5 text-[var(--foreground)]">({invites.filter((i) => !i.accepted_at).length} pending)</span>
+              </h3>
+              <span className={`text-sm text-[var(--muted)] transition-transform ${showInvites ? "rotate-180" : ""}`}>
                 ▾
               </span>
             </button>
             {showInvites && (
-              <div className="border-t border-[var(--border)] bg-white">
+              <div className="divide-y divide-[var(--border)] pb-1">
                 {invites.length === 0 ? (
-                  <p className="px-5 py-4 text-sm text-[var(--muted)]">
-                    No invites sent yet.
-                  </p>
+                  <p className="py-3 text-sm text-[var(--muted)]">No invites sent yet.</p>
                 ) : (
-                  <div className="divide-y divide-[var(--border)]">
-                    {invites.map((inv) => (
-                      <div
-                        key={inv.id}
-                        className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-6"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-bold text-[var(--foreground)]">
-                            {inv.email}
-                          </p>
-                          <p className="text-xs text-[var(--muted)]">
-                            Sent{" "}
-                            {new Date(inv.created_at).toLocaleDateString()}
-                            {" · "}
-                            Expires{" "}
-                            {new Date(inv.expires_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span
-                            className={`rounded border px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${inv.accepted_at
-                              ? "border-[var(--success)] bg-green-50 text-[var(--success)]"
-                              : "border-[var(--warn)] bg-amber-50 text-[var(--warn)]"
-                              }`}
-                          >
-                            {inv.accepted_at ? "Accepted" : "Pending"}
-                          </span>
-                          <span className="rounded border border-[var(--border)] bg-[var(--panel-strong)] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
-                            {inv.role}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleRevokeInvite(inv.id, inv.email)}
-                            className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--muted)] transition hover:text-[var(--accent)]"
-                          >
-                            {inv.accepted_at ? "Delete" : "Revoke"}
-                          </button>
-                        </div>
+                  invites.map((inv) => (
+                    <div key={inv.id} className="flex items-center gap-3 py-2.5">
+                      <div className="min-w-0 flex-1">
+                        <span className="text-sm font-bold text-[var(--foreground)]">
+                          {inv.email}
+                        </span>
+                        <span className="mx-2 text-[var(--border)]">·</span>
+                        <span className="text-xs text-[var(--muted)]">
+                          {new Date(inv.created_at).toLocaleDateString()} → {new Date(inv.expires_at).toLocaleDateString()}
+                        </span>
                       </div>
-                    ))}
-                  </div>
+                      <span
+                        className={`shrink-0 border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] ${inv.accepted_at
+                          ? "border-[var(--success)] bg-green-50 text-[var(--success)]"
+                          : "border-[var(--warn)] bg-amber-50 text-[var(--warn)]"
+                          }`}
+                      >
+                        {inv.accepted_at ? "Accepted" : "Pending"}
+                      </span>
+                      <span className="shrink-0 border border-[var(--border)] bg-[var(--panel-strong)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
+                        {inv.role === "sales_manager" ? "Sales Mgr" : inv.role}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleRevokeInvite(inv.id, inv.email)}
+                        className="shrink-0 border border-transparent px-2 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                      >
+                        {inv.accepted_at ? "Delete" : "Revoke"}
+                      </button>
+                    </div>
+                  ))
                 )}
               </div>
             )}
-          </section>
-        </>
+          </div>
+        </div>
       )}
     </div>
   );

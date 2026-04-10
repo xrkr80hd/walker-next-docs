@@ -98,6 +98,14 @@ export function DeliveryChecklistScreen() {
     setTone("success");
   }
 
+  async function handlePrintAll() {
+    if (!(await confirmVinAction(workflow.vin, "printing"))) return;
+    const path = workflow.dealType === "new" ? "/print/all-new" : "/print/all";
+    window.open(`${path}?autoprint=1`, "_blank");
+    setStatus("Print All window opened.");
+    setTone("success");
+  }
+
   async function handleSendToSm() {
     const dealId = getLocalDealId();
     if (!dealId) {
@@ -124,6 +132,16 @@ export function DeliveryChecklistScreen() {
     setTone("success");
   }
 
+  const printAllButton = (
+    <button
+      type="button"
+      onClick={handlePrintAll}
+      className="inline-flex min-h-10 items-center justify-center border border-white/20 bg-white/10 px-4 text-sm font-bold text-white transition hover:bg-white/20"
+    >
+      Print All Completed Forms
+    </button>
+  );
+
   const emailFniButton = (
     <button
       type="button"
@@ -137,7 +155,7 @@ export function DeliveryChecklistScreen() {
   return (
     <>
       <div className="mx-auto flex w-full max-w-[8.5in] flex-col rounded-lg bg-[#1c1c1e] p-3 shadow-[0_0_40px_rgba(190,23,23,0.15),0_24px_60px_rgba(0,0,0,0.3)] sm:p-4">
-        <DocToolbar vin={workflow.vin} mileage={workflow.mileage} saved={saved} onSave={handleSave} onPrint={handlePrint} />
+        <DocToolbar vin={workflow.vin} mileage={workflow.mileage} saved={saved} onSave={handleSave} onPrint={handlePrint} extraActions={printAllButton} />
 
         {status ? (
           <p

@@ -16,6 +16,14 @@ export default function DocumentsPage() {
           View, edit, and print any deal document. All forms pull from the
           information entered on the Workflow page.
         </p>
+        <Link
+          href="/print/all"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex min-h-11 items-center justify-center border border-[var(--accent)] bg-[var(--accent)] px-5 text-sm font-bold uppercase tracking-[0.08em] text-white"
+        >
+          Print All Completed Forms
+        </Link>
       </section>
 
       <section className="grid gap-3">
@@ -46,8 +54,8 @@ export default function DocumentsPage() {
               </div>
               <span
                 className={`shrink-0 border px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] ${doc.ready
-                    ? "border-[var(--success)] text-[var(--success)]"
-                    : "border-[var(--border)] text-[var(--muted)]"
+                  ? "border-[var(--success)] text-[var(--success)]"
+                  : "border-[var(--border)] text-[var(--muted)]"
                   }`}
               >
                 {doc.ready ? "Ready" : "Queued"}

@@ -75,6 +75,14 @@ export function DashboardScreen() {
               >
                 Cheat Sheet
               </Link>
+              <Link
+                href="/print/all"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-12 w-full items-center justify-center border border-[var(--accent)] bg-white/10 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:bg-white/20"
+              >
+                Print All Completed Forms
+              </Link>
               {isSm && (
                 <Link
                   href="/sm-queue"
